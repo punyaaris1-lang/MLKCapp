@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Struktur Pengurus KC</title>
+    
+    <script>
+        // ==========================================
+        // SISTEM BACA TEMA ANTI-KEDIP
+        // ==========================================
+        const savedTheme = localStorage.getItem('maka_theme');
+        if (savedTheme === 'soft-blue') {
+            document.documentElement.classList.add('theme-soft-blue');
+        }
+
+        // ==========================================
+        // SISTEM AUTO-UPDATE PAKSA
+        // ==========================================
+        const PENGURUS_VERSION = "4.1"; // Pemisahan Divisi Humas, Kreator, URC
+        if (localStorage.getItem('maka_pengurus_v') !== PENGURUS_VERSION) {
+            if ('caches' in window) {
+                caches.keys().then((names) => { names.forEach(name => { caches.delete(name); }); });
+            }
+            localStorage.setItem('maka_pengurus_v', PENGURUS_VERSION);
+            window.location.reload(true); 
+        }
+    </script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;700;800&family=Space+Grotesk:wght@700;800;900&family=Outfit:wght@700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* === TEMA DEFAULT: CYBER NAVY (DARK MODE) === */
+        :root { 
+            --cyan-logo: #00E5FF;     
+            --cyan-dark: #0077B6;     
+            --yellow-logo: #FFFF00;   
+            --yellow-dark: #D4AF37;   
+            --navy-bg: #050B14;       
+            --bg-surface: #000000;    
+            
+            --text-main: #FFFFFF; 
+            --text-muted: #E2E8F0; 
+            
+            --card-bg: rgba(5, 11, 20, 0.85);
+            --glass-border: rgba(0, 229, 255, 0.4);
+            --shadow-cyan: 0 10px 30px rgba(0, 229, 255, 0.15);
+            --shadow-gold: 0 15px 40px rgba(255, 255, 0, 0.15);
+        }
+
+        /* === TEMA KEDUA: SOFT BLUE (LIGHT MODE) === */
+        html.theme-soft-blue {
+            --cyan-logo: #0284C7; 
+            --cyan-dark: #0369A1;
+            --yellow-logo: #D97706; 
+            --yellow-dark: #B45309;
+            --navy-bg: #E0F2FE; 
+            --bg-surface: #F8FAFC; 
+            
+            --text-main: #0F172A; 
+            --text-muted: #334155; 
+            
+            --card-bg: rgba(255, 255, 255, 0.85); 
+            --glass-border: rgba(2, 132, 199, 0.3);
+            --shadow-cyan: 0 10px 30px rgba(2, 132, 199, 0.15);
+            --shadow-gold: 0 15px 40px rgba(217, 119, 6, 0.2);
+        }
+        
+        body { 
+            margin: 0; 
+            background-color: var(--bg-surface);
+            background-image: radial-gradient(circle at top right, var(--navy-bg) 0%, var(--bg-surface) 70%);
+            font-family: 'Inter', sans-serif; 
+            color: var(--text-main); 
+            padding-bottom: 120px; 
+            -webkit-tap-highlight-color: transparent;
+            min-height: 100vh;
+        }
+
+        * { box-sizing: border-box; text-decoration: none; outline: none; }
+
+        /* AMBIENT LIGHTS */
+        .ambient-light { position: fixed; border-radius: 50%; filter: blur(120px); z-index: -1; opacity: 0.25; animation: floatLight 10s infinite alternate; }
+        .light-1 { top: -20%; left: -20%; width: 500px; height: 500px; background: var(--cyan-dark); }
+        .light-2 { top: 40%; right: -30%; width: 400px; height: 400px; background: var(--cyan-logo); animation-delay: 2s; opacity: 0.15; }
+        html.theme-soft-blue .ambient-light { opacity: 0.5; }
+        @keyframes floatLight { 0% {transform: translate(0,0);} 100% {transform: translate(20px, 40px);} }
+
+        /* HEADER */
+        .header-main { padding: 40px 20px 20px; position: relative; z-index: 10; text-align: center; }
+        .sub-tag { font-family: 'Space Grotesk'; font-size: 11px; font-weight: 900; letter-spacing: 2px; color: var(--cyan-logo); text-transform: uppercase; margin-bottom: 5px; display: block; }
+        .main-title { font-family: 'Outfit'; font-size: 28px; font-weight: 900; color: var(--text-main); margin: 0; letter-spacing: -1px; text-shadow: 0 10px 30px rgba(0,229,255,0.2); }
+
+        /* CONTAINER & SECTION LABELS */
+        .content-container { padding: 0 20px; position: relative; z-index: 10; display: flex; flex-direction: column; gap: 25px; margin-top: 10px;}
+        
+        .sec-label { text-align: center; font-family: 'Space Grotesk'; font-size: 11px; font-weight: 900; color: var(--cyan-logo); text-transform: uppercase; letter-spacing: 2px; margin: 10px 0; position: relative; opacity: 0.9;}
+        .sec-label::before, .sec-label::after { content:''; display:inline-block; width:20px; height:2px; background:var(--cyan-logo); vertical-align:middle; margin: 0 10px; opacity:0.5;}
+
+        /* CARD STYLES */
+        .p-card { 
+            background: var(--card-bg); backdrop-filter: blur(15px);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px; padding: 20px; 
+            text-align: center; display: flex; flex-direction: column; align-items: center; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5); transition: 0.3s; position: relative; overflow: hidden;
+        }
+        html.theme-soft-blue .p-card { border: 2px solid var(--glass-border); box-shadow: var(--shadow-cyan); }
+        .p-card:active { transform: scale(0.98); }
+
+        /* KETUM SPECIAL STYLE */
+        .card-ketum { 
+            background: linear-gradient(135deg, rgba(5, 11, 20, 0.95) 0%, rgba(212, 175, 55, 0.15) 100%);
+            border: 2px solid var(--yellow-logo);
+            box-shadow: var(--shadow-gold);
+            padding: 30px 20px;
+        }
+        html.theme-soft-blue .card-ketum {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(217, 119, 6, 0.15) 100%);
+            border-color: var(--yellow-logo);
+        }
+
+        .ketum-crown { position: absolute; top: 15px; font-size: 24px; color: var(--yellow-logo); filter: drop-shadow(0 5px 10px rgba(255,255,0,0.4)); animation: floatCrown 3s ease-in-out infinite; }
+        @keyframes floatCrown { 0%,100% {transform:translateY(0);} 50% {transform:translateY(-5px);} }
+
+        /* FOTO PENGURUS */
+        .p-photo-wrap { position: relative; border-radius: 20px; border: 2px solid var(--cyan-logo); box-shadow: 0 8px 20px rgba(0,229,255,0.3); overflow: hidden; background: #000; margin-bottom: 12px; flex-shrink: 0; width: 75px; height: 75px;}
+        .card-ketum .p-photo-wrap { width: 100px; height: 100px; border-color: var(--yellow-logo); box-shadow: 0 8px 20px rgba(255,255,0,0.4); }
+        .p-photo-bg { position: absolute; inset: 0; background-image: url('bg_maka.jpg'); background-size: cover; background-position: center; opacity: 0.6; z-index: 1; }
+        .p-photo-img { position: relative; width: 100%; height: 100%; object-fit: cover; z-index: 3; background: transparent;}
+        .p-photo-fallback { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 28px; color: rgba(255,255,255,0.6); z-index: 2; font-weight: 900;}
+
+        /* TEKS PENGURUS */
+        .p-role { 
+            font-family: 'Space Grotesk'; font-size: 10px; font-weight: 900; 
+            color: #000; text-transform: uppercase; letter-spacing: 1px; 
+            margin-bottom: 8px; background: var(--cyan-logo); padding: 4px 10px; border-radius: 8px; 
+            box-shadow: 0 0 10px rgba(0,229,255,0.4);
+        }
+        html.theme-soft-blue .p-role { color: #fff; }
+        .card-ketum .p-role { background: linear-gradient(90deg, var(--yellow-logo) 0%, var(--yellow-dark) 100%); color: #000; box-shadow: 0 0 15px rgba(255,255,0,0.4); border: none;}
+        html.theme-soft-blue .card-ketum .p-role { color: #fff; }
+
+        .p-name { font-family: 'Outfit'; font-size: 16px; font-weight: 900; color: var(--text-main); margin: 0; line-height: 1.2; text-transform: uppercase;}
+        .card-ketum .p-name { font-size: 22px; color: var(--yellow-logo); }
+        html.theme-soft-blue .card-ketum .p-name { color: var(--yellow-dark); }
+        
+        .p-plat { font-size: 11px; font-weight: 800; color: var(--text-muted); margin-top: 6px; font-family: 'Inter'; text-transform: uppercase;}
+        .p-divisi { font-size: 9px; font-weight: 900; color: var(--cyan-logo); border: 1px solid var(--cyan-logo); padding: 2px 6px; border-radius: 4px; margin-top: 6px; display: inline-block; background: rgba(0,229,255,0.1); }
+
+        /* TOMBOL WA */
+        .btn-wa-mini { margin-top: 10px; width: 35px; height: 35px; border-radius: 10px; background: rgba(0, 229, 255, 0.1); border: 2px solid var(--cyan-logo); display: flex; align-items: center; justify-content: center; color: var(--cyan-logo); font-size: 18px; transition: 0.2s;}
+        html.theme-soft-blue .btn-wa-mini { background: #F1F5F9; }
+        .btn-wa-mini:active { transform: scale(0.9); background: var(--cyan-logo); color: #000;}
+        .card-ketum .btn-wa-mini { border-color: var(--yellow-logo); color: var(--yellow-logo); background: rgba(255,255,0,0.1);}
+        .card-ketum .btn-wa-mini:active { background: var(--yellow-logo); color: #000;}
+
+        /* GRIDS */
+        .tier-2-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .tier-3-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px; }
+
+        /* BACK NAV */
+        .back-nav { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); width: 85%; max-width: 350px; z-index: 100; text-align: center;}
+        .btn-premium-back { background: rgba(5, 11, 20, 0.95); backdrop-filter: blur(15px); border: 2px solid var(--glass-border); padding: 16px 25px; border-radius: 50px; font-family: 'Space Grotesk'; font-weight: 900; font-size: 13px; color: var(--cyan-logo); text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 10px; transition: 0.2s; box-shadow: var(--shadow-cyan); letter-spacing: 1px;}
+        html.theme-soft-blue .btn-premium-back { background: #FFFFFF; border: 2px solid var(--cyan-logo); }
+        .btn-premium-back:active { transform: scale(0.95); }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-light light-1"></div>
+    <div class="ambient-light light-2"></div>
+
+    <header class="header-main">
+        <span class="sub-tag">LEADERSHIP CORE</span>
+        <h1 class="main-title">PENGURUS KC</h1>
+    </header>
+
+    <div class="content-container">
+        <div id="loader" style="text-align:center; padding:40px; color:var(--text-muted); font-weight:800;">
+            <i class="fas fa-spinner fa-spin" style="font-size:30px; color:var(--cyan-logo); margin-bottom:10px; display:block;"></i>Membangun Struktur...
+        </div>
+
+        <div id="tier1"></div>
+
+        <div id="tier2-title" style="display:none;"><div class="sec-label">PIMPINAN EKSEKUTIF</div></div>
+        <div id="tier2" class="tier-2-grid"></div>
+
+        <div id="tier3-title" style="display:none;"><div class="sec-label">PENASEHAT & PEMBINA</div></div>
+        <div id="tier3" class="tier-3-grid"></div>
+
+        <div id="tier-humas-title" style="display:none;"><div class="sec-label">HUBUNGAN MASYARAKAT (HUMAS)</div></div>
+        <div id="tier-humas" class="tier-3-grid"></div>
+
+        <div id="tier-kreator-title" style="display:none;"><div class="sec-label">TIM KREATOR</div></div>
+        <div id="tier-kreator" class="tier-2-grid"></div>
+
+        <div id="tier-urc-title" style="display:none;"><div class="sec-label">UNIT REAKSI CEPAT (URC)</div></div>
+        <div id="tier-urc" class="tier-2-grid"></div>
+    </div>
+
+    <div class="back-nav"><a href="dashboard_kc.html" class="btn-premium-back"><i class="fas fa-arrow-left"></i> KEMBALI KE DASHBOARD</a></div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // DATABASE KC
+        const firebaseConfig = { apiKey: "AIzaSyDfsTAGclYUSRe6YhiljS-xb-v-9RBYVEM", authDomain: "antriankcnew.firebaseapp.com", projectId: "antriankcnew" };
+        const app = initializeApp(firebaseConfig); const db = getFirestore(app);
+
+        // DATA PENGURUS KARTIKA CHANDRA (Master Structure KC)
+        const structurePengurus = [
+            { namaDefault: "Agus Sukmana", jabatan: "Ketua", plat: "B 4124 SWI", divisi: "RTO", hp: "6281316048252" },
+            { namaDefault: "Rifky Alfiansyah", jabatan: "Wakil Ketua", plat: "B 4426 SWF", divisi: "RTO", hp: "6281283187508" },
+            { namaDefault: "Jerry", jabatan: "Sekretaris", plat: "B 4995 SWJ", divisi: "TransGo", hp: "6285931323303" },
+            { namaDefault: "Andri Prasetya", jabatan: "Pembina", plat: "B 4295 SWE", divisi: "TransGo", hp: "6288210637387" },
+            { namaDefault: "Awang Rock", jabatan: "Pembina", plat: "B 4617 SWH", divisi: "TransGo", hp: "628569288190" },
+            { namaDefault: "Alfian", jabatan: "Humas Internal", plat: "B 4959 SWF", divisi: "RTO", hp: "6285280065304" },
+            { namaDefault: "FITO", jabatan: "Humas Eksternal", plat: "B 4372 SWJ", divisi: "RTO", hp: "6287880692224" },
+            { namaDefault: "Don Thobias Chotob", jabatan: "Humas Eksternal", plat: "B 4439 SWD", divisi: "RTO", hp: "6281321251955" },
+            { namaDefault: "Dino Three", jabatan: "Kreator", plat: "B 4903 SWG", divisi: "TransGo", hp: "628212349883" },
+            { namaDefault: "Adi Setiawan", jabatan: "Kreator", plat: "B 4766 SWJ", divisi: "RTO", hp: "6285892167827" },
+            { namaDefault: "Ricky Alamsyah", jabatan: "URC KC", plat: "B 5739 TFN", divisi: "URC", hp: "6287711069877" },
+            { namaDefault: "Tyan", jabatan: "URC KC", plat: "B 4166 SWI", divisi: "TransGo", hp: "6285121312930" },
+            { namaDefault: "M. Sauqi Vansuri", jabatan: "URC KC", plat: "B 4728 SWJ", divisi: "TransGo", hp: "6282249831918" },
+            { namaDefault: "Franky Simanjuntak", jabatan: "URC KC", plat: "B 4174 SWI", divisi: "TransGo", hp: "6281385487429" }
+        ];
+
+        function renderCard(containerId, p, dbMatch, isKetum = false) {
+            const container = document.getElementById(containerId);
+            const namaReal = dbMatch && (dbMatch.namaKtp || dbMatch.nama) ? (dbMatch.namaKtp || dbMatch.nama) : p.namaDefault;
+            
+            const emptyPixel = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+            const photoSrc = dbMatch && dbMatch.foto && dbMatch.foto.length > 50 ? dbMatch.foto : emptyPixel;
+            const fallbackIcon = photoSrc === emptyPixel ? `<div class="p-photo-fallback"><i class="fas fa-user"></i></div>` : '';
+
+            const cardClass = isKetum ? 'p-card card-ketum' : 'p-card';
+            const crownHtml = isKetum ? '<i class="fas fa-crown ketum-crown"></i>' : '';
+            const waLink = `https://wa.me/${p.hp}`;
+
+            // Sesuaikan ukuran font nama berdasarkan kontainer agar tidak terlalu sempit
+            let nameStyle = '';
+            if (containerId === 'tier-humas' || containerId === 'tier-kreator' || containerId === 'tier-urc') {
+                nameStyle = 'font-size:13px;';
+            }
+
+            const html = `
+                <div class="${cardClass}">
+                    ${crownHtml}
+                    <div class="p-photo-wrap">
+                        <div class="p-photo-bg"></div>
+                        ${fallbackIcon}
+                        <img src="${photoSrc}" class="p-photo-img" onerror="this.src='${emptyPixel}'">
+                    </div>
+                    <div class="p-role">${p.jabatan}</div>
+                    <h3 class="p-name" style="${nameStyle}">${namaReal}</h3>
+                    <div class="p-plat">${p.plat}</div>
+                    <div class="p-divisi">${p.divisi}</div>
+                    <a href="${waLink}" target="_blank" class="btn-wa-mini"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+        }
+
+        async function loadPengurus() {
+            const loader = document.getElementById('loader');
+            let dbDataMap = {};
+
+            try {
+                const querySnapshot = await getDocs(collection(db, "anggota"));
+                querySnapshot.forEach((doc) => {
+                    dbDataMap[doc.id] = doc.data();
+                });
+
+                loader.style.display = 'none';
+
+                // Tampilkan Judul Section
+                document.getElementById('tier2-title').style.display = 'block';
+                document.getElementById('tier3-title').style.display = 'block';
+                document.getElementById('tier-humas-title').style.display = 'block';
+                document.getElementById('tier-kreator-title').style.display = 'block';
+                document.getElementById('tier-urc-title').style.display = 'block';
+
+                structurePengurus.forEach(p => {
+                    const idRapat = (p.plat || "").replace(/\s+/g, '').toUpperCase();
+                    const dbMatch = dbDataMap[idRapat];
+                    const jab = p.jabatan.toUpperCase();
+
+                    // PEMBAGIAN TIER BERDASARKAN JABATAN KC SECARA SPESIFIK
+                    if (jab.includes('KETUA') && !jab.includes('WAKIL')) {
+                        renderCard('tier1', p, dbMatch, true);
+                    } 
+                    else if (jab.includes('WAKIL') || jab.includes('SEKRETARIS') || jab.includes('BENDAHARA')) {
+                        renderCard('tier2', p, dbMatch, false);
+                    } 
+                    else if (jab.includes('PEMBINA') || jab.includes('PENASEHAT')) {
+                        renderCard('tier3', p, dbMatch, false);
+                    } 
+                    else if (jab.includes('HUMAS')) {
+                        renderCard('tier-humas', p, dbMatch, false);
+                    }
+                    else if (jab.includes('KREATOR')) {
+                        renderCard('tier-kreator', p, dbMatch, false);
+                    }
+                    else if (jab.includes('URC')) {
+                        renderCard('tier-urc', p, dbMatch, false);
+                    }
+                });
+
+            } catch (e) {
+                loader.innerHTML = `<span style="color:var(--danger)">Gagal memuat struktur: ${e.message}</span>`;
+            }
+        }
+
+        loadPengurus();
+    </script>
+</body>
+</html>
