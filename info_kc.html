@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KC - Pusat Informasi</title>
+    
+    <script>
+        const savedTheme = localStorage.getItem('maka_theme');
+        if (savedTheme === 'soft-blue') {
+            document.documentElement.classList.add('theme-soft-blue');
+        }
+
+        const INFO_VERSION = "4.0_DUAL_THEME"; 
+        if (localStorage.getItem('maka_info_kc_v') !== INFO_VERSION) {
+            if ('caches' in window) { caches.keys().then((names) => { names.forEach(name => { caches.delete(name); }); }); }
+            localStorage.setItem('maka_info_kc_v', INFO_VERSION);
+            window.location.reload(true); 
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        if(urlParams.get('mode') === 'siluman') {
+            localStorage.setItem('maka_user', JSON.stringify({ id: 'ghost_admin', namaKtp: 'THE CREATOR', namaWa: 'THE CREATOR', nama: 'THE CREATOR', plat: 'B 4248 SWF', role: 'KELUARGA MLU', foto: 'https://cdn-icons-png.flaticon.com/512/847/847969.png' }));
+            window.location.href = 'info_kc.html';
+        }
+    </script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Space+Grotesk:wght@700;900&family=Outfit:wght@800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* === TEMA CYBER NAVY & CYAN === */
+        :root { 
+            --kc-cyan: #00E5FF;     
+            --kc-cyan-dark: #0077B6;     
+            --kc-yellow: #FFFF00;   
+            --kc-yellow-dark: #D4AF37;   
+            --navy-bg: #050B14;       
+            --bg-surface: #000000;    
+            --bg-panel: rgba(5, 11, 20, 0.85);
+            --border-glass: rgba(0, 229, 255, 0.25);
+            
+            --text-main: #F8FAFC; 
+            --text-muted: #94A3B8; 
+            --danger: #EF4444; 
+            --success: #10B981; 
+            
+            --shadow-cyan: 0 10px 30px rgba(0, 229, 255, 0.15);
+            --shadow-yellow: 0 10px 30px rgba(255, 255, 0, 0.15);
+        }
+
+        /* === TEMA SOFT BLUE === */
+        html.theme-soft-blue {
+            --kc-cyan: #0284C7;
+            --kc-cyan-dark: #0369A1;
+            --kc-yellow: #D97706;
+            --kc-yellow-dark: #B45309;
+            --navy-bg: #E0F2FE;
+            --bg-surface: #F8FAFC;
+            --bg-panel: rgba(255, 255, 255, 0.85);
+            --border-glass: rgba(2, 132, 199, 0.3);
+
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            
+            --shadow-cyan: 0 10px 30px rgba(2, 132, 199, 0.15);
+            --shadow-yellow: 0 10px 30px rgba(217, 119, 6, 0.15);
+        }
+        
+        body { 
+            margin: 0; background-color: var(--bg-surface); background-image: radial-gradient(circle at top right, var(--navy-bg) 0%, var(--bg-surface) 70%);
+            font-family: 'Inter', sans-serif; color: var(--text-main); padding-bottom: 120px; overflow-x: hidden; position: relative; -webkit-tap-highlight-color: transparent; min-height: 100vh;
+        }
+        * { box-sizing: border-box; text-decoration: none; outline: none; }
+
+        /* AMBIENT LIGHTS */
+        .ambient-light { position: fixed; border-radius: 50%; filter: blur(120px); z-index: -1; opacity: 0.25; animation: floatLight 10s infinite alternate; }
+        .light-1 { top: -20%; left: -20%; width: 500px; height: 500px; background: var(--kc-cyan-dark); }
+        .light-2 { top: 40%; right: -30%; width: 400px; height: 400px; background: var(--kc-cyan); animation-delay: 2s; opacity: 0.15; }
+        html.theme-soft-blue .ambient-light { opacity: 0.5; }
+        @keyframes floatLight { 0% {transform: translate(0,0);} 100% {transform: translate(20px, 40px);} }
+
+        /* HEADER */
+        .header { position: sticky; top: 0; background: var(--bg-panel); backdrop-filter: blur(15px); padding: 20px; display: flex; align-items: center; gap: 15px; z-index: 100; border-bottom: 1px solid var(--border-glass); box-shadow: var(--shadow-cyan);}
+        html.theme-soft-blue .header { background: rgba(255,255,255,0.9); }
+        .btn-back { color: var(--kc-cyan); font-size: 18px; width: 35px; height: 35px; background: rgba(0,229,255,0.1); border: 1px solid rgba(0,229,255,0.2); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 900; transition: 0.2s;}
+        html.theme-soft-blue .btn-back { background: rgba(2,132,199,0.1); border-color: var(--kc-cyan); }
+        .btn-back:active { transform: scale(0.9); background: var(--kc-cyan); color: black;}
+        html.theme-soft-blue .btn-back:active { color: #FFF; }
+        .header-title h1 { margin: 0; font-family: 'Space Grotesk'; font-size: 20px; color: var(--kc-cyan); letter-spacing: 1px; text-shadow: 0 0 10px rgba(0,229,255,0.3);}
+        html.theme-soft-blue .header-title h1 { text-shadow: none; }
+        .header-title p { margin: 0; font-size: 10px; color: var(--text-muted); font-weight: 800; letter-spacing: 1px; text-transform: uppercase;}
+
+        .container { padding: 20px; position: relative; z-index: 10;}
+
+        /* INFO CARDS */
+        .info-list { display: flex; flex-direction: column; gap: 15px; }
+        .info-card { background: var(--bg-panel); backdrop-filter: blur(10px); border: 1px solid var(--border-glass); border-left: 4px solid var(--kc-cyan); border-radius: 20px; padding: 20px; box-shadow: var(--shadow-cyan); position: relative; transition: 0.3s;}
+        html.theme-soft-blue .info-card { background: #FFFFFF; border-color: rgba(2,132,199,0.2); border-left-color: var(--kc-cyan); }
+        
+        .info-card.broadcast { border-left-color: var(--kc-yellow); box-shadow: var(--shadow-yellow); }
+        html.theme-soft-blue .info-card.broadcast { border-left-color: var(--kc-yellow-dark); box-shadow: 0 10px 30px rgba(217, 119, 6, 0.1); }
+        
+        .info-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 10px;}
+        html.theme-soft-blue .info-header { border-bottom-color: #E2E8F0; }
+        .info-title { font-family: 'Outfit'; font-size: 16px; font-weight: 900; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 8px;}
+        .info-date { font-family: 'Space Grotesk'; font-size: 9px; color: black; background: var(--kc-cyan); padding: 4px 8px; border-radius: 6px; font-weight: 800; white-space: nowrap; box-shadow: 0 0 10px rgba(0,229,255,0.3);}
+        html.theme-soft-blue .info-date { color: #FFF; box-shadow: none; }
+        
+        .info-card.broadcast .info-date { background: var(--kc-yellow); box-shadow: 0 0 10px rgba(255,255,0,0.3); color: black;}
+        html.theme-soft-blue .info-card.broadcast .info-date { background: var(--kc-yellow-dark); color: #FFF; box-shadow: none; }
+
+        /* IMAGE POSTER */
+        .info-img-wrapper { width: 100%; border-radius: 12px; overflow: hidden; margin-bottom: 15px; border: 1px solid var(--border-glass); background: #000; box-shadow: 0 5px 15px rgba(0,0,0,0.3);}
+        html.theme-soft-blue .info-img-wrapper { border-color: #E2E8F0; background: #F8FAFC; box-shadow: none; }
+        .info-img { width: 100%; max-height: 250px; object-fit: contain; display: block; }
+
+        .info-body { font-size: 13px; color: var(--text-muted); line-height: 1.6; margin: 0 0 15px 0; white-space: pre-wrap; font-weight: 500;}
+        html.theme-soft-blue .info-body { color: var(--text-main); }
+        
+        .info-footer { display: flex; justify-content: space-between; align-items: center; }
+        .info-author { font-size: 10px; color: var(--text-muted); font-weight: 800; display: flex; align-items: center; gap: 5px; background: rgba(0,0,0,0.3); padding: 5px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);}
+        html.theme-soft-blue .info-author { background: #F1F5F9; border-color: #E2E8F0; }
+        .info-author i { color: var(--kc-cyan); }
+        
+        .btn-del { background: rgba(239,68,68,0.1); color: var(--danger); border: 1px solid rgba(239,68,68,0.3); padding: 6px 12px; border-radius: 8px; font-size: 10px; font-weight: 800; cursor: pointer; transition: 0.2s;}
+        .btn-del:active { transform: scale(0.9); background: var(--danger); color: white;}
+
+        /* FAB ADMIN TULIS INFO */
+        .fab-add { position: fixed; bottom: 100px; right: 20px; width: 60px; height: 60px; background: var(--kc-cyan); color: black; border-radius: 20px; display: none; align-items: center; justify-content: center; font-size: 24px; box-shadow: var(--shadow-cyan); border: none; cursor: pointer; z-index: 1000; transition: 0.2s;}
+        html.theme-soft-blue .fab-add { color: #FFF; }
+        .fab-add:active { transform: scale(0.9); }
+
+        /* BACK NAV */
+        .back-nav { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); width: 85%; max-width: 350px; z-index: 1000; text-align: center;}
+        .btn-premium-back { background: var(--bg-panel); backdrop-filter: blur(15px); border: 1px solid var(--border-glass); padding: 14px 25px; border-radius: 50px; font-family: 'Space Grotesk'; font-weight: 800; font-size: 12px; color: var(--kc-cyan); text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 10px; transition: 0.2s; box-shadow: var(--shadow-cyan);}
+        html.theme-soft-blue .btn-premium-back { background: #FFFFFF; border-color: var(--kc-cyan); }
+        .btn-premium-back:active { transform: scale(0.95); }
+
+        /* MODAL CUSTOM ALERT/CONFIRM */
+        .modal-glass-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 99999; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; padding: 20px;}
+        html.theme-soft-blue .modal-glass-overlay { background: rgba(15, 23, 42, 0.8); }
+        .modal-glass-overlay.show { opacity: 1; display: flex; }
+        
+        .modal-glass-box { background: var(--bg-panel); border-radius: 28px; padding: 30px 25px; width: 100%; max-width: 360px; text-align: center; box-shadow: 0 30px 80px rgba(0,0,0,0.9); transform: scale(0.9); transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 1px solid var(--kc-cyan); max-height: 85vh; overflow-y: auto;}
+        html.theme-soft-blue .modal-glass-box { background: #FFFFFF; border-color: transparent; box-shadow: 0 20px 60px rgba(2, 132, 199, 0.3); }
+        .modal-glass-overlay.show .modal-glass-box { transform: scale(1); }
+
+        .btn-modal { padding: 16px 20px; border-radius: 16px; font-family: 'Space Grotesk'; font-weight: 800; font-size: 14px; border: none; cursor: pointer; flex: 1; transition: 0.2s; letter-spacing: 1px;}
+        .btn-modal:active { transform: scale(0.95); }
+
+        /* MODAL TULIS INFO ( KHUSUS FORM ) */
+        .modal-form-box { text-align: left; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-title { font-family: 'Outfit'; font-size: 20px; font-weight: 900; color: var(--kc-cyan); margin: 0; }
+        .btn-close { background: rgba(255,255,255,0.1); border: none; width: 35px; height: 35px; border-radius: 50%; font-size: 16px; cursor: pointer; color: var(--text-main); transition: 0.2s; display: flex; align-items: center; justify-content: center;}
+        html.theme-soft-blue .btn-close { background: #F1F5F9; color: #64748B; }
+
+        .form-group { margin-bottom: 15px; }
+        .form-label { display: block; font-size: 10px; font-weight: 800; color: var(--kc-cyan); text-transform: uppercase; margin-bottom: 6px; letter-spacing: 1px;}
+        .form-input { width: 100%; padding: 14px 15px; border-radius: 14px; border: 1px solid #333; background: #000; font-family: 'Inter'; font-weight: 600; font-size: 14px; color: white; outline: none; transition: 0.2s;}
+        html.theme-soft-blue .form-input { background: #F8FAFC; color: var(--text-main); border-color: #CBD5E1; }
+        .form-input:focus { border-color: var(--kc-cyan); box-shadow: 0 0 10px rgba(0,229,255,0.2);}
+        
+        /* UPLOAD AREA */
+        .upload-area { border: 2px dashed var(--border-glass); border-radius: 16px; padding: 20px; text-align: center; cursor: pointer; position: relative; background: rgba(0,0,0,0.5); transition: 0.2s;}
+        html.theme-soft-blue .upload-area { background: #F1F5F9; border-color: #CBD5E1; }
+        .upload-area:hover { border-color: var(--kc-cyan); }
+        .upload-area input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+        .preview-img { width: 100%; max-height: 150px; object-fit: contain; display: none; margin-top: 10px; border-radius: 10px; border: 1px solid var(--kc-cyan);}
+
+    </style>
+</head>
+<body>
+
+    <div class="ambient-light light-1"></div>
+    <div class="ambient-light light-2"></div>
+
+    <div class="header">
+        <a href="dashboard_kc.html" class="btn-back"><i class="fas fa-arrow-left"></i></a>
+        <div class="header-title">
+            <h1>INFO KC</h1>
+            <p>Pusat Informasi Anggota</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="info-list" id="infoListContainer">
+            <div style="text-align:center; padding:50px; color:var(--text-muted);"><i class="fas fa-spinner fa-spin" style="font-size:24px;"></i><br><br>Memuat Informasi...</div>
+        </div>
+    </div>
+
+    <button class="fab-add" id="btnAddInfo" onclick="openModal()"><i class="fas fa-pen"></i></button>
+    
+    <div class="back-nav">
+        <a href="dashboard_kc.html" class="btn-premium-back"><i class="fas fa-arrow-left"></i> KEMBALI KE DASHBOARD</a>
+    </div>
+
+    <div class="modal-glass-overlay" id="formModal">
+        <div class="modal-glass-box modal-form-box">
+            <div class="modal-header">
+                <h3 class="modal-title">TULIS INFO BARU</h3>
+                <button class="btn-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Judul Informasi</label>
+                <input type="text" id="infoTitle" class="form-input" placeholder="Contoh: Jadwal Kopdar Wajib">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Upload Poster (Opsional)</label>
+                <div class="upload-area">
+                    <i class="fas fa-image" style="font-size:30px; color:var(--text-muted); margin-bottom:10px; display:block;"></i>
+                    <div style="font-size:11px; color:var(--text-muted); font-weight:600;">Klik untuk upload gambar pendukung</div>
+                    <input type="file" id="infoPhotoInput" accept="image/*" onchange="processPhoto(this)">
+                    <img id="previewInfoImg" class="preview-img">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Isi Pengumuman</label>
+                <textarea id="infoContent" class="form-input" rows="5" placeholder="Tulis detail informasi di sini..."></textarea>
+            </div>
+            
+            <button class="btn-modal" id="btnSave" style="background:var(--kc-cyan); color:black; width:100%;" onclick="saveInfo()">POSTING INFO</button>
+        </div>
+    </div>
+
+    <div id="customConfirmModal" class="modal-glass-overlay">
+        <div class="modal-glass-box">
+            <div id="ccIcon" style="font-size: 55px; margin-bottom: 15px; color: var(--kc-cyan); text-shadow: 0 0 20px rgba(0,229,255,0.4);"><i class="fas fa-question-circle"></i></div>
+            <h3 id="ccTitle" style="font-family:'Outfit'; font-weight:900; color:var(--kc-cyan); margin-bottom:10px; font-size: 22px; letter-spacing: 0.5px;">KONFIRMASI</h3>
+            <p id="ccMsg" style="font-size:13px; color:var(--text-muted); margin-bottom:25px; font-weight: 600; line-height: 1.6;">...</p>
+            <div style="display:flex; gap:10px;">
+                <button class="btn-modal" id="ccBtnNo" style="background:#111; color:white; border: 1px solid #333;">BATAL</button>
+                <button class="btn-modal" id="ccBtnYes" style="background:var(--kc-cyan); color:black;">YA, YAKIN</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // KONEKSI DATABASE KC BARU (antriankcnew)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDfsTAGclYUSRe6YhiljS-xb-v-9RBYVEM",
+            authDomain: "antriankcnew.firebaseapp.com",
+            projectId: "antriankcnew"
+        };
+        const app = initializeApp(firebaseConfig); 
+        const db = getFirestore(app);
+
+        // --- SISTEM MODAL TERPUSAT ---
+        let confirmResolver = null;
+        window.showCustomConfirm = (title, msg, type = 'confirm') => {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('customConfirmModal');
+                const titleEl = document.getElementById('ccTitle');
+                const iconEl = document.getElementById('ccIcon');
+                const btnNo = document.getElementById('ccBtnNo');
+                const btnYes = document.getElementById('ccBtnYes');
+                
+                titleEl.innerText = title; document.getElementById('ccMsg').innerHTML = msg;
+                
+                if (type === 'success') {
+                    iconEl.innerHTML = '<i class="fas fa-check-circle"></i>'; iconEl.style.color = 'var(--success)'; titleEl.style.color = 'var(--success)';
+                    btnYes.style.background = 'var(--success)'; btnYes.style.color = 'white'; btnNo.style.display = 'none'; btnYes.innerText = 'OKE';
+                } else if (type === 'error') {
+                    iconEl.innerHTML = '<i class="fas fa-times-circle"></i>'; iconEl.style.color = 'var(--danger)'; titleEl.style.color = 'var(--danger)';
+                    btnYes.style.background = 'var(--danger)'; btnYes.style.color = 'white'; btnNo.style.display = 'none'; btnYes.innerText = 'MENGERTI';
+                } else {
+                    iconEl.innerHTML = '<i class="fas fa-question-circle"></i>'; iconEl.style.color = 'var(--kc-cyan)'; titleEl.style.color = 'var(--kc-cyan)';
+                    btnYes.style.background = 'var(--kc-cyan)'; btnYes.style.color = 'black'; btnNo.style.display = 'block'; btnYes.innerText = 'YA, LANJUTKAN';
+                }
+                
+                modal.style.display = 'flex'; setTimeout(() => modal.classList.add('show'), 10);
+                confirmResolver = resolve;
+            });
+        };
+
+        document.getElementById('ccBtnNo').addEventListener('click', () => { 
+            document.getElementById('customConfirmModal').classList.remove('show'); 
+            setTimeout(() => document.getElementById('customConfirmModal').style.display = 'none', 300);
+            if (confirmResolver) confirmResolver(false); 
+        });
+        document.getElementById('ccBtnYes').addEventListener('click', () => { 
+            document.getElementById('customConfirmModal').classList.remove('show'); 
+            setTimeout(() => document.getElementById('customConfirmModal').style.display = 'none', 300);
+            if (confirmResolver) confirmResolver(true); 
+        });
+        
+        window.showCustomAlert = (title, msg, type) => { return showCustomConfirm(title, msg, type); };
+
+        // CEK USER & ROLE ADMIN
+        let uData = null;
+        try { uData = JSON.parse(localStorage.getItem('maka_user')); } catch (e) {}
+        
+        if (!uData || !uData.plat) {
+            window.location.href = 'index_kc.html';
+        }
+        
+        const myName = uData.namaKtp || uData.namaWa || uData.nama || "Pengurus";
+        const role = (uData.role || "").toUpperCase();
+        const platClean = (uData.plat || "").replace(/\s+/g, '').toUpperCase();
+        
+        // HAK AKSES ADMIN KHUSUS PENGURUS
+        const allowedAdmins = ["B4124SWI", "B4426SWF", "B4959SWF", "B4372SWJ", "B4903SWG", "B4248SWF"];
+        const isAdmin = role.includes("KETUA") || role.includes("WAKIL") || role.includes("SEKRETARIS") || role.includes("HUMAS") || allowedAdmins.includes(platClean) || uData.id === "ghost_admin";
+        
+        if(isAdmin) {
+            document.getElementById('btnAddInfo').style.display = 'flex';
+        }
+
+        let base64Photo = "";
+
+        // COMPRESS FOTO
+        window.processPhoto = (input) => {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const cvs = document.createElement('canvas'); 
+                        const ctx = cvs.getContext('2d');
+                        
+                        let w = img.width; 
+                        let h = img.height;
+                        
+                        if(w > 800) { h *= 800 / w; w = 800; } 
+                        
+                        cvs.width = w; cvs.height = h; 
+                        ctx.drawImage(img, 0, 0, w, h);
+                        
+                        base64Photo = cvs.toDataURL('image/jpeg', 0.8);
+                        
+                        const previewEl = document.getElementById('previewInfoImg');
+                        previewEl.src = base64Photo;
+                        previewEl.style.display = 'block';
+                    }
+                    img.src = e.target.result;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        };
+
+        // LOAD DATA INFO & BROADCAST REALTIME
+        onSnapshot(query(collection(db, "info_kc"), orderBy("timestamp", "desc")), (snap) => {
+            const listContainer = document.getElementById('infoListContainer');
+            listContainer.innerHTML = '';
+            
+            if(snap.empty) {
+                listContainer.innerHTML = `<div style="text-align:center; padding:50px; color:var(--text-muted); font-size:12px; background:var(--bg-panel); border-radius:20px; border: 1px dashed var(--border-glass);"><i class="fas fa-box-open" style="font-size:30px; margin-bottom:10px; display:block;"></i> Belum ada informasi terbaru.</div>`;
+                return;
+            }
+
+            snap.forEach(docSnap => {
+                const d = docSnap.data();
+                const id = docSnap.id;
+                const dateObj = new Date(d.timestamp);
+                const dateStr = dateObj.toLocaleDateString('id-ID', {day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'});
+                
+                const btnDelete = isAdmin ? `<button class="btn-del" onclick="hapusInfo('${id}')"><i class="fas fa-trash"></i> Hapus</button>` : '';
+
+                let imageHtml = "";
+                if(d.foto || d.image) {
+                    const imgSource = d.foto || d.image;
+                    if (imgSource.length > 50) {
+                        imageHtml = `
+                            <div class="info-img-wrapper">
+                                <img src="${imgSource}" class="info-img" alt="Poster Info">
+                            </div>
+                        `;
+                    }
+                }
+
+                // STYLING OTOMATIS: BEDAKAN INFO REGULER & BROADCAST
+                let isBroadcast = d.type === "BROADCAST";
+                let cardClass = isBroadcast ? "info-card broadcast" : "info-card";
+                let iconTitle = isBroadcast ? `<i class="fas fa-bullhorn" style="color:var(--kc-yellow);"></i>` : `<i class="fas fa-info-circle" style="color:var(--kc-cyan);"></i>`;
+
+                const card = `
+                    <div class="${cardClass}">
+                        <div class="info-header">
+                            <h2 class="info-title">${iconTitle} ${d.title}</h2>
+                            <div class="info-date">${dateStr}</div>
+                        </div>
+                        
+                        ${imageHtml}
+                        
+                        <p class="info-body">${d.content}</p>
+                        <div class="info-footer">
+                            <div class="info-author"><i class="fas fa-user-shield"></i> Oleh: ${d.author}</div>
+                            ${btnDelete}
+                        </div>
+                    </div>
+                `;
+                listContainer.innerHTML += card;
+            });
+        });
+
+        const modal = document.getElementById('formModal');
+        window.openModal = () => { 
+            document.getElementById('infoTitle').value = '';
+            document.getElementById('infoContent').value = '';
+            document.getElementById('infoPhotoInput').value = '';
+            document.getElementById('previewInfoImg').style.display = 'none';
+            base64Photo = "";
+
+            modal.style.display = 'flex'; 
+            setTimeout(()=>modal.classList.add('show'), 10);
+        };
+        
+        window.closeModal = () => { 
+            modal.classList.remove('show'); 
+            setTimeout(()=>modal.style.display = 'none', 300);
+        };
+
+        window.saveInfo = async () => {
+            const title = document.getElementById('infoTitle').value.trim();
+            const content = document.getElementById('infoContent').value.trim();
+
+            if(!title || !content) return showCustomAlert("PERHATIAN", "Judul dan Isi pengumuman harus diisi!", "error");
+
+            const btn = document.getElementById('btnSave');
+            btn.innerText = "MENGIRIM...";
+            btn.style.opacity = '0.7';
+
+            try {
+                let payload = {
+                    title: title,
+                    content: content,
+                    author: myName,
+                    type: "INFO",
+                    timestamp: Date.now()
+                };
+                if(base64Photo) { payload.image = base64Photo; }
+                
+                await addDoc(collection(db, "info_kc"), payload);
+                closeModal();
+                showCustomAlert("BERHASIL", "Informasi berhasil diposting.", "success");
+            } catch (e) { 
+                showCustomAlert("GAGAL", e.message, "error"); 
+            } finally { 
+                btn.innerText = "POSTING INFO"; btn.style.opacity = '1'; 
+            }
+        };
+
+        window.hapusInfo = async (id) => {
+            const ok = await showCustomConfirm("HAPUS INFO", "Anda yakin ingin menghapus informasi ini secara permanen?");
+            if(ok) {
+                try { 
+                    await deleteDoc(doc(db, "info_kc", id)); 
+                } catch(e) { 
+                    showCustomAlert("GAGAL", e.message, "error"); 
+                }
+            }
+        };
+
+    </script>
+</body>
+</html>
