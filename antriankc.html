@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KC - Smart Charging Hub</title>
+    
+    <script>
+        const savedTheme = localStorage.getItem('maka_theme');
+        if (savedTheme === 'soft-blue') {
+            document.documentElement.classList.add('theme-soft-blue');
+        }
+
+        const ANTRIAN_VERSION = "10.0_ULTIMATE_LIST_FIX"; 
+        if (localStorage.getItem('maka_antrian_kc_v') !== ANTRIAN_VERSION) {
+            if ('caches' in window) { caches.keys().then((names) => { names.forEach(name => { caches.delete(name); }); }); }
+            localStorage.setItem('maka_antrian_kc_v', ANTRIAN_VERSION);
+            window.location.reload(true); 
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        if(urlParams.get('mode') === 'siluman') {
+            localStorage.setItem('maka_user', JSON.stringify({ id: 'ghost_admin', namaKtp: 'THE CREATOR', namaWa: 'THE CREATOR', nama: 'THE CREATOR', plat: 'B 4248 SWF', role: 'KELUARGA MLU', foto: 'https://cdn-icons-png.flaticon.com/512/847/847969.png' }));
+            window.location.href = 'antriankc.html';
+        }
+    </script>
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#050B14">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@700;800;900&family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* === TEMA CYBER NAVY & CYAN === */
+        :root { 
+            --kc-cyan: #00E5FF;     
+            --kc-cyan-dark: #0077B6;     
+            --kc-yellow: #FFFF00;   
+            --kc-yellow-dark: #D4AF37;   
+            --navy-bg: #050B14;       
+            --bg-surface: #000000;    
+            --bg-panel: rgba(5, 11, 20, 0.85);
+            --border-glass: rgba(0, 229, 255, 0.25);
+            
+            --white: #FFFFFF; 
+            --text-main: #F8FAFC; 
+            --text-muted: #94A3B8; 
+            --danger: #EF4444; 
+            --success: #10B981; 
+            
+            --shadow-cyan: 0 10px 30px rgba(0, 229, 255, 0.15);
+            --shadow-yellow: 0 10px 30px rgba(255, 255, 0, 0.15);
+        }
+
+        /* === TEMA SOFT BLUE === */
+        html.theme-soft-blue {
+            --kc-cyan: #0284C7;
+            --kc-cyan-dark: #0369A1;
+            --kc-yellow: #D97706;
+            --kc-yellow-dark: #B45309;
+            --navy-bg: #E0F2FE;
+            --bg-surface: #F8FAFC;
+            --bg-panel: rgba(255, 255, 255, 0.85);
+            --border-glass: rgba(2, 132, 199, 0.3);
+
+            --white: #FFFFFF;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            
+            --shadow-cyan: 0 10px 30px rgba(2, 132, 199, 0.15);
+            --shadow-yellow: 0 10px 30px rgba(217, 119, 6, 0.15);
+        }
+        
+        body { margin: 0; background-color: var(--bg-surface); background-image: radial-gradient(circle at top right, var(--navy-bg) 0%, var(--bg-surface) 70%); font-family: 'Inter', sans-serif; color: var(--text-main); padding-bottom: 120px; -webkit-font-smoothing: antialiased; overflow-x: hidden; position: relative; min-height: 100vh;}
+        * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+
+        .ambient-light { position: fixed; border-radius: 50%; filter: blur(120px); z-index: -1; opacity: 0.25; animation: floatLight 10s infinite alternate; }
+        .light-1 { top: -20%; left: -20%; width: 500px; height: 500px; background: var(--kc-cyan-dark); }
+        .light-2 { top: 40%; right: -30%; width: 400px; height: 400px; background: var(--kc-cyan); animation-delay: 2s; opacity: 0.15;}
+        html.theme-soft-blue .ambient-light { opacity: 0.5; }
+        @keyframes floatLight { 0% {transform: translate(0,0);} 100% {transform: translate(20px, 40px);} }
+
+        /* --- HEADER MEWAH GLOWING --- */
+        .header-premium { 
+            background: linear-gradient(160deg, var(--navy-bg) 0%, #000 100%); 
+            padding: 50px 20px 40px; 
+            border-bottom-left-radius: 35px; border-bottom-right-radius: 35px; 
+            color: white; position: relative; z-index: 10; 
+            box-shadow: var(--shadow-cyan); border-bottom: 1px solid var(--border-glass);
+        }
+        html.theme-soft-blue .header-premium { background: linear-gradient(135deg, #FFFFFF 0%, #E0F2FE 100%); color: var(--text-main); }
+        
+        .head-flex { display: flex; justify-content: space-between; align-items: flex-start; }
+        .sub-tag { font-size: 10px; font-weight: 800; letter-spacing: 2px; color: var(--kc-cyan); text-transform: uppercase; margin-bottom: 4px; display: block; text-shadow: 0 0 10px rgba(0,229,255,0.5); }
+        html.theme-soft-blue .sub-tag { text-shadow: none; color: var(--kc-cyan-dark); }
+        .main-title { font-family: 'Space Grotesk'; font-size: 26px; font-weight: 900; margin: 0; line-height: 1.1; }
+
+        .admin-badge { display: none; background: rgba(0,229,255,0.1); color: var(--kc-cyan); border: 1px solid var(--border-glass); padding: 5px 10px; border-radius: 12px; font-size: 9px; font-weight: 800; align-items: center; gap: 4px; box-shadow: var(--shadow-cyan); }
+        .gps-badge { position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%); background: var(--kc-yellow); color: #000; padding: 6px 15px; border-radius: 20px; font-size: 10px; font-weight: 800; letter-spacing: 1px; display: flex; align-items: center; gap: 5px; box-shadow: 0 5px 15px rgba(255,255,0,0.3); z-index: 15; white-space: nowrap; }
+        .gps-badge.ok { background: var(--kc-cyan); box-shadow: var(--shadow-cyan); color: #000;}
+        html.theme-soft-blue .gps-badge.ok { color: #FFF; }
+        .gps-badge.err { background: var(--danger); box-shadow: 0 0 15px rgba(239,68,68,0.3); color: #fff;}
+
+        /* --- RUNNING TEXT --- */
+        .marquee-box {
+            margin: 20px 20px 0; background: var(--bg-panel); border: 1px solid var(--border-glass);
+            border-radius: 12px; padding: 10px 15px; display: flex; align-items: center; gap: 10px;
+            box-shadow: var(--shadow-cyan); backdrop-filter: blur(10px); position: relative; z-index: 11;
+            overflow: hidden;
+        }
+        html.theme-soft-blue .marquee-box { background: #FFFFFF; }
+        .marquee-icon { color: var(--kc-yellow); font-size: 16px; animation: pulse 2s infinite; flex-shrink: 0; }
+        html.theme-soft-blue .marquee-icon { color: var(--kc-yellow-dark); }
+        @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.7; } 100% { transform: scale(1); opacity: 1; } }
+        
+        .marquee-wrap { flex: 1; overflow: hidden; white-space: nowrap; position: relative; }
+        .marquee-text { 
+            display: inline-block; padding-left: 100%; animation: scrollMarquee 15s linear infinite; 
+            font-size: 12px; font-weight: 700; color: var(--text-main); font-family: 'Space Grotesk';
+        }
+        @keyframes scrollMarquee { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
+
+        /* --- QUEUE STATUS GLASS --- */
+        .status-overlap { padding: 0 20px; margin-top: 15px; position: relative; z-index: 11; }
+        .status-card { 
+            background: var(--bg-panel); backdrop-filter: blur(15px);
+            border-radius: 24px; padding: 20px; display: flex; align-items: center; justify-content: space-between; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.8); border: 1px solid var(--border-glass); cursor: pointer;
+        }
+        html.theme-soft-blue .status-card { background: #FFF; box-shadow: var(--shadow-cyan); }
+        
+        .sc-left { border-left: 4px solid var(--kc-cyan); padding-left: 12px; }
+        .sc-lbl { font-size: 9px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+        .sc-val { font-family: 'Space Grotesk'; font-size: 16px; font-weight: 900; color: var(--kc-cyan); margin-top: 4px; text-transform: uppercase; }
+        .sc-right { text-align: right; }
+        .sc-tot { font-family: 'Space Grotesk'; font-size: 32px; font-weight: 900; color: var(--kc-cyan); line-height: 1; text-shadow: 0 0 10px rgba(0,229,255,0.2);}
+        html.theme-soft-blue .sc-tot { text-shadow: none; }
+
+        /* --- SLOT BAY GLASSMORPHISM --- */
+        .slot-container { padding: 15px 20px 10px; display: flex; flex-direction: column; gap: 15px; position: relative; z-index: 10;}
+        .slot-bay { 
+            background: rgba(5,11,20,0.6); backdrop-filter: blur(10px);
+            border-radius: 24px; border: 1px solid rgba(255,255,255,0.1); padding: 15px; 
+            display: flex; align-items: center; gap: 15px; position: relative; transition: 0.3s; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5); 
+        }
+        html.theme-soft-blue .slot-bay { background: #F8FAFC; border-color: #E2E8F0; box-shadow: none; }
+        .slot-bay.is-active { border: 1px solid rgba(0,229,255,0.3); box-shadow: var(--shadow-cyan); background: rgba(0,229,255,0.05); }
+        html.theme-soft-blue .slot-bay.is-active { background: #FFFFFF; border-color: var(--kc-cyan); box-shadow: var(--shadow-cyan); }
+        .slot-bay.is-admin { border: 1px solid rgba(255,255,0,0.3); box-shadow: var(--shadow-yellow); background: rgba(255,255,0,0.05); }
+        html.theme-soft-blue .slot-bay.is-admin { background: #FFFFFF; border-color: var(--kc-yellow); box-shadow: var(--shadow-yellow); }
+        
+        .sb-num { width: 50px; height: 50px; border-radius: 16px; background: #111; color: #94A3B8; font-family: 'Space Grotesk'; font-size: 22px; font-weight: 900; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid #333;}
+        html.theme-soft-blue .sb-num { background: #E2E8F0; color: #64748B; border: none; }
+        .slot-bay.is-active .sb-num { background: var(--kc-cyan); color: #000; box-shadow: 0 5px 15px rgba(0,229,255,0.4); border-color: var(--kc-cyan);}
+        html.theme-soft-blue .slot-bay.is-active .sb-num { color: #FFF; box-shadow: none; }
+        .slot-bay.is-admin .sb-num { background: var(--kc-yellow); color: #000; box-shadow: 0 5px 15px rgba(255,255,0,0.4); border-color: var(--kc-yellow);}
+        html.theme-soft-blue .slot-bay.is-admin .sb-num { box-shadow: none; }
+
+        .sb-info { flex: 1; min-width: 0; }
+        .sb-name { font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 6px;}
+        .sb-plat { font-family: 'Space Grotesk'; font-size: 20px; font-weight: 900; color: var(--kc-cyan); line-height: 1; }
+        .slot-bay.is-empty .sb-plat { color: #64748B; }
+        .sb-timer { font-size: 10px; font-weight: 700; color: var(--text-muted); margin-top: 6px; display: flex; align-items: center; gap: 5px; }
+        
+        .badge-pengurus { background: rgba(255,255,0,0.1); color: var(--kc-yellow); border: 1px solid rgba(255,255,0,0.3); font-size: 8px; font-weight: 900; padding: 3px 6px; border-radius: 6px; letter-spacing: 1px; }
+        html.theme-soft-blue .badge-pengurus { color: var(--kc-yellow-dark); border-color: var(--kc-yellow); }
+        .badge-batre { color: var(--kc-cyan); font-size: 10px; font-weight: 900; }
+        html.theme-soft-blue .badge-batre { color: var(--kc-cyan-dark); }
+
+        .btn-dots { width: 40px; height: 40px; border-radius: 50%; background: #111; color: var(--text-main); border: 1px solid #333; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; position: relative; z-index: 20; }
+        html.theme-soft-blue .btn-dots { background: #F1F5F9; border-color: #CBD5E1; color: #64748B; }
+        .btn-dots:active { background: rgba(0,229,255,0.1); border-color: var(--kc-cyan); color: var(--kc-cyan); transform: scale(0.9); }
+        html.theme-soft-blue .btn-dots:active { background: var(--kc-cyan); color: #FFF; }
+        
+        .admin-only { display: none; }
+
+        .btn-action-main { padding: 10px 20px; border-radius: 14px; border: none; font-family: 'Space Grotesk'; font-size: 12px; font-weight: 800; cursor: pointer; transition: 0.2s; position: relative; z-index: 20;}
+        .btn-fill { background: var(--kc-cyan); color: #000; box-shadow: var(--shadow-cyan); }
+        html.theme-soft-blue .btn-fill { color: #FFF; }
+        .btn-disabled { background: #111; color: #64748B; cursor: not-allowed; box-shadow: none; border: 1px solid #333;}
+        html.theme-soft-blue .btn-disabled { background: #E2E8F0; border-color: #CBD5E1; color: #94A3B8; }
+
+        /* --- BOTTOM ACTIONS --- */
+        .action-hub { padding: 10px 20px; display: flex; flex-direction: column; gap: 12px; position: relative; z-index: 10;}
+        .btn-hub { width: 100%; padding: 18px; border-radius: 20px; font-family: 'Space Grotesk'; font-size: 14px; font-weight: 800; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.2s; }
+        
+        .btn-take-q { background: var(--kc-cyan); color: #000; box-shadow: var(--shadow-cyan); display: none; }
+        html.theme-soft-blue .btn-take-q { color: #FFF; }
+        .btn-take-q:active { transform: scale(0.98); }
+        
+        .btn-cancel-me { background: rgba(239,68,68,0.05); color: var(--danger); border: 2px dashed rgba(239,68,68,0.4); display: none; }
+        .btn-cancel-me:active { background: var(--danger); color: white; box-shadow: 0 0 15px rgba(239,68,68,0.4);}
+        
+        .btn-manage-q { background: var(--bg-panel); color: var(--kc-cyan); border: 1px solid var(--kc-cyan); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5); display: none; }
+        html.theme-soft-blue .btn-manage-q { background: #FFF; box-shadow: var(--shadow-cyan); border-color: var(--border-glass); }
+        .btn-manage-q:active { transform: scale(0.98); background: var(--kc-cyan); color: black;}
+        html.theme-soft-blue .btn-manage-q:active { color: #FFF; }
+
+        /* STATS BTN */
+        .btn-stats-admin { background: rgba(255,255,0,0.1); color: var(--kc-yellow); border: 1px solid rgba(255,255,0,0.3); display: none; }
+        .btn-stats-admin:active { background: var(--kc-yellow); color: black; }
+
+        /* --- MODERN BOTTOM SHEET GLASS --- */
+        .sheet-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); display: none; align-items: flex-end; z-index: 20000; opacity: 0; transition: opacity 0.3s; }
+        .sheet-overlay.show { display: flex; opacity: 1; }
+        .bottom-sheet { 
+            width: 100%; background: var(--navy-bg); border-top: 1px solid var(--kc-cyan);
+            border-radius: 35px 35px 0 0;
+            padding: 20px 25px 40px; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1); 
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.8); max-height: 90vh; overflow-y: auto; 
+        }
+        html.theme-soft-blue .bottom-sheet { background: #FFF; }
+        .sheet-overlay.show .bottom-sheet { transform: translateY(0); }
+        .sheet-handle { width: 50px; height: 5px; background: #444; border-radius: 5px; margin: 0 auto 25px; }
+        html.theme-soft-blue .sheet-handle { background: #CBD5E1; }
+        
+        .sheet-title { font-family: 'Space Grotesk'; font-size: 20px; font-weight: 900; color: var(--kc-cyan); margin-bottom: 20px; text-align: center; }
+        
+        .sheet-menu { display: flex; flex-direction: column; gap: 10px; }
+        .sm-btn { width: 100%; padding: 16px 20px; background: rgba(0,0,0,0.5); border: 1px solid #333; border-radius: 16px; display: flex; align-items: center; gap: 15px; font-family: 'Inter'; font-size: 14px; font-weight: 700; color: var(--text-main); cursor: pointer; transition: 0.2s; text-align: left; }
+        html.theme-soft-blue .sm-btn { background: #F8FAFC; border-color: #CBD5E1; }
+        .sm-btn:active { background: rgba(0,229,255,0.05); border-color: rgba(0,229,255,0.3); transform: scale(0.98); }
+        .sm-icon { width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+        .bg-blue { background: rgba(0,229,255,0.1); color: var(--kc-cyan); }
+        .bg-red { background: rgba(239,68,68,0.1); color: var(--danger); }
+        .bg-dark { background: #111; color: var(--white); border: 1px solid #333;}
+        html.theme-soft-blue .bg-dark { background: #E2E8F0; color: #64748B; border: none; }
+        
+        .btn-kudeta { background: linear-gradient(135deg, var(--danger), #B91C1C); color: white; border: none; box-shadow: 0 0 15px rgba(239,68,68,0.4); justify-content: center; font-family: 'Space Grotesk'; font-weight: 900; letter-spacing: 1px; }
+        .btn-kudeta:active { transform: scale(0.96); background: #991B1B;}
+
+        .sheet-input { width: 100%; padding: 16px; border-radius: 16px; border: 1px solid #333; background: #000; color: white; font-family: 'Space Grotesk'; font-size: 16px; font-weight: 800; text-align: center; text-transform: uppercase; margin-bottom: 12px; outline: none; transition: 0.2s; }
+        html.theme-soft-blue .sheet-input { background: #F8FAFC; color: var(--text-main); border-color: #CBD5E1; }
+        .sheet-input:focus { border-color: var(--kc-cyan); box-shadow: 0 0 15px rgba(0,229,255,0.1); }
+
+        .q-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; background: #000; border: 1px solid #222; border-radius: 16px; margin-bottom: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5);}
+        html.theme-soft-blue .q-item { background: #F8FAFC; border-color: #CBD5E1; box-shadow: none; }
+        .qi-ctrl { display: flex; gap: 5px; }
+        .qi-btn { width: 32px; height: 32px; border-radius: 10px; border: none; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s;}
+        .qi-btn:active { transform: scale(0.9); }
+
+        .back-nav { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); width: 85%; max-width: 350px; z-index: 100;}
+        .btn-premium-back { background: rgba(5,11,20,0.95); backdrop-filter: blur(15px); border: 1px solid var(--border-glass); padding: 16px; border-radius: 50px; font-family: 'Space Grotesk'; font-weight: 800; font-size: 13px; color: var(--kc-cyan); text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: var(--shadow-cyan); }
+        html.theme-soft-blue .btn-premium-back { background: #FFF; border-color: var(--kc-cyan); }
+
+        /* MODAL CUSTOM (TAMPILAN BARU YG LEBIH BAGUS) */
+        .modal-glass-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 99999; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; padding: 20px;}
+        html.theme-soft-blue .modal-glass-overlay { background: rgba(15, 23, 42, 0.8); }
+        .modal-glass-overlay.show { opacity: 1; display: flex; }
+        
+        .modal-glass-box { background: var(--bg-panel); border-radius: 28px; padding: 30px 25px; width: 100%; max-width: 360px; text-align: center; box-shadow: 0 30px 80px rgba(0,0,0,0.9); transform: scale(0.9); transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 1px solid var(--kc-cyan); max-height: 85vh; overflow-y: auto;}
+        html.theme-soft-blue .modal-glass-box { background: #FFFFFF; border-color: transparent; box-shadow: 0 20px 60px rgba(2, 132, 199, 0.3); }
+        .modal-glass-overlay.show .modal-glass-box { transform: scale(1); }
+
+        .btn-modal { padding: 16px 20px; border-radius: 16px; font-family: 'Space Grotesk'; font-weight: 800; font-size: 14px; border: none; cursor: pointer; flex: 1; transition: 0.2s; letter-spacing: 1px;}
+        .btn-modal:active { transform: scale(0.95); }
+
+        /* STATS GRID DI DALAM MODAL STATISTIK */
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .st-box { background: rgba(0,0,0,0.5); border: 1px solid #333; padding: 15px; border-radius: 16px; text-align: center; }
+        html.theme-soft-blue .st-box { background: #F8FAFC; border-color: #E2E8F0; }
+        .st-v { font-family: 'Space Grotesk'; font-size: 24px; font-weight: 900; color: var(--kc-cyan); line-height: 1; margin-bottom: 5px; }
+        .st-l { font-size: 9px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; }
+
+        .log-box { background: #000; border: 1px solid #222; border-radius: 16px; padding: 12px; max-height: 200px; overflow-y: auto; text-align: left;}
+        html.theme-soft-blue .log-box { background: #F1F5F9; border-color: #CBD5E1; }
+        .log-item { font-size: 11px; border-bottom: 1px dashed #333; padding: 8px 0; color: var(--text-main); font-weight: 600;}
+        html.theme-soft-blue .log-item { border-bottom-color: #CBD5E1; }
+        .log-item:last-child { border-bottom: none; }
+        .log-time { color: var(--kc-yellow); font-family: 'Space Grotesk'; font-weight: 800; margin-right: 5px; }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-light light-1"></div>
+    <div class="ambient-light light-2"></div>
+
+    <header class="header-premium">
+        <div class="head-flex">
+            <div>
+                <span class="sub-tag">Station Monitor</span>
+                <h1 class="main-title">FC KARTIKA CHANDRA</h1>
+            </div>
+            <div class="admin-badge admin-only" id="adminIndicator"><i class="fas fa-shield-alt"></i> PENGURUS</div>
+        </div>
+        <div class="gps-badge" id="gpsIndicator"><i class="fas fa-spinner fa-spin"></i> MEMERIKSA LOKASI...</div>
+    </header>
+
+    <div class="marquee-box">
+        <i class="fas fa-bullhorn marquee-icon"></i>
+        <div class="marquee-wrap">
+            <div class="marquee-text" id="runningTextDesc">Memuat info pengumuman...</div>
+        </div>
+    </div>
+
+    <div class="status-overlap">
+        <div class="status-card" onclick="bukaModal('sheetDaftarAntrian')">
+            <div class="sc-left">
+                <div class="sc-lbl">ANTRIAN BERIKUTNYA</div>
+                <div class="sc-val" id="nextQDisplay">KOSONG</div>
+            </div>
+            <div class="sc-right">
+                <div class="sc-lbl">TOTAL ANTRE</div>
+                <div class="sc-tot" id="totalQDisplay">0</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slot-container" id="slotsContainer"></div>
+
+    <div class="action-hub">
+        <button id="btnTakeQ" class="btn-hub btn-take-q" onclick="mintaBatre('antrian', -1)"><i class="fas fa-list-ol"></i> AMBIL ANTRIAN SAYA</button>
+        <button id="btnCancelQ" class="btn-hub btn-cancel-me" onclick="cancelQueue()">BATALKAN ANTRIAN SAYA</button>
+        
+        <button id="btnAdminPanel" class="btn-hub btn-manage-q admin-only" onclick="bukaModal('sheetManageAntrian')"><i class="fas fa-sliders-h"></i> ATUR DAFTAR ANTRIAN</button>
+        <button id="btnStats" class="btn-hub btn-stats-admin admin-only" onclick="bukaModal('statsModal')"><i class="fas fa-chart-line"></i> STATISTIK & LOG ADMIN</button>
+    </div>
+
+    <div class="back-nav"><a href="dashboard_kc.html" class="btn-premium-back"><i class="fas fa-arrow-left"></i> KEMBALI KE DASHBOARD</a></div>
+
+    <div class="modal-glass-overlay" id="statsModal">
+        <div class="modal-glass-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h2 style="font-family:'Outfit'; font-size:18px; font-weight:900; color:var(--kc-yellow); margin:0;"><i class="fas fa-chart-bar"></i> STATS & LOG</h2>
+                <button onclick="tutupModal('statsModal')" style="background:rgba(255,255,255,0.1); border:none; color:var(--text-main); font-size:16px; cursor:pointer; width:30px; height:30px; border-radius:50%; transition:0.2s;"><i class="fas fa-times"></i></button>
+            </div>
+
+            <div class="stat-grid">
+                <div class="st-box">
+                    <div class="st-v" id="statModalHariIni">0</div>
+                    <div class="st-l">Cas Hari Ini</div>
+                </div>
+                <div class="st-box">
+                    <div class="st-v" id="statModalKemarin" style="color:var(--text-muted);">0</div>
+                    <div class="st-l">Cas Kemarin</div>
+                </div>
+                <div class="st-box" style="grid-column: span 2;">
+                    <div class="st-v" id="statModalPeak" style="color:var(--kc-yellow); font-size:18px;">18:00 - 21:00</div>
+                    <div class="st-l">Prediksi Jam Sibuk</div>
+                </div>
+            </div>
+
+            <h3 style="font-size:11px; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px; letter-spacing:1px; text-align: left;">10 Riwayat Tindakan Admin</h3>
+            <div class="log-box" id="logAdminBody">
+                <div style="text-align:center; padding:20px; font-size:10px; color:var(--text-muted);">Memuat log...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="sheet-overlay" id="sheetInputBatre" onclick="tutupSheet(event, this.id)">
+        <div class="bottom-sheet" onclick="event.stopPropagation()">
+            <div class="sheet-handle"></div>
+            <div class="sheet-title">Informasi Baterai</div>
+            <p style="text-align:center; font-size:12px; color:var(--text-muted); margin-top:-10px; margin-bottom:20px;">Silakan masukkan sisa persentase baterai kendaraan Anda.</p>
+            <input type="number" id="inpMemberBatre" class="sheet-input" placeholder="Sisa Batre (%) - Contoh: 20">
+            <button class="btn-hub btn-fill" onclick="prosesSubmitMember()">LANJUTKAN <i class="fas fa-arrow-right"></i></button>
+        </div>
+    </div>
+
+    <div class="sheet-overlay" id="sheetKelolaIsi" onclick="tutupSheet(event, this.id)">
+        <div class="bottom-sheet" onclick="event.stopPropagation()">
+            <div class="sheet-handle"></div>
+            <div class="sheet-title" id="titleKelolaIsi">Kelola Slot</div>
+            <div class="sheet-menu">
+                <button class="sm-btn btn-kudeta admin-only" onclick="adminTriggerKudeta()"><i class="fas fa-khanda"></i> KUDETA SLOT INI</button>
+                <button class="sm-btn" onclick="tutupModal('sheetKelolaIsi'); setTimeout(() => bukaModal('sheetPilihSlot'), 150);"><div class="sm-icon bg-blue"><i class="fas fa-exchange-alt"></i></div> Pindah ke Slot Lain</button>
+                <button class="sm-btn" onclick="adminToQueue()"><div class="sm-icon bg-dark"><i class="fas fa-undo"></i></div> Kembalikan Jadi Antrian</button>
+                <button class="sm-btn" onclick="adminKick()"><div class="sm-icon bg-red"><i class="fas fa-times"></i></div> Keluarkan (Selesai)</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="sheet-overlay" id="sheetPilihSlot" onclick="tutupSheet(event, this.id)">
+        <div class="bottom-sheet" onclick="event.stopPropagation()">
+            <div class="sheet-handle"></div>
+            <div class="sheet-title">Pindah ke Slot Mana?</div>
+            <div class="sheet-menu">
+                <button class="sm-btn" onclick="adminMoveSlot(0)"><div class="sm-icon bg-dark">1</div> Masuk Slot 1</button>
+                <button class="sm-btn" onclick="adminMoveSlot(1)"><div class="sm-icon bg-dark">2</div> Masuk Slot 2</button>
+                <button class="sm-btn" onclick="adminMoveSlot(2)"><div class="sm-icon bg-dark">3</div> Masuk Slot 3</button>
+                <button class="sm-btn" onclick="adminMoveSlot(3)"><div class="sm-icon bg-dark">4</div> Masuk Slot 4</button>
+                <button class="sm-btn" onclick="adminMoveSlot(4)"><div class="sm-icon bg-dark">5</div> Masuk Slot 5</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="sheet-overlay" id="sheetDaftarAdmin" onclick="tutupSheet(event, this.id)">
+        <div class="bottom-sheet" onclick="event.stopPropagation()">
+            <div class="sheet-handle"></div>
+            <div class="sheet-title"><i class="fas fa-clipboard-list"></i> Daftar via Admin</div>
+            <input type="text" id="inpAdminNama" class="sheet-input" placeholder="Nama Pengendara">
+            <input type="text" id="inpAdminPlat" class="sheet-input" placeholder="Plat Nomor (B 123 XX)">
+            <input type="number" id="inpAdminBatre" class="sheet-input" placeholder="Sisa Batre (%)">
+            
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn-hub btn-fill" style="flex:1; font-size:12px; padding: 15px;" onclick="adminSubmitDaftar('antrian')"><i class="fas fa-list-ol"></i> MASUK ANTRIAN</button>
+                <button class="btn-hub" style="background:var(--kc-yellow); color:#000; flex:1; font-size:12px; padding: 15px; box-shadow:0 0 15px rgba(255,255,0,0.3);" onclick="adminSubmitDaftar('slot')"><i class="fas fa-bolt"></i> MASUK SLOT</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="sheet-overlay" id="sheetManageAntrian" onclick="tutupSheet(event, this.id)">
+        <div class="bottom-sheet" onclick="event.stopPropagation()">
+            <div class="sheet-handle"></div>
+            <div class="sheet-title">Atur Daftar Antrian</div>
+            <div id="qAdminBody" style="margin-bottom: 20px;"></div>
+            
+            <button class="sm-btn" onclick="tutupModal('sheetManageAntrian'); setTimeout(() => { window.currentTargetSlot = -1; document.getElementById('inpAdminNama').value=''; document.getElementById('inpAdminPlat').value=''; document.getElementById('inpAdminBatre').value=''; bukaModal('sheetDaftarAdmin'); }, 150);" style="margin-bottom: 10px;"><div class="sm-icon bg-blue"><i class="fas fa-plus"></i></div> Daftar via Admin</button>
+            <button class="sm-btn" onclick="unblockAll()"><div class="sm-icon bg-dark"><i class="fas fa-unlock"></i></div> Buka Semua Daftar Blokir</button>
+        </div>
+    </div>
+
+    <div class="sheet-overlay" id="sheetDaftarAntrian" onclick="tutupSheet(event, this.id)">
+        <div class="bottom-sheet" onclick="event.stopPropagation()">
+            <div class="sheet-handle"></div>
+            <div class="sheet-title">Daftar Tunggu</div>
+            <div id="qListBody"></div>
+        </div>
+    </div>
+
+    <div id="customConfirmModal" class="modal-glass-overlay">
+        <div class="modal-glass-box">
+            <div id="ccIcon" style="font-size: 55px; margin-bottom: 15px; color: var(--kc-cyan); text-shadow: 0 0 20px rgba(0,229,255,0.4);"><i class="fas fa-question-circle"></i></div>
+            <h3 id="ccTitle" style="font-family:'Outfit'; font-weight:900; color:var(--kc-cyan); margin-bottom:10px; font-size: 22px; letter-spacing: 0.5px;">KONFIRMASI</h3>
+            <p id="ccMsg" style="font-size:13px; color:var(--text-muted); margin-bottom:25px; font-weight: 600; line-height: 1.6;">...</p>
+            <div style="display:flex; gap:10px;">
+                <button class="btn-modal" id="ccBtnNo" style="background:#111; color:white; border: 1px solid #333;">BATAL</button>
+                <button class="btn-modal" id="ccBtnYes" style="background:var(--kc-cyan); color:black;">YA, YAKIN</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, onSnapshot, runTransaction, updateDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // KONEKSI DATABASE KC BARU (antriankcnew)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDfsTAGclYUSRe6YhiljS-xb-v-9RBYVEM",
+            authDomain: "antriankcnew.firebaseapp.com",
+            projectId: "antriankcnew"
+        };
+        const app = initializeApp(firebaseConfig);
+        const dbKC = getFirestore(app);
+        const mainRef = doc(dbKC, "antrian", "utama");
+        const statsRef = doc(dbKC, "antrian", "stats_kc");
+
+        window.currentTargetSlot = -1;
+        window.memberActionType = '';
+        window.memberActionSlotIdx = -1;
+
+        // SISTEM MODAL TERPUSAT (Perbaikan Triggers)
+        window.bukaModal = (id) => { 
+            const m = document.getElementById(id); 
+            m.style.display = 'flex'; 
+            setTimeout(() => m.classList.add('show'), 10); 
+            
+            // TRIGER UNTUK MENGGAMBAR ISI DAFTAR SAAT POP UP DIBUKA
+            if(id === 'sheetManageAntrian') renderQueueAdmin();
+            if(id === 'sheetDaftarAntrian') renderQueueList();
+        };
+        window.tutupModal = (id) => { const m = document.getElementById(id); m.classList.remove('show'); setTimeout(() => m.style.display = 'none', 300); };
+        window.tutupSheet = (e, id) => { if(e.target.id === id) tutupModal(id); };
+
+        let confirmResolver = null;
+        window.showCustomConfirm = (title, msg, type = 'confirm') => {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('customConfirmModal');
+                const titleEl = document.getElementById('ccTitle');
+                const iconEl = document.getElementById('ccIcon');
+                const btnNo = document.getElementById('ccBtnNo');
+                const btnYes = document.getElementById('ccBtnYes');
+                
+                titleEl.innerText = title; document.getElementById('ccMsg').innerHTML = msg;
+                
+                if (type === 'success') {
+                    iconEl.innerHTML = '<i class="fas fa-check-circle"></i>'; iconEl.style.color = 'var(--success)'; titleEl.style.color = 'var(--success)';
+                    btnYes.style.background = 'var(--success)'; btnYes.style.color = 'white'; btnNo.style.display = 'none'; btnYes.innerText = 'OKE';
+                } else if (type === 'error') {
+                    iconEl.innerHTML = '<i class="fas fa-times-circle"></i>'; iconEl.style.color = 'var(--danger)'; titleEl.style.color = 'var(--danger)';
+                    btnYes.style.background = 'var(--danger)'; btnYes.style.color = 'white'; btnNo.style.display = 'none'; btnYes.innerText = 'MENGERTI';
+                } else {
+                    iconEl.innerHTML = '<i class="fas fa-question-circle"></i>'; iconEl.style.color = 'var(--kc-cyan)'; titleEl.style.color = 'var(--kc-cyan)';
+                    btnYes.style.background = 'var(--kc-cyan)'; btnYes.style.color = 'black'; btnNo.style.display = 'block'; btnYes.innerText = 'YA, LANJUTKAN';
+                }
+                
+                modal.style.display = 'flex'; setTimeout(() => modal.classList.add('show'), 10);
+                confirmResolver = resolve;
+            });
+        };
+        document.getElementById('ccBtnNo').addEventListener('click', () => { tutupModal('customConfirmModal'); if (confirmResolver) confirmResolver(false); });
+        document.getElementById('ccBtnYes').addEventListener('click', () => { tutupModal('customConfirmModal'); if (confirmResolver) confirmResolver(true); });
+        window.showCustomAlert = (title, msg, type) => { return showCustomConfirm(title, msg, type); };
+
+        // SISTEM LOGIN & HAK AKSES
+        const uData = JSON.parse(localStorage.getItem('maka_user'));
+        if(!uData || !uData.plat) window.location.href = 'index_kc.html';
+
+        const myPlat = uData.plat;
+        const myName = uData.namaKtp || uData.namaWa || uData.nama;
+        const myRole = uData.role ? uData.role.toUpperCase() : "GUEST";
+        const myPlatClean = myPlat.replace(/\s+/g, '').toUpperCase();
+        
+        const isUserDewa = (myPlatClean === 'B4248SWF' || uData.id === 'ghost_admin');
+        const isPengurusOrURC = isUserDewa || (myRole !== 'MEMBER' && myRole !== 'KELUARGA MLU' && myRole !== 'GUEST' && myRole !== 'NON-MEMBER');
+        if(isPengurusOrURC) { document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'flex'); }
+
+        // FUNGSI LOG ADMIN (JALUR AMAN DI LUAR TRANSAKSI)
+        async function writeAdminLog(actionDesc) {
+            if(!isPengurusOrURC) return;
+            try {
+                const sDoc = await getDoc(statsRef);
+                let data = sDoc.exists() ? sDoc.data() : { logs: [] };
+                let logs = data.logs || [];
+                const dateStr = new Date().toLocaleDateString('id-ID', {day:'numeric', month:'short'});
+                const timeStr = new Date().toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
+                logs.unshift(`<span class="log-time">[${dateStr} ${timeStr}]</span> <b>${myName.split(' ')[0]}:</b> ${actionDesc}`);
+                if(logs.length > 10) logs.pop();
+                await setDoc(statsRef, { logs: logs }, { merge: true });
+            } catch (e) { console.error("Gagal log", e); }
+        }
+
+        // LISTENERS INFO BOARD & STATS
+        onSnapshot(doc(dbKC, "settings", "board_info"), (snap) => {
+            if(snap.exists()) {
+                const data = snap.data();
+                const rt = document.getElementById('runningTextDesc');
+                if(rt) rt.innerText = `${data.title || "INFO KARTIKA CHANDRA"} • ${data.desc || "-"}`;
+            }
+        });
+
+        onSnapshot(statsRef, (snap) => {
+            if(snap.exists()) {
+                const d = snap.data(); const today = new Date().toLocaleDateString('id-ID');
+                let tHariIni = d.totalHariIni || 0; let tKemarin = d.totalKemarin || 0;
+                if(d.lastDate && d.lastDate !== today) { tKemarin = tHariIni; tHariIni = 0; }
+                document.getElementById('statModalHariIni').innerText = tHariIni;
+                document.getElementById('statModalKemarin').innerText = tKemarin;
+                document.getElementById('statModalPeak').innerText = d.jamSibuk || "18:00 - 21:00";
+                
+                const logBody = document.getElementById('logAdminBody'); logBody.innerHTML = '';
+                if(d.logs && d.logs.length > 0) d.logs.forEach(l => { logBody.innerHTML += `<div class="log-item">${l}</div>`; });
+                else logBody.innerHTML = `<div style="text-align:center; padding:20px; font-size:10px; color:var(--text-muted);">Belum ada log.</div>`;
+            }
+        });
+
+        // GPS RADAR
+        const STATION_LAT = -6.2285953; const STATION_LNG = 106.819502; const MAX_DIST_KM = 0.07; 
+        let isInLocation = false; 
+        function calculateDist(lat1, lon1, lat2, lon2) { const R = 6371; const dLat = (lat2-lat1)*Math.PI/180; const dLon = (lon2-lon1)*Math.PI/180; const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2; return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); }
+
+        const gpsInd = document.getElementById('gpsIndicator');
+        if (isUserDewa) {
+            isInLocation = true; gpsInd.className = "gps-badge ok"; gpsInd.innerHTML = "<i class='fas fa-shield-alt'></i> BYPASS ADMIN";
+        } else if (navigator.geolocation) {
+            navigator.geolocation.watchPosition((pos) => {
+                const dist = calculateDist(STATION_LAT, STATION_LNG, pos.coords.latitude, pos.coords.longitude);
+                if(dist <= MAX_DIST_KM) { isInLocation = true; gpsInd.className = "gps-badge ok"; gpsInd.innerHTML = "<i class='fas fa-map-marker-alt'></i> ANDA DI LOKASI"; } 
+                else { isInLocation = false; gpsInd.className = "gps-badge err"; gpsInd.innerHTML = `<i class='fas fa-eye'></i> MODE PANTAU (${(dist).toFixed(1)} KM)`; }
+                updateUI();
+            }, () => { isInLocation = false; gpsInd.className = "gps-badge err"; gpsInd.innerHTML = "<i class='fas fa-eye'></i> MODE PANTAU (NO GPS)"; updateUI(); }, {enableHighAccuracy: true, maximumAge: 10000});
+        }
+
+        // UTAMA FIREBASE LISTENER
+        let localSlots = [null, null, null, null, null]; let localQueue = []; let blockedList = [];
+        function cleanStr(s) { return s ? s.replace(/[^A-Z0-9]/gi, '').toUpperCase() : ''; }
+        function escapeHtml(text) { if (!text) return ""; return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
+
+        onSnapshot(mainRef, (snap) => { 
+            if (!snap.exists()) return; 
+            const d = snap.data(); localSlots = d.chargingSlots || [null, null, null, null, null]; localQueue = d.waitingQueue || []; blockedList = d.blockedPlates || []; 
+            updateUI(); 
+            
+            // JIKA SEDANG BUKA MODAL, REFRESH DAFTAR AGAR REALTIME
+            if(document.getElementById('sheetManageAntrian').classList.contains('show')) renderQueueAdmin();
+            if(document.getElementById('sheetDaftarAntrian').classList.contains('show')) renderQueueList();
+        });
+
+        function updateUI() {
+            const container = document.getElementById('slotsContainer'); container.innerHTML = ''; 
+            let myQIndex = localQueue.findIndex(q => cleanStr(q.plat) === cleanStr(myPlat));
+            let amIFilling = localSlots.some(s => s && cleanStr(s.plat) === cleanStr(myPlat));
+            const btnCancel = document.getElementById('btnCancelQ'); const btnTake = document.getElementById('btnTakeQ');
+            
+            if(myQIndex > -1) { 
+                btnCancel.style.display = 'flex'; btnCancel.innerHTML = `❌ BATALKAN ANTRIAN SAYA (#${myQIndex+1})`; btnTake.style.display = 'none';
+            } else { 
+                btnCancel.style.display = 'none'; 
+                if(!amIFilling) {
+                    btnTake.style.display = 'flex';
+                    if(!isInLocation && !isUserDewa) { btnTake.className = "btn-hub btn-disabled"; btnTake.innerHTML = "<i class='fas fa-map-marker-alt'></i> HARUS DI LOKASI (MAKS 70M)"; btnTake.onclick = null; } 
+                    else { btnTake.className = "btn-hub btn-take-q"; btnTake.innerHTML = "<i class='fas fa-list-ol'></i> AMBIL ANTRIAN SAYA"; btnTake.onclick = () => mintaBatre('antrian', -1); }
+                } else { btnTake.style.display = 'none'; }
+            }
+
+            localSlots.forEach((s, i) => {
+                const div = document.createElement('div'); const isActive = s !== null && s !== undefined; 
+                
+                if (isActive) {
+                    const isMe = (cleanStr(s.plat) === cleanStr(myPlat)); const isManual = (s.role === 'MANUAL' || s.role === 'KUDETA'); 
+                    div.className = `slot-bay ${isManual ? 'is-admin' : 'is-active'}`;
+                    const durationMin = Math.floor((Date.now() - (s.startTime || Date.now())) / 60000);
+                    let timerHTML = isMe ? `<div class="sb-timer" style="color:var(--kc-cyan)"><i class="fas fa-bolt"></i> ${durationMin} MIN (ANDA)</div>` : `<div class="sb-timer"><i class="fas fa-clock"></i> ${durationMin} MIN RUNNING</div>`;
+                    let adminBtn = isPengurusOrURC ? `<button class="btn-dots" onclick="event.stopPropagation(); window.currentTargetSlot=${i}; document.getElementById('titleKelolaIsi').innerHTML='Kelola Slot ${i+1} <span style=\\'font-size:12px; color:#94A3B8;\\'>(${escapeHtml(s.plat)})</span>'; bukaModal('sheetKelolaIsi');"><i class="fas fa-ellipsis-v"></i></button>` : '';
+                    let batreInfo = (s.batre && s.batre !== '-' && s.batre !== 'undefined') ? `<span class="badge-batre"><i class="fas fa-bolt"></i> ${s.batre}</span>` : '';
+                    let roleBadge = (s.role && s.role !== 'MEMBER' && s.role !== 'GUEST' && s.role !== 'KELUARGA MLU' && s.role !== 'MANUAL' && s.role !== 'KUDETA') ? `<span class="badge-pengurus">${s.role}</span>` : '';
+
+                    div.innerHTML = `<div class="sb-num">${i+1}</div><div class="sb-info"><div class="sb-name">${escapeHtml(s.userName)} ${batreInfo} ${roleBadge}</div><div class="sb-plat">${s.plat}</div>${timerHTML}</div>${adminBtn}`;
+                    if(isMe) { div.onclick = async (e) => { e.stopPropagation(); const ok = await showCustomConfirm("SELESAI PENGISIAN?", "Apakah Anda sudah selesai dan ingin mengosongkan slot ini?"); if(ok) stopCharging(i); }; div.style.cursor = "pointer"; }
+                } else {
+                    div.className = `slot-bay is-empty`;
+                    let adminBtn = isPengurusOrURC ? `<button class="btn-dots" onclick="event.stopPropagation(); window.currentTargetSlot=${i}; document.getElementById('inpAdminNama').value=''; document.getElementById('inpAdminPlat').value=''; document.getElementById('inpAdminBatre').value=''; bukaModal('sheetDaftarAdmin');"><i class="fas fa-plus"></i></button>` : '';
+                    let actionHtml = '';
+
+                    if (myQIndex > -1) { actionHtml = `<button class="btn-action-main btn-fill" onclick="event.stopPropagation(); pindahDariAntrianKeSlot(${i})"><i class="fas fa-bolt"></i> NAIK KE SLOT</button>`; } 
+                    else if (localQueue.length === 0 && !amIFilling) {
+                        if (isInLocation || isUserDewa) actionHtml = `<button class="btn-action-main btn-fill" onclick="event.stopPropagation(); mintaBatre('slot', ${i})">MASUK SLOT</button>`; 
+                        else actionHtml = `<button class="btn-action-main btn-disabled" onclick="event.stopPropagation();">HARUS DI LOKASI</button>`;
+                    } 
+                    else if (localQueue.length > 0 && !amIFilling) { actionHtml = `<button class="btn-action-main btn-disabled" onclick="event.stopPropagation();">ANTRIAN BERJALAN</button>`; }
+
+                    div.innerHTML = `<div class="sb-num">${i+1}</div><div class="sb-info"><div class="sb-plat">KOSONG</div></div><div style="display:flex; gap:10px; align-items:center;">${actionHtml}${adminBtn}</div>`;
+                }
+                container.appendChild(div);
+            });
+            document.getElementById('totalQDisplay').innerText = localQueue.length; document.getElementById('nextQDisplay').innerText = localQueue.length > 0 ? localQueue[0].userName : "KOSONG";
+        }
+
+        // USER ACTIONS (DENGAN PERISAI UNDEFINED DATABASE)
+        window.pindahDariAntrianKeSlot = async (slotIndex) => {
+            try {
+                await runTransaction(dbKC, async(t) => {
+                    const dDoc = await t.get(mainRef); const d = dDoc.exists() ? dDoc.data() : { chargingSlots: [null,null,null,null,null], waitingQueue: [] };
+                    let slots = d.chargingSlots || [null, null, null, null, null]; while(slots.length < 5) slots.push(null); 
+                    if(slots[slotIndex] !== null) throw "Slot ini baru saja terisi!";
+                    
+                    let q = d.waitingQueue || []; const myIdx = q.findIndex(x => cleanStr(x.plat) === cleanStr(myPlat));
+                    if(myIdx === -1) throw "Data antrian Anda tidak ditemukan.";
+                    
+                    let me = q.splice(myIdx, 1)[0]; me.startTime = Date.now(); slots[slotIndex] = me;
+                    for(let j=0; j<5; j++) if(slots[j] === undefined) slots[j] = null;
+                    t.update(mainRef, { chargingSlots: slots, waitingQueue: q });
+                });
+                showCustomAlert("BERHASIL", "Anda berhasil naik ke Slot!", "success");
+            } catch(e) { showCustomAlert("GAGAL", e.message || e, "error"); }
+        };
+
+        window.mintaBatre = (tipeAction, slotIndex) => {
+            if(blockedList.includes(cleanStr(myPlat))) return showCustomAlert("DIBLOKIR", "Plat Anda diblokir Admin.", "error");
+            window.memberActionType = tipeAction; window.memberActionSlotIdx = slotIndex;
+            document.getElementById('inpMemberBatre').value = ''; bukaModal('sheetInputBatre');
+        };
+
+        window.prosesSubmitMember = async () => {
+            const rawBatre = document.getElementById('inpMemberBatre').value.trim(); const batreFinal = rawBatre === "" ? "-" : rawBatre + "%"; tutupModal('sheetInputBatre');
+            try {
+                if(window.memberActionType === 'antrian') {
+                    await runTransaction(dbKC, async(t) => {
+                        const dDoc = await t.get(mainRef); const d = dDoc.exists() ? dDoc.data() : { chargingSlots: [null,null,null,null,null], waitingQueue: [] };
+                        let q = d.waitingQueue || []; if(q.some(x => cleanStr(x.plat) === cleanStr(myPlat))) throw "Anda sudah mengantri!";
+                        q.push({ plat: myPlat, userName: myName, role: myRole, batre: batreFinal, battery: batreFinal, time: Date.now() });
+                        t.set(mainRef, { waitingQueue: q, chargingSlots: d.chargingSlots || [null,null,null,null,null] }, { merge: true });
+                    });
+                    showCustomAlert("BERHASIL", "Anda berhasil masuk antrean.", "success");
+                } else if (window.memberActionType === 'slot') {
+                    await runTransaction(dbKC, async(t)=>{ 
+                        const dDoc = await t.get(mainRef); const d = dDoc.exists() ? dDoc.data() : { chargingSlots: [null,null,null,null,null], waitingQueue: [] }; 
+                        let slots = d.chargingSlots || [null, null, null, null, null]; while(slots.length < 5) slots.push(null);
+                        if(slots[window.memberActionSlotIdx] !== null) throw "SLOT PENUH!"; 
+                        let q = d.waitingQueue || []; const idx = q.findIndex(x => cleanStr(x.plat) === cleanStr(myPlat)); 
+                        if(idx === -1 && !isUserDewa) throw "ANDA TIDAK ADA DI ANTRIAN!"; 
+                        let me = idx > -1 ? q.splice(idx, 1)[0] : { plat: myPlat, userName: myName, role: myRole }; 
+                        me.startTime = Date.now(); me.batre = batreFinal; me.battery = batreFinal; slots[window.memberActionSlotIdx] = me; 
+                        for(let j=0; j<5; j++) if(slots[j] === undefined) slots[j] = null;
+                        t.set(mainRef, { chargingSlots: slots, waitingQueue: q }, { merge: true }); 
+                    });
+                    showCustomAlert("BERHASIL", "Berhasil masuk Slot.", "success");
+                } else if (window.memberActionType === 'kudeta') {
+                    let targetKudeta = window.currentTargetSlot;
+                    await runTransaction(dbKC, async(t) => {
+                        const dDoc = await t.get(mainRef); const d = dDoc.exists() ? dDoc.data() : { chargingSlots: [null,null,null,null,null], waitingQueue: [] };
+                        let slots = d.chargingSlots || [null, null, null, null, null]; while(slots.length < 5) slots.push(null);
+                        let q = d.waitingQueue || []; q = q.filter(x => cleanStr(x.plat) !== cleanStr(myPlat));
+                        slots[targetKudeta] = { plat: myPlat, userName: myName + " 👑", role: "KUDETA", startTime: Date.now(), batre: batreFinal, battery: batreFinal };
+                        for(let j=0; j<5; j++) if(slots[j] === undefined) slots[j] = null;
+                        t.set(mainRef, {chargingSlots: slots, waitingQueue: q}, {merge:true});
+                    });
+                    showCustomAlert("KUDETA BERHASIL", "Korban telah ditendang dari slot.", "success"); writeAdminLog(`Kudeta terhadap Slot ${targetKudeta+1}`);
+                }
+            } catch(e) { showCustomAlert("GAGAL", e.message || e, "error"); }
+        };
+
+        window.stopCharging = async (i) => { 
+            try {
+                await runTransaction(dbKC, async(t)=>{ 
+                    const dDoc = await t.get(mainRef); const sDoc = await t.get(statsRef); 
+                    const d = dDoc.exists() ? dDoc.data() : { chargingSlots: [null,null,null,null,null], waitingQueue: [] };
+                    let slots = d.chargingSlots || [null, null, null, null, null]; while(slots.length < 5) slots.push(null);
+                    slots[i] = null; for(let j=0; j<5; j++) if(slots[j] === undefined) slots[j] = null;
+                    t.update(mainRef, {chargingSlots: slots}); 
+                    let sData = sDoc.exists() ? sDoc.data() : {totalHariIni: 0, totalKemarin: 0, jamSibuk: "18:00 - 21:00", lastDate: ""};
+                    const today = new Date().toLocaleDateString('id-ID');
+                    if (sData.lastDate !== today) { sData.totalKemarin = sData.totalHariIni || 0; sData.totalHariIni = 0; sData.lastDate = today; }
+                    sData.totalHariIni += 1; t.set(statsRef, sData, {merge:true});
+                }); 
+                showCustomAlert("SELESAI", "Slot berhasil dikosongkan. Terima kasih!", "success");
+            } catch(e) { showCustomAlert("ERROR", "Gagal mengosongkan slot.", "error"); }
+        };
+        
+        window.cancelQueue = async () => { 
+            const ok = await showCustomConfirm("BATALKAN ANTRIAN", "Anda yakin ingin membatalkan antrian Anda?");
+            if(ok) { 
+                try {
+                    await runTransaction(dbKC, async(t) => { 
+                        const dDoc = await t.get(mainRef); const d = dDoc.exists() ? dDoc.data() : { chargingSlots: [null,null,null,null,null], waitingQueue: [] }; 
+                        let q = d.waitingQueue || []; const newQ = q.filter(x => cleanStr(x.plat) !== cleanStr(myPlat)); 
+                        t.update(mainRef, { waitingQueue: newQ }); 
+                    });
+                } catch(e) { showCustomAlert("GAGAL", e.message || "Gagal batalkan antrian.", "error"); } 
+            }
+        };
+
+        // ADMIN COMMANDS
+        window.adminMoveSlot = async (targetIdx) => { 
+            let moveTarget = window.currentTargetSlot; if(targetIdx === moveTarget) return tutupModal('sheetPilihSlot'); 
+            try {
+                await runTransaction(dbKC, async(t)=>{ 
+                    const dDoc = await t.get(mainRef); const d = dDoc.exists() ? dDoc.data() : { chargingSlots: [null,null,null,null,null], waitingQueue: [] }; 
+                    let slots = d.chargingSlots || [null, null, null, null, null]; while(slots.length < 5) slots.push(null);
+                    if(slots[targetIdx] !== null) throw "Slot Tujuan Sedang Terisi!"; 
+                    slots[targetIdx] = slots[moveTarget]; slots[moveTarget] = null; 
+                    for(let j=0; j<5; j++) if(slots[j] === undefined) slots[j] = null;
+                    t.update(mainRef, {chargingSlots: slots}); 
+                });
+                tutupModal('sheetPilihSlot'); writeAdminLog(`Memindah kendaraan ke Slot ${targetIdx+1}`);
+            } catch(e) { showCustomAlert("GAGAL", e.message || e, "error"); }
+        };
+        
+        window.adminKick = async () => { 
+            let kickedPlat = ''; let kickSlot = window.currentTargetSlot;
+            try {
+                await runTransaction(dbKC, async(t)=>{ 
+                    const dDoc = await t.get(mainRef); const sDoc = await t.get(statsRef); 
+                    const d = dDoc.exists() ? dDoc.data() : { chargingSlots: [null,null,null,null,null], waitingQueue: [] }; 
+                    let slots = d.chargingSlots || [null, null, null, null, null]; while(slots.length < 5) slots.push(null);
+                    kickedPlat = slots[kickSlot] ? slots[kickSlot].plat : 'Unknown'; slots[kickSlot] = null; 
+                    for(let j=0; j<5; j++) if(slots[j] === undefined) slots[j] = null;
+                    t.update(mainRef, {chargingSlots: slots}); 
+                    let sData = sDoc.exists() ? sDoc.data() : {totalHariIni: 0, totalKemarin: 0, jamSibuk: "18:00 - 21:00", lastDate: ""};
+                    const today = new Date().toLocaleDateString('id-ID');
+                    if (sData.lastDate !== today) { sData.totalKemarin = sData.totalHariIni || 0; sData.totalHariIni = 0; sData.lastDate = today; }
+                    sData.totalHariIni += 1; t.set(statsRef, sData, {merge:true});
+                });
+                tutupModal('sheetKelolaIsi'); if(kickedPlat) writeAdminLog(`Mengeluarkan paksa ${kickedPlat} dari Slot ${kickSlot+1}`);
+            } catch(e) { showCustomAlert("GAGAL", "Terjadi kesalahan.", "error"); }
+        };
+        
+        window.adminToQueue = async () => { 
+            let movedPlat = ''; let qSlot = window.currentTargetSlot;
+            try {
+                await runTransaction(dbKC, async(t)=>{ 
+                    const dDoc = await t.get(mainRef); const d = dDoc.exists() ? dDoc.data() : { chargingSlots: [null,null,null,null,null], waitingQueue: [] }; 
+                    let slots = d.chargingSlots || [null, null, null, null, null]; while(slots.length < 5) slots.push(null);
+                    let q = d.waitingQueue || []; const s = slots[qSlot]; 
+                    if(s) { q.unshift(s); slots[qSlot] = null; movedPlat = s.plat; } 
+                    for(let j=0; j<5; j++) if(slots[j] === undefined) slots[j] = null;
+                    t.update(mainRef, {chargingSlots: slots, waitingQueue: q}); 
+                });
+                tutupModal('sheetKelolaIsi'); if(movedPlat) writeAdminLog(`Mengembalikan ${movedPlat} ke Antrian Tunggu`);
+            } catch(e) { showCustomAlert("GAGAL", "Terjadi kesalahan.", "error"); }
+        };
+
+        window.adminTriggerKudeta = async () => {
+            const ok = await showCustomConfirm("KUDETA SLOT", "Pengguna ini akan dikeluarkan paksa, dan plat Anda akan menempati slot ini!");
+            if(!ok) return; window.memberActionType = 'kudeta'; document.getElementById('inpMemberBatre').value = '';
+            tutupModal('sheetKelolaIsi'); setTimeout(() => { bukaModal('sheetInputBatre'); }, 300);
+        };
+
+        window.bukaDaftarAdmin = (slotIndex) => {
+            window.currentTargetSlot = slotIndex; 
+            document.getElementById('inpAdminNama').value = ''; document.getElementById('inpAdminPlat').value = ''; document.getElementById('inpAdminBatre').value = '';
+            tutupModal('sheetManageAntrian'); setTimeout(() => { bukaModal('sheetDaftarAdmin'); }, 300);
+        };
+
+        window.adminSubmitDaftar = async (jalur) => {
+            const nama = document.getElementById('inpAdminNama').value.trim().toUpperCase(); const plat = document.getElementById('inpAdminPlat').value.trim().toUpperCase(); const batre = document.getElementById('inpAdminBatre').value.trim();
+            if(!nama || !plat) return showCustomAlert("PERHATIAN", "Nama dan Plat wajib diisi!", "error");
+            try {
+                await runTransaction(dbKC, async(t) => {
+                    const dDoc = await t.get(mainRef); const d = dDoc.exists() ? dDoc.data() : { chargingSlots: [null,null,null,null,null], waitingQueue: [] };
+                    let slots = d.chargingSlots || [null, null, null, null, null]; while(slots.length < 5) slots.push(null);
+                    const bVal = batre ? batre + '%' : '-'; const newObj = { plat: plat, userName: nama, batre: bVal, battery: bVal, role: "MANUAL", time: Date.now() };
+                    
+                    if(jalur === 'antrian') {
+                        let q = d.waitingQueue || []; if(q.some(x => cleanStr(x.plat) === cleanStr(plat))) throw "Plat sudah ada di antrian!";
+                        q.push(newObj); t.update(mainRef, { waitingQueue: q });
+                    } else if (jalur === 'slot') {
+                        let targetIdx = window.currentTargetSlot;
+                        if (targetIdx === -1) { targetIdx = slots.findIndex(s => s === null); if(targetIdx === -1) throw "Semua slot penuh! Pilih Masuk Antrian."; } 
+                        else { if(slots[targetIdx] !== null) throw "Slot keburu terisi!"; }
+                        newObj.startTime = Date.now(); slots[targetIdx] = newObj; 
+                        for(let j=0; j<5; j++) if(slots[j] === undefined) slots[j] = null;
+                        t.update(mainRef, { chargingSlots: slots });
+                    }
+                });
+                tutupModal('sheetDaftarAdmin'); writeAdminLog(`Mendaftarkan Manual: ${plat} ke ${jalur.toUpperCase()}`);
+            } catch(e) { showCustomAlert("GAGAL", e.message || e, "error"); }
+        };
+
+        window.adminPromoteToSlot = async (index) => {
+            let promotedPlat = ''; let targetSlotId = 0;
+            try {
+                await runTransaction(dbKC, async(t) => {
+                    const dDoc = await t.get(mainRef); const d = dDoc.exists() ? dDoc.data() : { chargingSlots: [null,null,null,null,null], waitingQueue: [] }; 
+                    let q = d.waitingQueue || []; let slots = d.chargingSlots || [null, null, null, null, null]; while(slots.length < 5) slots.push(null);
+                    let emptyIdx = slots.findIndex(s => s === null);
+                    if (emptyIdx === -1) throw "Semua slot sedang penuh! Keluarkan salah satu kendaraan di slot terlebih dahulu.";
+                    let userToPromote = q.splice(index, 1)[0]; userToPromote.startTime = Date.now(); slots[emptyIdx] = userToPromote;
+                    for(let j=0; j<5; j++) if(slots[j] === undefined) slots[j] = null;
+                    promotedPlat = userToPromote.plat; targetSlotId = emptyIdx + 1;
+                    t.update(mainRef, { waitingQueue: q, chargingSlots: slots });
+                });
+                tutupModal('sheetManageAntrian'); if(promotedPlat) writeAdminLog(`Menaikkan ${promotedPlat} dari Antrian ke Slot ${targetSlotId}`);
+            } catch(e) { showCustomAlert("GAGAL", e.message || e, "error"); }
+        };
+
+        window.renderQueueAdmin = () => {
+            const body = document.getElementById('qAdminBody'); body.innerHTML = '';
+            if(localQueue.length === 0) body.innerHTML = "<p style='text-align:center; color:var(--text-muted);'>Antrian Kosong</p>";
+            localQueue.forEach((q, i) => {
+                let b = q.batre || q.battery; let batreInfo = (b && b !== '-' && b !== 'undefined') ? ` ⚡ ${b}` : '';
+                body.innerHTML += `
+                    <div class="q-item">
+                        <div>
+                            <div style="font-family:'Space Grotesk'; font-size:16px; font-weight:900; color:var(--kc-cyan);">${i+1}. ${q.plat}</div>
+                            <div style="font-size:10px; color:var(--text-muted);">${q.userName}${batreInfo}</div>
+                        </div>
+                        <div class="qi-ctrl">
+                            <button class="qi-btn" style="background:var(--kc-cyan); color:#000; box-shadow:var(--shadow-cyan);" onclick="adminPromoteToSlot(${i})" title="Masukkan ke Slot Kosong"><i class="fas fa-bolt"></i></button>
+                            ${i > 0 ? `<button class="qi-btn" style="background:rgba(0,229,255,0.1); color:var(--kc-cyan); border:1px solid rgba(0,229,255,0.3);" onclick="adminReorder(${i}, -1)"><i class="fas fa-arrow-up"></i></button>` : ''}
+                            ${i < localQueue.length - 1 ? `<button class="qi-btn" style="background:#222; color:var(--white);" onclick="adminReorder(${i}, 1)"><i class="fas fa-arrow-down"></i></button>` : ''}
+                            <button class="qi-btn" style="background:transparent; color:var(--danger); border:1px solid var(--danger);" onclick="adminKickQueue('${escapeHtml(q.plat)}')"><i class="fas fa-times"></i></button>
+                        </div>
+                    </div>`;
+            });
+        };
+
+        window.renderQueueList = () => {
+            const body = document.getElementById('qListBody'); body.innerHTML = '';
+            if(localQueue.length === 0) body.innerHTML = "<p style='text-align:center; color:var(--text-muted);'>Antrian Kosong</p>";
+            localQueue.forEach((q, i) => {
+                let b = q.batre || q.battery; let batreInfo = (b && b !== '-' && b !== 'undefined') ? ` <span style="color:var(--kc-yellow); font-size:11px;"><i class="fas fa-bolt"></i> ${b}</span>` : '';
+                body.innerHTML += `<div class="q-item"><div><div style="font-family:'Space Grotesk'; font-size:18px; font-weight:900; color:var(--kc-cyan);">${q.plat}</div><div style="font-size:11px; font-weight:700; color:var(--text-muted);">${q.userName}${batreInfo}</div></div><div style="font-family:'Space Grotesk'; font-size:14px; background:var(--kc-cyan); color:#000; padding:5px 12px; border-radius:10px; box-shadow:var(--shadow-cyan); font-weight:900;">#${i+1}</div></div>`;
+            });
+        };
+
+        window.adminReorder = async (index, dir) => { 
+            try {
+                await runTransaction(dbKC, async(t)=>{ 
+                    const dDoc = await t.get(mainRef); const d = dDoc.exists() ? dDoc.data() : { chargingSlots: [null,null,null,null,null], waitingQueue: [] }; 
+                    let q = d.waitingQueue || []; if(q.length === 0) return;
+                    let temp = q[index]; q[index] = q[index + dir]; q[index + dir] = temp; 
+                    t.update(mainRef, {waitingQueue: q}); 
+                }); 
+            } catch(e) { showCustomAlert("GAGAL", e.message, "error"); }
+        };
+        
+        window.adminKickQueue = async (plat) => { 
+            const ok = await showCustomConfirm("HAPUS ANTRIAN", `Keluarkan ${plat} dari antrian?`); 
+            if(ok) { 
+                try {
+                    await runTransaction(dbKC, async(t)=>{ 
+                        const dDoc = await t.get(mainRef); const d = dDoc.exists() ? dDoc.data() : { chargingSlots: [null,null,null,null,null], waitingQueue: [] }; 
+                        let q = d.waitingQueue || []; const newQ = q.filter(x => cleanStr(x.plat) !== cleanStr(plat)); 
+                        t.update(mainRef, {waitingQueue: newQ}); 
+                    }); 
+                    writeAdminLog(`Menghapus ${plat} dari Antrian`);
+                    tutupModal('sheetManageAntrian');
+                } catch(e) { showCustomAlert("GAGAL", e.message, "error"); }
+            } 
+        };
+        
+        window.unblockAll = async () => { 
+            const ok = await showCustomConfirm("HAPUS BLOKIR", "Hapus semua daftar plat blokir?"); 
+            if(ok) { await updateDoc(mainRef, {blockedPlates: []}); tutupModal('sheetManageAntrian'); }
+        };
+    </script>
+</body>
+</html>
