@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KC Chat Room</title>
+    
+    <script>
+        const CHAT_VERSION = "4.0_WITH_NOTIF_CLEAR"; 
+        if (localStorage.getItem('maka_chat_kc_v') !== CHAT_VERSION) {
+            if ('caches' in window) {
+                caches.keys().then((names) => { names.forEach(name => { caches.delete(name); }); });
+            }
+            localStorage.setItem('maka_chat_kc_v', CHAT_VERSION);
+            window.location.reload(true); 
+        }
+    </script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* === TEMA CYBER NAVY & CYAN === */
+        :root { 
+            --cyan-logo: #00E5FF;     
+            --cyan-dark: #0077B6;     
+            --yellow-kc: #FFFF00;   
+            --navy-bg: #050B14;       
+            --bg-surface: #000000;    
+            
+            --bubble-other: rgba(10, 15, 25, 0.9);
+            --bubble-mine: linear-gradient(135deg, var(--cyan-dark) 0%, var(--cyan-logo) 100%);
+            --glass-border: rgba(0, 229, 255, 0.2);
+            --shadow-cyan: 0 5px 15px rgba(0, 229, 255, 0.15);
+        }
+        
+        /* FIX LAYAR TENGGELAM DI BROWSER HP */
+        body { margin: 0; background: var(--bg-surface); font-family: 'Inter', sans-serif; color: #fff; overflow: hidden; -webkit-tap-highlight-color: transparent;}
+        * { box-sizing: border-box; text-decoration: none; outline: none; }
+
+        /* WRAPPER MUTLAK AGAR PAS DI LAYAR */
+        .app-wrapper { position: absolute; top: 0; bottom: 0; left: 0; right: 0; display: flex; flex-direction: column; background-image: radial-gradient(circle at top right, var(--navy-bg) 0%, var(--bg-surface) 70%);}
+
+        /* HEADER */
+        .header { background: rgba(5, 11, 20, 0.85); backdrop-filter: blur(20px); padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; z-index: 100; border-bottom: 1px solid var(--glass-border); flex-shrink: 0; box-shadow: var(--shadow-cyan);}
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .btn-back { color: var(--cyan-logo); font-size: 20px; width: 40px; height: 40px; background: rgba(0, 229, 255, 0.1); border: 1px solid rgba(0, 229, 255, 0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.2s;}
+        .btn-back:active { transform: scale(0.9); background: var(--cyan-logo); color: black;}
+        
+        .header-title { display: flex; flex-direction: column; }
+        .header-title h1 { margin: 0; font-family: 'Space Grotesk'; font-size: 18px; color: var(--cyan-logo); letter-spacing: 1px; display: flex; align-items: center; gap: 6px; text-shadow: 0 0 10px rgba(0,229,255,0.3);}
+        .header-title p { margin: 0; font-size: 10px; color: #94a3b8; font-weight: 600; letter-spacing: 1px; }
+
+        /* AREA CHAT */
+        .chat-container { flex: 1; padding: 20px 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; scroll-behavior: smooth;}
+        
+        /* MSG WRAPPER DIBIKIN RELATIF UNTUK SWIPE */
+        .msg-container { position: relative; display: flex; flex-direction: column; max-width: 85%; animation: fadeIn 0.3s ease-out; }
+        .msg-container.mine { align-self: flex-end; align-items: flex-end; }
+        .msg-container.other { align-self: flex-start; align-items: flex-start; }
+
+        /* ICON REPLY MUNCUL SAAT DI-SWIPE */
+        .swipe-reply-icon { position: absolute; top: 50%; transform: translateY(-50%); font-size: 16px; color: var(--cyan-logo); opacity: 0; transition: opacity 0.2s; pointer-events: none;}
+        .msg-container.other .swipe-reply-icon { right: -35px; }
+        .msg-container.mine .swipe-reply-icon { left: -35px; }
+
+        /* WRAPPER BUBBLE BISA DIGESER */
+        .swipe-wrapper { display: flex; flex-direction: column; width: 100%; transition: transform 0.2s ease-out; }
+
+        .sender-info { font-size: 10px; color: #94a3b8; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; font-weight: 600;}
+        .msg-container.mine .sender-info { flex-direction: row-reverse; color: var(--cyan-logo); }
+        .role-badge { font-size: 8px; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; color: white; font-family: 'Space Grotesk'; font-weight: 900; letter-spacing: 0.5px; border: 1px solid rgba(255,255,255,0.05);}
+        .msg-container.mine .role-badge { background: rgba(0,229,255,0.1); color: var(--cyan-logo); border-color: rgba(0,229,255,0.3);}
+
+        .bubble { padding: 12px 16px; border-radius: 20px; font-size: 13px; line-height: 1.5; position: relative; word-wrap: break-word; box-shadow: 0 5px 15px rgba(0,0,0,0.5);}
+        .msg-container.other .bubble { background: var(--bubble-other); color: #f8fafc; border-top-left-radius: 4px; border: 1px solid rgba(255,255,255,0.05); }
+        .msg-container.mine .bubble { background: var(--bubble-mine); color: black; font-weight: 600; border-top-right-radius: 4px; box-shadow: var(--shadow-cyan);}
+
+        /* KOTAK KUTIPAN REPLY DI DALAM CHAT */
+        .quote-box { background: rgba(0,0,0,0.4); border-left: 3px solid var(--yellow-kc); padding: 8px 10px; border-radius: 8px; margin-bottom: 8px; font-size: 11px; color: #cbd5e1; display: flex; flex-direction: column; font-weight: 500;}
+        .msg-container.mine .quote-box { background: rgba(0,0,0,0.2); border-left-color: #000; color: #111;}
+        .quote-name { font-weight: 800; color: var(--yellow-kc); margin-bottom: 2px; font-size: 10px;}
+        .msg-container.mine .quote-name { color: #000; }
+        
+        .msg-container.other .quote-box { border-left-color: var(--cyan-logo); }
+        .msg-container.other .quote-name { color: var(--cyan-logo); }
+
+        .bubble-footer { display: flex; justify-content: flex-end; align-items: center; margin-top: 5px; gap: 15px; }
+        .timestamp { font-size: 9px; opacity: 0.6; font-family: monospace;}
+        .msg-container.mine .timestamp { color: rgba(0,0,0,0.6); }
+
+        /* PREVIEW REPLY SEBELUM DIKIRIM */
+        .reply-preview-area { background: rgba(5,11,20,0.95); padding: 10px 20px; display: none; justify-content: space-between; align-items: center; border-top: 1px solid var(--glass-border); flex-shrink: 0; backdrop-filter: blur(10px);}
+        .reply-preview-content { display: flex; flex-direction: column; flex: 1; border-left: 3px solid var(--cyan-logo); padding-left: 10px; }
+        .rp-title { font-size: 10px; color: var(--cyan-logo); font-weight: 800; margin-bottom: 2px;}
+        .rp-text { font-size: 11px; color: #cbd5e1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 250px; font-weight: 500;}
+        .btn-cancel-reply { background: none; border: none; color: #ef4444; font-size: 16px; cursor: pointer; padding: 5px; }
+
+        /* INPUT AREA */
+        .input-area { background: #000; padding: 10px 15px; display: flex; gap: 10px; align-items: flex-end; border-top: 1px solid rgba(255,255,255,0.05); flex-shrink: 0; }
+        .chat-input { flex: 1; background: #0A0F1A; border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 12px 15px; color: white; font-family: 'Inter'; font-size: 13px; resize: none; outline: none; max-height: 100px; min-height: 42px; line-height: 1.4; transition: 0.2s;}
+        .chat-input:focus { border-color: var(--cyan-logo); background: #000;}
+        .chat-input::placeholder { color: #64748b; }
+        
+        .btn-send { width: 42px; height: 42px; border-radius: 50%; background: var(--cyan-logo); color: black; border: none; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; flex-shrink: 0; transition: 0.2s; box-shadow: 0 0 15px rgba(0,229,255,0.3);}
+        .btn-send:disabled { background: #111; color: #333; cursor: not-allowed; box-shadow: none; border: 1px solid #222;}
+        .btn-send:active:not(:disabled) { transform: scale(0.9); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        #loader { text-align: center; color: var(--cyan-logo); font-size: 11px; padding: 10px; font-weight: 800; font-family: 'Space Grotesk'; letter-spacing: 1px;}
+    </style>
+</head>
+<body>
+
+<div class="app-wrapper">
+    <div class="header">
+        <div class="header-left">
+            <a href="dashboard_kc.html" class="btn-back"><i class="fas fa-arrow-left"></i></a>
+            <div class="header-title">
+                <h1><i class="fas fa-comments"></i> TONGKRONGAN KC</h1>
+                <p>KARTIKA CHANDRA SECURE CHAT</p>
+            </div>
+        </div>
+        <div style="color: var(--cyan-logo); opacity: 0.8; font-size: 20px;"><i class="fas fa-shield-alt"></i></div>
+    </div>
+
+    <div class="chat-container" id="chatBox">
+        <div id="loader"><i class="fas fa-circle-notch fa-spin"></i> MENGHUBUNGKAN...</div>
+    </div>
+
+    <div class="reply-preview-area" id="replyPreviewArea">
+        <div class="reply-preview-content">
+            <span class="rp-title" id="rpName">Membalas...</span>
+            <span class="rp-text" id="rpText">Pesan...</span>
+        </div>
+        <button class="btn-cancel-reply" onclick="batalBalas()"><i class="fas fa-times"></i></button>
+    </div>
+
+    <div class="input-area">
+        <textarea id="msgInput" class="chat-input" placeholder="Ketik pesan... (Geser chat ke kanan)" rows="1"></textarea>
+        <button id="btnSend" class="btn-send" onclick="kirimPesan()" disabled><i class="fas fa-paper-plane"></i></button>
+    </div>
+</div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // DATABASE MLU (TETAP PAKAI MLU SESUAI SCRIPT LAMA)
+        const firebaseConfig = { apiKey: "AIzaSyAk3G5aQUBVe_g7_peVu1F6xllP_RejGq0", authDomain: "rtomaka-e67b5.firebaseapp.com", projectId: "rtomaka-e67b5" };
+        const app = initializeApp(firebaseConfig); 
+        const db = getFirestore(app);
+
+        // AMBIL DATA USER
+        let uData = null;
+        try { uData = JSON.parse(localStorage.getItem('maka_user')); } catch (e) {}
+        if (!uData || !uData.plat) window.location.href = 'index_kc.html';
+
+        const myName = uData.namaKtp || uData.namaWa || "Member KC";
+        const myPlat = uData.plat || "B XXXX XX";
+        
+        let myRole = uData.role || "MEMBER";
+        if(myPlat.replace(/\s+/g, '').toUpperCase() === "B4248SWF" || uData.id === "ghost_admin") myRole = "PA BOS";
+
+        const chatBox = document.getElementById('chatBox');
+        const msgInput = document.getElementById('msgInput');
+        const btnSend = document.getElementById('btnSend');
+        
+        let currentReplyData = null;
+
+        msgInput.addEventListener('input', function() {
+            this.style.height = '42px';
+            this.style.height = (this.scrollHeight) + 'px';
+            btnSend.disabled = this.value.trim() === '';
+        });
+
+        window.siapkanBalasan = (encName, encText) => {
+            const name = decodeURIComponent(encName);
+            const text = decodeURIComponent(encText);
+            
+            currentReplyData = { name: name, text: text };
+            
+            document.getElementById('rpName').innerText = `Membalas ${name}`;
+            document.getElementById('rpText').innerText = text;
+            document.getElementById('replyPreviewArea').style.display = 'flex';
+            msgInput.focus();
+            scrollToBottom();
+        };
+
+        window.batalBalas = () => {
+            currentReplyData = null;
+            document.getElementById('replyPreviewArea').style.display = 'none';
+        };
+
+        window.kirimPesan = async () => {
+            const text = msgInput.value.trim();
+            if (!text) return;
+
+            msgInput.value = '';
+            msgInput.style.height = '42px';
+            btnSend.disabled = true;
+            
+            let payload = {
+                senderId: uData.id || myPlat,
+                senderName: myName,
+                senderPlat: myPlat,
+                senderRole: myRole,
+                text: text,
+                timestamp: Date.now()
+            };
+
+            if(currentReplyData) {
+                payload.replyTo = currentReplyData;
+                batalBalas(); 
+            }
+
+            try {
+                await addDoc(collection(db, "mlu_kc_chats"), payload);
+            } catch (error) {
+                alert("Gagal mengirim pesan: " + error.message);
+                btnSend.disabled = false;
+            }
+        };
+
+        function scrollToBottom() {
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function attachSwipeEvents() {
+            const wrappers = document.querySelectorAll('.swipe-wrapper');
+            
+            wrappers.forEach(wrapper => {
+                let startX = 0;
+                let currentX = 0;
+                let isSwiping = false;
+                const icon = wrapper.parentElement.querySelector('.swipe-reply-icon');
+                const isOther = wrapper.parentElement.classList.contains('other');
+                const maxSwipe = 60; 
+
+                wrapper.addEventListener('touchstart', e => {
+                    startX = e.touches[0].clientX;
+                    isSwiping = true;
+                    wrapper.style.transition = 'none';
+                }, {passive: true});
+
+                wrapper.addEventListener('touchmove', e => {
+                    if (!isSwiping) return;
+                    currentX = e.touches[0].clientX - startX;
+                    
+                    if (currentX > 0 && currentX < maxSwipe + 20) {
+                        wrapper.style.transform = `translateX(${currentX}px)`;
+                        let opacity = currentX / maxSwipe;
+                        if(icon) icon.style.opacity = opacity > 1 ? 1 : opacity;
+                    }
+                }, {passive: true});
+
+                wrapper.addEventListener('touchend', () => {
+                    if (!isSwiping) return;
+                    isSwiping = false;
+                    wrapper.style.transition = 'transform 0.3s ease-out';
+                    wrapper.style.transform = 'translateX(0)';
+                    
+                    if(icon) icon.style.opacity = '0';
+
+                    if (currentX >= maxSwipe) {
+                        const name = wrapper.getAttribute('data-name');
+                        const text = wrapper.getAttribute('data-text');
+                        if(name && text) {
+                            window.siapkanBalasan(name, text);
+                            if(navigator.vibrate) navigator.vibrate(50);
+                        }
+                    }
+                    currentX = 0;
+                });
+            });
+        }
+
+        const q = query(collection(db, "mlu_kc_chats"), orderBy("timestamp", "desc"), limit(100));
+        
+        onSnapshot(q, (snapshot) => {
+            const messages = [];
+            snapshot.forEach((doc) => {
+                messages.push({ id: doc.id, ...doc.data() });
+            });
+
+            messages.reverse();
+            
+            const isScrolledToBottom = chatBox.scrollHeight - chatBox.clientHeight <= chatBox.scrollTop + 50;
+
+            chatBox.innerHTML = ''; 
+            
+            if(messages.length === 0) {
+                chatBox.innerHTML = '<div style="text-align:center; color:#64748b; font-size:12px; margin-top:30px;">Belum ada obrolan. Jadilah yang pertama menyapa! 👋</div>';
+                return;
+            }
+
+            let htmlBuffer = '';
+            messages.forEach(msg => {
+                const isMine = msg.senderId === (uData.id || myPlat);
+                const alignClass = isMine ? 'mine' : 'other';
+                
+                const date = new Date(msg.timestamp);
+                const timeStr = date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+
+                const safeText = msg.text.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>");
+                const safeName = msg.senderName.split(' ')[0];
+
+                let replyHtml = '';
+                if(msg.replyTo) {
+                    const safeReplyText = msg.replyTo.text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                    replyHtml = `
+                        <div class="quote-box">
+                            <span class="quote-name">${msg.replyTo.name}</span>
+                            <span>${safeReplyText}</span>
+                        </div>
+                    `;
+                }
+
+                const encName = encodeURIComponent(safeName);
+                const encText = encodeURIComponent(msg.text);
+
+                htmlBuffer += `
+                    <div class="msg-container ${alignClass}">
+                        <i class="fas fa-reply swipe-reply-icon"></i>
+                        <div class="swipe-wrapper" data-name="${encName}" data-text="${encText}">
+                            <div class="sender-info">
+                                <span>${isMine ? 'Anda' : safeName}</span>
+                                <span class="role-badge">${msg.senderRole}</span>
+                            </div>
+                            <div class="bubble">
+                                ${replyHtml}
+                                ${safeText}
+                                <div class="bubble-footer">
+                                    <span class="timestamp">${timeStr}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            chatBox.innerHTML = htmlBuffer;
+            attachSwipeEvents(); 
+
+            // SETELAH RENDER HTML: UPDATE STATUS TERBACA (RESET NOTIFIKASI)
+            localStorage.setItem('maka_last_read_chat', Date.now().toString());
+            localStorage.setItem('maka_unread_chat_count', '0');
+
+            if (isScrolledToBottom) {
+                setTimeout(scrollToBottom, 50);
+            }
+        });
+
+        window.visualViewport.addEventListener("resize", scrollToBottom);
+        msgInput.addEventListener("focus", () => {
+            setTimeout(scrollToBottom, 300);
+        });
+
+    </script>
+</body>
+</html>
