@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KC - Station Locator</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Space+Grotesk:wght@700;900&family=Outfit:wght@800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        /* TEMA KC */
+        :root { --kc-yellow: #D4FF00; --kc-green: #10B981; --danger: #EF4444; --bg-black: #050505; }
+        body { margin: 0; padding: 0; font-family: 'Inter', sans-serif; overflow: hidden; background: #E2E8F0; }
+        * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent;}
+
+        #map { position: absolute; top: 0; bottom: 0; left: 0; right: 0; width: 100vw; height: 100vh; z-index: 1; }
+
+        /* HEADER OVERLAY KC (GELAP KE BAWAH) */
+        .header-overlay { position: absolute; top: 0; left: 0; width: 100%; padding: 40px 20px 20px; background: linear-gradient(180deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.8) 60%, transparent 100%); z-index: 1000; text-align: center; pointer-events: none; }
+        .header-title { font-family: 'Outfit'; font-size: 26px; font-weight: 900; color: var(--kc-yellow); margin: 0; text-shadow: 0 2px 10px rgba(0,0,0,0.8); letter-spacing: 1px;}
+        .gps-status { display: inline-flex; align-items: center; gap: 8px; background: #111; padding: 8px 20px; border-radius: 50px; font-family: 'Space Grotesk'; font-weight: 800; font-size: 10px; color: var(--kc-yellow); box-shadow: 0 5px 15px rgba(0,0,0,0.5); margin-top: 10px; pointer-events: auto; cursor: pointer; border: 1px solid rgba(212,255,0,0.2);}
+        .gps-dot { width: 8px; height: 8px; background: var(--kc-green); border-radius: 50%; animation: blink 1.5s infinite; box-shadow: 0 0 10px var(--kc-green);}
+        @keyframes blink { 50% { opacity: 0.3; } }
+
+        /* CUSTOM MARKER CSS */
+        .custom-div-icon { background: transparent; border: none; }
+        .marker-on { width: 35px; height: 35px; background: var(--kc-yellow); color: black; border-radius: 50%; border: 3px solid black; display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); transition: 0.2s; }
+        .marker-off { width: 35px; height: 35px; background: var(--danger); color: white; border-radius: 50%; border: 3px solid black; display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); opacity: 0.8; }
+        .marker-label { position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); background: #111; color: var(--kc-yellow); padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 800; white-space: nowrap; box-shadow: 0 3px 10px rgba(0,0,0,0.5); border: 1px solid rgba(212,255,0,0.3);}
+        .marker-label.lbl-off { color: white; background: var(--danger); border-color: darkred;}
+        
+        .user-dot { width: 20px; height: 20px; background: var(--kc-green); border-radius: 50%; border: 3px solid white; box-shadow: 0 0 0 10px rgba(16,185,129,0.2), 0 5px 15px rgba(0,0,0,0.5); }
+
+        /* BOTTOM SHEET POPUP (MODE GELAP) */
+        .bottom-sheet { position: fixed; bottom: -100%; left: 0; width: 100%; background: #111; border-top-left-radius: 30px; border-top-right-radius: 30px; padding: 25px; box-shadow: 0 -10px 40px rgba(0,0,0,0.8); z-index: 2000; transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; flex-direction: column; border-top: 1px solid #333;}
+        .bottom-sheet.show { bottom: 0; }
+        
+        .bs-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .bs-title { font-family: 'Outfit'; font-size: 22px; font-weight: 900; color: white; margin: 0; text-transform: uppercase; }
+        .btn-close { width: 35px; height: 35px; background: #222; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; border: none; font-size: 16px; cursor: pointer; }
+
+        .info-bar { background: rgba(212,255,0,0.1); border: 1px solid rgba(212,255,0,0.2); border-radius: 12px; padding: 15px; display: flex; align-items: center; gap: 15px; margin-bottom: 20px; font-family: 'Space Grotesk'; font-weight: 800; color: var(--kc-yellow); }
+        .info-bar i { font-size: 18px; }
+
+        .btn-nav { width: 100%; padding: 18px; border: none; border-radius: 16px; background: var(--kc-yellow); color: black; font-family: 'Space Grotesk'; font-weight: 900; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 10px 25px rgba(212,255,0,0.3); transition: 0.2s;}
+        .btn-nav:active { transform: scale(0.96); }
+        .btn-nav.disabled { background: var(--danger); color: white; box-shadow: 0 10px 25px rgba(239,68,68,0.3); cursor: not-allowed; }
+
+        /* TOMBOL KEMBALI KE HOME */
+        .btn-home { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); background: #111; color: var(--kc-yellow); padding: 15px 30px; border-radius: 50px; font-family: 'Space Grotesk'; font-weight: 800; font-size: 12px; display: flex; align-items: center; gap: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); border: 1px solid rgba(212,255,0,0.2); text-decoration: none; z-index: 1500; transition: 0.3s;}
+        .btn-home.hide { bottom: -100px; } 
+    </style>
+</head>
+<body>
+
+    <div id="map"></div>
+
+    <div class="header-overlay">
+        <h1 class="header-title">LOKASI FC</h1>
+        <div class="gps-status" onclick="recenterMap()">
+            <div class="gps-dot" id="gpsIndicator"></div> <span id="gpsText">MENCARI GPS...</span>
+        </div>
+    </div>
+
+    <div class="bottom-sheet" id="bottomSheet">
+        <div class="bs-header">
+            <h2 class="bs-title" id="sheetTitle">NAMA FC</h2>
+            <button class="btn-close" onclick="closeSheet()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="info-bar" id="sheetInfoBar">
+            <i class="fas fa-route"></i> <span id="sheetDist">0 KM</span> • <i class="fas fa-clock"></i> <span id="sheetTime">0 MNT</span>
+        </div>
+        <button class="btn-nav" id="btnNav"><i class="fas fa-location-arrow"></i> BUKA NAVIGASI MAPS</button>
+    </div>
+
+    <a href="dashboard_kc.html" class="btn-home" id="btnHome"><i class="fas fa-home"></i> KEMBALI KE HOME</a>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // KONEKSI KE DATABASE MLU (KHUSUS UNTUK BACA LOKASI FC SAJA)
+        const firebaseConfig = { 
+            apiKey: "AIzaSyAk3G5aQUBVe_g7_peVu1F6xllP_RejGq0", 
+            authDomain: "rtomaka-e67b5.firebaseapp.com", 
+            projectId: "rtomaka-e67b5" 
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const locRef = collection(db, "fc_locations");
+
+        let map, userMarker, watchId;
+        let myLat = -6.1754, myLng = 106.8272; // Default Jakarta
+        let fcMarkers = [];
+
+        // INIT MAP (TETAP PUTIH/TERANG)
+        map = L.map('map', { zoomControl: false }).setView([myLat, myLng], 12);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+
+        // DATA DEFAULT (JAGA-JAGA)
+        const fixedStations = [
+            { id: 'gading', name: 'FC Kelapa Gading', lat: -6.159389, lng: 106.901416, isActive: true, mapLink: '' },
+            { id: 'kc', name: 'FC Kartika Chandra', lat: -6.2285953, lng: 106.819502, isActive: true, mapLink: '' }
+        ];
+
+        // TRACK GPS USER
+        if (navigator.geolocation) {
+            watchId = navigator.geolocation.watchPosition((pos) => {
+                myLat = pos.coords.latitude;
+                myLng = pos.coords.longitude;
+                
+                document.getElementById('gpsText').innerText = "GPS AKTIF (TAP UTK RE-CENTER)";
+                document.getElementById('gpsIndicator').style.background = "var(--kc-green)";
+
+                if (!userMarker) {
+                    const uIcon = L.divIcon({ className: 'custom-div-icon', html: `<div class="user-dot"></div>`, iconSize: [20,20] });
+                    userMarker = L.marker([myLat, myLng], { icon: uIcon, zIndexOffset: 1000 }).addTo(map);
+                    map.setView([myLat, myLng], 13);
+                } else {
+                    userMarker.setLatLng([myLat, myLng]);
+                }
+            }, (err) => {
+                document.getElementById('gpsText').innerText = "GPS MATI / TIDAK DIIZINKAN";
+                document.getElementById('gpsIndicator').style.background = "var(--danger)";
+            }, { enableHighAccuracy: true });
+        }
+
+        window.recenterMap = () => { if(userMarker) map.setView([myLat, myLng], 14); }
+
+        // BACA DATABASE FIREBASE SECARA REALTIME DARI MLU
+        onSnapshot(locRef, (snap) => {
+            fcMarkers.forEach(m => map.removeLayer(m));
+            fcMarkers = [];
+
+            let allLocations = [...fixedStations]; 
+            
+            snap.forEach(doc => {
+                // Cek agar tidak duplikat dengan fixedStations jika ID nya sama
+                if(doc.id !== 'gading' && doc.id !== 'kc') {
+                    allLocations.push({ id: doc.id, ...doc.data() });
+                }
+            });
+
+            // Render ke Peta
+            allLocations.forEach(loc => {
+                const isOff = loc.isActive === false;
+                
+                const iconHtml = isOff 
+                    ? `<div class="marker-off"><i class="fas fa-ban"></i></div><div class="marker-label lbl-off">${loc.name}</div>`
+                    : `<div class="marker-on"><i class="fas fa-charging-station"></i></div><div class="marker-label">${loc.name}</div>`;
+
+                const mIcon = L.divIcon({ className: 'custom-div-icon', html: iconHtml, iconSize: [35,35], iconAnchor: [17, 35] });
+                const marker = L.marker([loc.lat, loc.lng], { icon: mIcon }).addTo(map);
+                
+                marker.on('click', () => {
+                    openSheet(loc);
+                    map.setView([loc.lat, loc.lng], 14);
+                });
+
+                fcMarkers.push(marker);
+            });
+        });
+
+        // LOGIKA BOTTOM SHEET
+        function openSheet(loc) {
+            document.getElementById('sheetTitle').innerText = loc.name;
+            
+            const dist = calculateDist(myLat, myLng, loc.lat, loc.lng);
+            document.getElementById('sheetDist').innerText = `${dist.toFixed(1)} KM`;
+            document.getElementById('sheetTime').innerText = `${Math.ceil((dist/25)*60)} MNT`;
+
+            const btnNav = document.getElementById('btnNav');
+
+            if (loc.isActive !== false) {
+                document.getElementById('sheetInfoBar').style.background = "rgba(212,255,0,0.1)";
+                document.getElementById('sheetInfoBar').style.color = "var(--kc-yellow)";
+                document.getElementById('sheetInfoBar').style.borderColor = "rgba(212,255,0,0.2)";
+                
+                btnNav.className = 'btn-nav';
+                btnNav.innerHTML = '<i class="fas fa-location-arrow"></i> BUKA NAVIGASI MAPS';
+                btnNav.onclick = () => {
+                    const destUrl = loc.mapLink || `http://maps.google.com/maps?daddr=${loc.lat},${loc.lng}`;
+                    window.open(destUrl, '_blank');
+                };
+            } else {
+                document.getElementById('sheetInfoBar').style.background = "rgba(239,68,68,0.1)";
+                document.getElementById('sheetInfoBar').style.color = "var(--danger)";
+                document.getElementById('sheetInfoBar').style.borderColor = "rgba(239,68,68,0.2)";
+
+                btnNav.className = 'btn-nav disabled';
+                btnNav.innerHTML = `<i class="fas fa-lock"></i> OFFLINE: ${loc.statusMsg || 'Sedang Perbaikan'}`;
+                btnNav.onclick = null; 
+            }
+
+            document.getElementById('bottomSheet').classList.add('show');
+            document.getElementById('btnHome').classList.add('hide'); 
+        }
+
+        window.closeSheet = () => {
+            document.getElementById('bottomSheet').classList.remove('show');
+            document.getElementById('btnHome').classList.remove('hide');
+            recenterMap(); 
+        }
+
+        function calculateDist(lat1, lon1, lat2, lon2) { 
+            const p = 0.017453292519943295, c = Math.cos; 
+            const a = 0.5 - c((lat2 - lat1) * p)/2 + c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p))/2; 
+            return 12742 * Math.asin(Math.sqrt(a)); 
+        }
+
+        map.on('click', () => { closeSheet(); });
+    </script>
+</body>
+</html>

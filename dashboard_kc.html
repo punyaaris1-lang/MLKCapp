@@ -11,7 +11,7 @@
             document.documentElement.classList.add('theme-soft-blue');
         }
 
-        const DASH_VERSION = "15.0_FINAL_CHAT_NOTIF"; 
+        const DASH_VERSION = "16.0_UI_REFINEMENT"; 
         if (localStorage.getItem('maka_dash_kc_v') !== DASH_VERSION) {
             if ('caches' in window) { caches.keys().then((names) => { names.forEach(name => { caches.delete(name); }); }); }
             localStorage.setItem('maka_dash_kc_v', DASH_VERSION); window.location.reload(true); 
@@ -48,33 +48,35 @@
             --shadow-soft: 0 15px 40px rgba(0, 229, 255, 0.1);
         }
 
-        /* === TEMA KEDUA: SOFT BLUE === */
+        /* === TEMA KEDUA: SOFT BLUE (SINKRON DENGAN DATA ANGGOTA) === */
         html.theme-soft-blue {
             --kc-cyan: #0284C7;
             --kc-cyan-dark: #0369A1;
             --kc-yellow: #D97706;
             --kc-yellow-dark: #B45309;
             
-            --bg-surface: #F0F4F8;
+            --navy-bg: #82C3E9;
+            --bg-surface: #E2F1FA;
             --bg-panel: rgba(255, 255, 255, 0.85);
             --border-glass: rgba(2, 132, 199, 0.3);
             
             --text-main: #0F172A;
-            --text-muted: #64748B;
+            --text-muted: #475569;
             
-            --shadow-soft: 0 15px 40px rgba(2, 132, 199, 0.08);
+            --shadow-soft: 0 15px 40px rgba(2, 132, 199, 0.1);
         }
         
         body { 
             margin: 0; background-color: var(--bg-surface); background-image: radial-gradient(circle at top right, var(--navy-bg) 0%, var(--bg-surface) 70%);
             font-family: 'Inter', sans-serif; color: var(--text-main); padding-bottom: 120px; overflow-x: hidden; position: relative; -webkit-tap-highlight-color: transparent; min-height: 100vh;
         }
+        html.theme-soft-blue body { background-image: linear-gradient(180deg, #A5D6F7 0%, #F0F8FF 100%); }
         * { box-sizing: border-box; outline: none; text-decoration: none; }
 
         .ambient-light { position: fixed; border-radius: 50%; filter: blur(120px); z-index: -1; opacity: 0.25; animation: floatLight 10s infinite alternate; }
         .light-1 { top: -20%; left: -20%; width: 500px; height: 500px; background: var(--cyan-dark); }
         .light-2 { top: 40%; right: -30%; width: 400px; height: 400px; background: var(--cyan-logo); animation-delay: 2s; opacity: 0.15; }
-        html.theme-soft-blue .ambient-light { opacity: 0.5; }
+        html.theme-soft-blue .ambient-light { opacity: 0.4; }
         @keyframes floatLight { 0% {transform: translate(0,0);} 100% {transform: translate(20px, 40px);} }
 
         /* --- HEADER --- */
@@ -86,11 +88,11 @@
         
         .header-actions { display: flex; gap: 10px; }
         .btn-top { width: 45px; height: 45px; border-radius: 14px; background: var(--bg-panel); border: 1px solid var(--border-glass); color: var(--kc-cyan); font-size: 18px; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-cyan); cursor: pointer; transition: 0.2s; position: relative;}
-        html.theme-soft-blue .btn-top { background: #FFFFFF; }
+        html.theme-soft-blue .btn-top { background: #FFFFFF; color: var(--kc-cyan-dark); }
         .btn-top:active { transform: scale(0.9); background: var(--kc-cyan); color: black; }
         
         .btn-logout { background: rgba(239, 68, 68, 0.1); border-color: var(--danger); color: var(--danger); }
-        html.theme-soft-blue .btn-logout { background: #FEF2F2; }
+        html.theme-soft-blue .btn-logout { background: #FEF2F2; color: var(--danger); }
 
         .inbox-badge { position: absolute; top: -5px; right: -5px; background: var(--danger); color: white; font-family: 'Space Grotesk'; font-size: 10px; font-weight: 900; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--bg-surface); box-shadow: 0 3px 10px rgba(239,68,68,0.4); animation: pulseBadge 2s infinite;}
         @keyframes pulseBadge { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
@@ -104,7 +106,8 @@
         .vip-card::before { content: ''; position: absolute; right: -20px; top: -20px; width: 120px; height: 120px; background: radial-gradient(circle, rgba(0,229,255,0.2) 0%, transparent 70%); border-radius: 50%; z-index: 1;}
         html.theme-soft-blue .vip-card::before { background: radial-gradient(circle, rgba(2, 132, 199, 0.1) 0%, transparent 70%); }
         
-        .vc-big-logo { position: absolute; right: 15px; top: 15px; height: 140px; width: auto; object-fit: contain; z-index: 2; opacity: 0.2; pointer-events: none;}
+        /* LOGO DIPERBESAR & OPACITY DINAIKKAN */
+        .vc-big-logo { position: absolute; right: -10px; top: 10px; height: 180px; width: auto; object-fit: contain; z-index: 2; opacity: 0.45; pointer-events: none;}
 
         .vc-top { padding: 20px 25px 10px; display: flex; justify-content: space-between; align-items: flex-start; position: relative; z-index: 3;}
         .vc-chip { width: 35px; height: 25px; background: linear-gradient(135deg, #FDE047, #CA8A04); border-radius: 6px; position: relative; overflow: hidden; opacity: 0.9;}
@@ -199,7 +202,11 @@
         .menu-btn:active { transform: scale(0.95); background: rgba(0, 229, 255, 0.1); border-color: var(--kc-cyan); }
         
         .icon-box { width: 55px; height: 55px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 12px; color: #000; box-shadow: 0 5px 20px rgba(0, 229, 255, 0.4); font-weight: 900;}
-        html.theme-soft-blue .icon-box { color: #FFFFFF; }
+        
+        /* THEME SOFT BLUE IKON BOX CLEAN (POIN 6) */
+        html.theme-soft-blue .icon-box { background: #E0F2FE !important; color: var(--kc-cyan-dark) !important; box-shadow: none !important; border: 1px solid rgba(2, 132, 199, 0.2) !important; }
+        html.theme-soft-blue .ic-urc { background: #FEF2F2 !important; color: var(--danger) !important; border-color: rgba(220, 38, 38, 0.2) !important; }
+        html.theme-soft-blue .ic-broadcast { background: #FEF3C7 !important; color: var(--kc-yellow-dark) !important; border-color: rgba(217, 119, 6, 0.2) !important; }
         
         .ic-anggota { background: linear-gradient(135deg, var(--kc-cyan) 0%, var(--kc-cyan-dark) 100%); } 
         .ic-pengurus { background: linear-gradient(135deg, var(--kc-cyan) 0%, var(--kc-cyan-dark) 100%); } 
@@ -236,10 +243,10 @@
         .modal-glass-overlay.show { opacity: 1; }
         
         .modal-glass-box { background: var(--bg-panel); border-radius: 25px; padding: 25px; width: 100%; max-width: 350px; text-align: center; box-shadow: 0 30px 80px rgba(0,0,0,0.9); transform: scale(0.9); transition: 0.3s; border: 1px solid var(--kc-cyan); position: relative; max-height: 85vh; overflow-y: auto;}
-        html.theme-soft-blue .modal-glass-box { background: #FFFFFF; box-shadow: 0 30px 80px rgba(2, 132, 199, 0.3); }
+        html.theme-soft-blue .modal-glass-box { background: #FFFFFF; box-shadow: 0 30px 80px rgba(2, 132, 199, 0.3); border-color: transparent;}
         .modal-glass-overlay.show .modal-glass-box { transform: scale(1); }
         
-        .btn-modal { padding: 16px 25px; border-radius: 14px; font-weight: 900; font-family: 'Space Grotesk'; font-size: 15px; border: none; cursor: pointer; flex: 1; margin: 0 5px; color: #000; letter-spacing: 1px; transition: 0.2s;}
+        .btn-modal { padding: 16px 25px; border-radius: 14px; font-family: 'Space Grotesk'; font-weight: 900; font-size: 15px; border: none; cursor: pointer; flex: 1; margin: 0 5px; color: #000; letter-spacing: 1px; transition: 0.2s;}
         .btn-modal:active { transform: scale(0.95); }
         .btn-close-modal { position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.1); border: none; width: 35px; height: 35px; border-radius: 50%; font-size: 16px; cursor: pointer; color: var(--text-main); transition: 0.2s;}
         html.theme-soft-blue .btn-close-modal { background: #F1F5F9; color: #64748B; }
@@ -389,7 +396,7 @@
             </a>
             
             <a href="javascript:void(0)" class="menu-btn" id="menuBroadcast" style="display: none;" onclick="openBroadcastModal()">
-                <div class="icon-box" style="background: linear-gradient(135deg, var(--kc-yellow) 0%, var(--kc-yellow-dark) 100%); color: black; box-shadow: 0 5px 20px rgba(255, 255, 0, 0.4);">
+                <div class="icon-box ic-broadcast">
                     <i class="fas fa-bullhorn"></i>
                 </div>
                 <div class="menu-title" style="color: var(--kc-yellow);">Broadcast</div>
@@ -438,7 +445,7 @@
     </div>
 
     <div class="modal-glass-overlay" id="broadcastModal">
-        <div class="modal-glass-box" style="text-align:center;">
+        <div class="modal-glass-box" style="text-align:center; border-color: var(--kc-yellow);">
             <div style="font-size:40px; margin-bottom:10px; color:var(--kc-yellow);"><i class="fa-solid fa-bullhorn fa-shake"></i></div>
             <h3 id="bcTitle" style="font-family:'Outfit'; font-weight:900; color:var(--kc-yellow); margin:0 0 10px; font-size: 24px;">INFO PENTING</h3>
             <p id="bcBody" style="font-size:14px; color:var(--text-main); margin-bottom:25px; font-weight: 700; line-height: 1.6;">Isi pengumuman...</p>
@@ -447,7 +454,7 @@
     </div>
 
     <div class="modal-glass-overlay" id="sosModal">
-        <div class="modal-glass-box" style="text-align:left;">
+        <div class="modal-glass-box" style="text-align:left; border-color: var(--danger);">
             <h3 style="font-family:'Outfit'; color:var(--danger); margin-top:0; margin-bottom:15px; font-weight: 900; font-size: 22px; text-align: center;"><i class="fas fa-broadcast-tower"></i> DARURAT S.O.S</h3>
             <p style="font-size:12px; color:var(--text-muted); margin-bottom:20px; font-weight: 700; text-align: center;">Pesan darurat akan dikirim ke URC beserta lokasi Anda.</p>
             
@@ -471,7 +478,7 @@
     </div>
 
     <div class="modal-glass-overlay" id="broadcastModalKC">
-        <div class="modal-glass-box" style="text-align:left;">
+        <div class="modal-glass-box" style="text-align:left; border-color: var(--kc-yellow);">
             <h3 style="font-family:'Outfit'; color:var(--kc-yellow); margin-top:0; margin-bottom:15px; font-weight: 900; font-size: 22px; text-align: center;"><i class="fas fa-bullhorn"></i> BROADCAST PESAN</h3>
 
             <label class="form-label" style="color:var(--kc-yellow);">Judul Pesan:</label>
@@ -521,6 +528,9 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, doc, onSnapshot, updateDoc, collection, query, orderBy, limit, setDoc, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+        // =========================================================================
+        // 1. DEKLARASI FUNGSI UI & TEMA
+        // =========================================================================
         window.toggleTheme = () => {
             const htmlEl = document.documentElement;
             if (htmlEl.classList.contains('theme-soft-blue')) {
@@ -559,9 +569,11 @@
         window.showConfirm = (msg, callback) => { document.getElementById('confirmMsg').innerText = msg; const modal = document.getElementById('confirmModal'); modal.style.display = 'flex'; setTimeout(()=>modal.classList.add('show'), 10); window.confirmCallback = callback; }
         window.closeConfirm = (res) => { const modal = document.getElementById('confirmModal'); modal.classList.remove('show'); setTimeout(()=>modal.style.display = 'none', 300); if(window.confirmCallback) window.confirmCallback(res); }
         
-        window.logoutApp = () => { window.showConfirm("Yakin ingin Keluar Aplikasi KC?", (res) => { if(res) { localStorage.removeItem('maka_user'); localStorage.removeItem('myPlat'); window.location.href = 'index_kc.html'; } }); };
+        window.logoutApp = () => { window.showConfirm("Yakin ingin Keluar Aplikasi KC?", (res) => { if(res) { localStorage.removeItem('maka_user'); localStorage.removeItem('maka_loc_share'); localStorage.removeItem('myPlat'); window.location.href = 'index_kc.html'; } }); };
 
-        // FIREBASE INIT
+        // =========================================================================
+        // 2. INISIALISASI FIREBASE
+        // =========================================================================
         const firebaseConfig = { apiKey: "AIzaSyDfsTAGclYUSRe6YhiljS-xb-v-9RBYVEM", authDomain: "antriankcnew.firebaseapp.com", projectId: "antriankcnew" };
         const appKC = initializeApp(firebaseConfig, "AppKC"); const dbKC = getFirestore(appKC);
         const refKC = doc(dbKC, "antrian", "utama");
@@ -570,11 +582,13 @@
         const appGading = initializeApp(appGadingConfig, "AppGading"); const dbGading = getFirestore(appGading);
         const refGading = doc(dbGading, "antrian", "utama");
 
-        // TAMBAHAN DATABASE MLU UNTUK CHAT
         const appMLUConfig = { apiKey: "AIzaSyAk3G5aQUBVe_g7_peVu1F6xllP_RejGq0", authDomain: "rtomaka-e67b5.firebaseapp.com", projectId: "rtomaka-e67b5" };
         const appMLU = initializeApp(appMLUConfig, "AppMLU");
         const dbMLU = getFirestore(appMLU);
 
+        // =========================================================================
+        // 3. LOAD DATA USER & RENDER UI
+        // =========================================================================
         let uData = null; try { uData = JSON.parse(localStorage.getItem('maka_user')); } catch (e) {}
         if (!uData || !uData.plat) window.location.href = 'index_kc.html'; 
 
@@ -613,6 +627,9 @@
             document.getElementById('menuBroadcast').style.display = 'flex';
         }
 
+        // =========================================================================
+        // 4. SISTEM ANTRIAN (BUNGLON) & GPS SILENT TRACKER
+        // =========================================================================
         let isBannerKC = true; 
         let statusKCHtml = "Memuat...";
         let statusGadingHtml = "Memuat...";
@@ -644,6 +661,7 @@
             const mainTitle = document.getElementById('mainFcTitle');
             const mainVal = document.getElementById('mainFcVal'); 
             const mainStatus = document.getElementById('mainFcDesc');
+            
             const altName = document.getElementById('altFcName');
             const altDist = document.getElementById('altFcDist');
 
@@ -652,13 +670,15 @@
                 mainTitle.innerHTML = `<i class="fas fa-bolt"></i> FC KARTIKA CHANDRA`;
                 mainVal.innerHTML = statusKCHtml; 
                 mainStatus.innerHTML = `<i class="fas fa-location-arrow"></i> ${window.kcDist || 'Menghitung...'} KM`;
+                
                 altName.innerText = "FC KELAPA GADING";
                 altDist.innerHTML = `<i class="fas fa-location-arrow"></i> ~${window.gdDist || '...'} KM`;
             } else {
                 mainPart.classList.add('mode-gading');
-                mainTitle.innerHTML = `<i class="fas fa-charging-station"></i> FC KELAPA GADING`;
+                mainTitle.innerHTML = `<i class="fas fa-charging-station" style="color:var(--success);"></i> FC KELAPA GADING`;
                 mainVal.innerHTML = statusGadingHtml; 
                 mainStatus.innerHTML = `<i class="fas fa-location-arrow"></i> ${window.gdDist || 'Menghitung...'} KM`;
+                
                 altName.innerText = "FC KARTIKA CHANDRA";
                 altDist.innerHTML = `<i class="fas fa-location-arrow"></i> ~${window.kcDist || '...'} KM`;
             }
@@ -675,6 +695,7 @@
         if(navigator.geolocation) {
             navigator.geolocation.watchPosition((pos) => {
                 const uLat = pos.coords.latitude; const uLng = pos.coords.longitude;
+                
                 const distKC = calculateDist(LAT_KC, LNG_KC, uLat, uLng);
                 const distGading = calculateDist(LAT_GADING, LNG_GADING, uLat, uLng);
 
@@ -686,25 +707,28 @@
                 updateBunglonUI();
 
                 setDoc(doc(dbKC, "live_tracking", myPlatClean), { lat: uLat, lng: uLng, nama: myCurrentName, plat: myPlat, hp: uData.hp || uData.wa || "", foto: myCurrentPhoto, timestamp: Date.now() }, { merge: true }).catch(e => console.log(e));
-            }, (err) => { document.getElementById('mainFcDesc').innerHTML = `<i class="fas fa-exclamation-triangle"></i> Izin GPS Ditolak`; document.getElementById('mainFcDesc').style.color = "var(--danger)"; }, {enableHighAccuracy: true, maximumAge: 10000});
-        } else {
-            document.getElementById('mainFcDesc').innerHTML = `<i class="fas fa-exclamation-triangle"></i> GPS Tidak Didukung`;
-            document.getElementById('mainFcDesc').style.color = "var(--danger)";
+
+            }, (err) => { document.getElementById('kcBoardDesc').innerText += ` [GPS Ditolak/Mati]`; }, {enableHighAccuracy: true, maximumAge: 10000});
         }
 
         window.sendSos = () => {
             if(!navigator.geolocation) { alert("Sistem GPS tidak didukung di HP Anda."); return; }
-            const btn = document.querySelector('#sosModal .btn-modal:last-child'); const originalText = btn.innerHTML; btn.innerHTML = "MENCARI...";
-            navigator.geolocation.getCurrentPosition(async (pos) => {
-                setDoc(doc(dbKC, "live_tracking", myPlatClean), { lat: pos.coords.latitude, lng: pos.coords.longitude, isSOS: true, timestamp: Date.now() }, { merge: true }).catch(e => console.log(e));
+            const btn = document.querySelector('#sosModal .btn-modal:last-child'); const originalText = btn.innerHTML; btn.innerHTML = "MENCARI LOKASI...";
+            navigator.geolocation.getCurrentPosition((pos) => {
+                const lat = pos.coords.latitude; const lng = pos.coords.longitude;
                 const jenis = document.getElementById('sosType').value; const ket = document.getElementById('sosDesc').value;
-                const pesan = `🚨 *DARURAT S.O.S (KC)* 🚨\n\n👤 *Nama:* ${myCurrentName}\n🏍️ *Plat:* ${myPlat}\n⚠️ *Kasus:* ${jenis}\n📝 *Ket:* ${ket ? ket : '-'}\n\n📍 *LOKASI KORBAN:* \nhttps://maps.google.com/?q=$${pos.coords.latitude},${pos.coords.longitude}\n\n_Mohon segera diluncurkan bantuan!_`;
-                window.open(`https://wa.me/6287711069877?text=${encodeURIComponent(pesan)}`, '_blank');
+                const trackRef = doc(dbKC, "live_tracking", myPlatClean);
+                setDoc(trackRef, { isSOS: true, timestamp: Date.now() }, { merge: true }).catch(e => console.log(e));
+                const pesan = `🚨 *DARURAT S.O.S (KC)* 🚨\n\n👤 *Nama:* ${myName}\n🏍️ *Plat:* ${myPlat}\n⚠️ *Kasus:* ${jenis}\n📝 *Ket:* ${ket ? ket : '-'}\n\n📍 *LOKASI KORBAN:* \nhttps://maps.google.com/?q=${lat},${lng}\n\n_Mohon segera diluncurkan bantuan!_`;
+                const linkWA = `https://wa.me/6287711069877?text=${encodeURIComponent(pesan)}`;
+                window.open(linkWA, '_blank');
                 document.getElementById('sosModal').classList.remove('show'); setTimeout(() => document.getElementById('sosModal').style.display = 'none', 300); btn.innerHTML = originalText;
             }, () => { alert("⚠️ AKSES DITOLAK! Izinkan akses Lokasi (GPS) agar bantuan bisa dikirim!"); btn.innerHTML = originalText; }, { enableHighAccuracy: true });
         };
 
-        // PENGUMUMAN
+        // =========================================================================
+        // 5. PENGUMUMAN, BROADCAST & INBOX
+        // =========================================================================
         onSnapshot(doc(dbKC, "settings", "board_info"), (snap) => {
             if(snap.exists()) {
                 const data = snap.data();
@@ -719,17 +743,17 @@
         window.saveBoardInfo = async () => { 
             const titleInput = document.getElementById('inputBoardTitle').value.trim(); const descInput = document.getElementById('inputBoardDesc').value.trim(); 
             if(!titleInput || !descInput) return alert("Judul dan pesan tidak boleh kosong!"); 
-            try { await setDoc(doc(dbKC, "settings", "board_info"), { title: titleInput, desc: descInput, author: myCurrentName, timestamp: Date.now() }, { merge: true }); document.getElementById('boardEditModal').classList.remove('show'); setTimeout(()=>document.getElementById('boardEditModal').style.display='none',300); } catch (e) { alert(e.message); } 
+            try { await setDoc(doc(dbKC, "settings", "board_info"), { title: titleInput, desc: descInput, author: myName, timestamp: Date.now() }, { merge: true }); document.getElementById('boardEditModal').classList.remove('show'); setTimeout(()=>document.getElementById('boardEditModal').style.display='none',300); } catch (e) { alert(e.message); } 
         };
 
         window.sendBroadcastKC = async () => { 
             const title = document.getElementById('inputBroadcastTitle').value.trim(); const desc = document.getElementById('inputBroadcastDesc').value.trim(); 
             if(!title || !desc) return alert("Isi pesan tidak boleh kosong!"); 
             const btn = document.getElementById('btnSendBroadcast'); btn.innerText = "MENGIRIM..."; btn.style.opacity = '0.7'; 
-            try { await addDoc(collection(dbKC, "info_kc"), { title: title, content: desc, author: myCurrentName, type: "BROADCAST", timestamp: Date.now() }); document.getElementById('broadcastModalKC').classList.remove('show'); setTimeout(()=>document.getElementById('broadcastModalKC').style.display='none',300); alert("Pesan Broadcast terkirim."); } catch (e) { alert(e.message); } finally { btn.innerText = "KIRIM PESAN"; btn.style.opacity = '1'; } 
+            try { await addDoc(collection(dbKC, "info_kc"), { title: title, content: desc, author: myName, type: "BROADCAST", timestamp: Date.now() }); document.getElementById('broadcastModalKC').classList.remove('show'); setTimeout(()=>document.getElementById('broadcastModalKC').style.display='none',300); alert("Pesan Broadcast terkirim."); } catch (e) { alert(e.message); } finally { btn.innerText = "KIRIM PESAN"; btn.style.opacity = '1'; } 
         };
 
-        // INBOX
+        // INBOX & REALTIME BROADCAST
         onSnapshot(query(collection(dbKC, "info_kc"), orderBy("timestamp", "desc"), limit(10)), (snap) => {
             const listBody = document.getElementById('inboxListBody'); let unreadCount = 0; let lastReadTime = parseInt(localStorage.getItem('maka_last_read_inbox') || '0'); let htmlStr = '';
             if (snap.empty) { listBody.innerHTML = `<div style="text-align:center; padding:30px 20px; color:var(--text-muted); font-size:12px; font-weight:600;">Belum ada pesan masuk.</div>`; document.getElementById('inboxBadge').style.display = 'none'; return; }
@@ -778,38 +802,30 @@
             if(rank === 1) list.innerHTML = `<div style="text-align: center; font-size: 11px; color: var(--text-muted); padding: 10px; font-weight:600;">Belum ada data Sultan.</div>`;
         });
 
-        // =========================================================================
-        // SENSOR CHAT BARU (RADAR NOTIF CHAT)
-        // =========================================================================
-        function startChatListener() {
-            onSnapshot(query(collection(dbMLU, "mlu_kc_chats"), orderBy("timestamp", "desc"), limit(15)), (snap) => {
-                let unreadCount = 0;
-                let lastReadTime = parseInt(localStorage.getItem('maka_last_read_chat') || '0');
-                
-                snap.forEach(doc => {
-                    const data = doc.data();
-                    if(data.timestamp > lastReadTime && data.senderId !== myPlatClean) {
-                        unreadCount++;
-                    }
-                });
-
-                const badge = document.getElementById('chatBadge');
-                if(badge) {
-                    if(unreadCount > 0) {
-                        badge.style.display = 'flex';
-                        badge.innerText = unreadCount > 9 ? '9+' : unreadCount;
-                        const savedUnread = parseInt(localStorage.getItem('maka_unread_chat_count') || '0');
-                        if(unreadCount > savedUnread && navigator.vibrate) navigator.vibrate([100, 50, 100]); 
-                        localStorage.setItem('maka_unread_chat_count', unreadCount.toString());
-                    } else {
-                        badge.style.display = 'none';
-                        localStorage.setItem('maka_unread_chat_count', '0');
-                    }
-                }
+        // SENSOR CHAT BARU
+        onSnapshot(query(collection(dbMLU, "mlu_kc_chats"), orderBy("timestamp", "desc"), limit(15)), (snap) => {
+            let unreadCount = 0;
+            let lastReadTime = parseInt(localStorage.getItem('maka_last_read_chat') || '0');
+            
+            snap.forEach(doc => {
+                const data = doc.data();
+                if(data.timestamp > lastReadTime && data.senderId !== myPlatClean) unreadCount++;
             });
-        }
-        startChatListener();
 
+            const badge = document.getElementById('chatBadge');
+            if(badge) {
+                if(unreadCount > 0) {
+                    badge.style.display = 'flex';
+                    badge.innerText = unreadCount > 9 ? '9+' : unreadCount;
+                    const savedUnread = parseInt(localStorage.getItem('maka_unread_chat_count') || '0');
+                    if(unreadCount > savedUnread && navigator.vibrate) navigator.vibrate([100, 50, 100]); 
+                    localStorage.setItem('maka_unread_chat_count', unreadCount.toString());
+                } else {
+                    badge.style.display = 'none';
+                    localStorage.setItem('maka_unread_chat_count', '0');
+                }
+            }
+        });
     </script>
 </body>
 </html>

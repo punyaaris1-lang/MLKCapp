@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KC - Trip Planner</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@700;800;900&family=Outfit:wght@500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* === TEMA PITCH BLACK KC === */
+        :root {
+            --kc-yellow: #D4FF00; --kc-green: #10B981; 
+            --bg-surface: #000000; --white: #FFFFFF; --text-main: #FFFFFF; 
+            --success: #10B981; --danger: #EF4444; --warning: #F59E0B;
+            --text-muted: #94A3B8;
+        }
+
+        body { margin: 0; padding: 0; font-family: 'Inter', sans-serif; background: var(--bg-surface); color: var(--text-main); padding-bottom: 100px; -webkit-tap-highlight-color: transparent;}
+        * { box-sizing: border-box; outline: none; }
+
+        /* HEADER */
+        .hero-header {
+            background: linear-gradient(160deg, #111 0%, #000 100%);
+            padding: 50px 20px 80px;
+            border-bottom-left-radius: 40px; border-bottom-right-radius: 40px;
+            text-align: center; color: white; position: relative;
+            border-bottom: 1px solid var(--kc-yellow);
+        }
+        .header-tag { font-family: 'Space Grotesk'; font-size: 10px; font-weight: 800; letter-spacing: 2px; color: var(--kc-green); text-transform: uppercase; margin-bottom: 5px; }
+        .main-title { font-family: 'Outfit'; font-size: 32px; font-weight: 900; margin: 0; letter-spacing: -1px; color: var(--kc-yellow); }
+
+        /* CONTAINER FORM */
+        .planner-container { padding: 0 20px; margin-top: -50px; position: relative; z-index: 10; }
+        .form-card {
+            background: #111; border-radius: 30px; padding: 25px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8); border: 1px solid #333;
+        }
+
+        .input-box { position: relative; margin-bottom: 15px; }
+        .input-label { position: absolute; left: 18px; top: 18px; font-size: 10px; font-weight: 800; color: var(--kc-yellow); text-transform: uppercase; letter-spacing: 1px; z-index: 2; }
+        
+        .form-control {
+            width: 100%; padding: 16px 18px 16px 70px;
+            background: #000; border: 1px solid #333; border-radius: 18px;
+            font-family: 'Inter', sans-serif; font-weight: 600; font-size: 14px; color: white;
+            transition: 0.3s;
+        }
+        .form-control:focus { border-color: var(--kc-yellow); box-shadow: 0 0 15px rgba(212, 255, 0, 0.2); }
+        .form-control.gps-active { border-color: var(--kc-green); color: var(--kc-green); background: rgba(16, 185, 129, 0.1); }
+
+        .btn-gps {
+            position: absolute; right: 10px; top: 10px; width: 34px; height: 34px;
+            background: rgba(212, 255, 0, 0.1); color: var(--kc-yellow); border: none; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s;
+        }
+        .btn-gps:active { transform: scale(0.9); }
+
+        .btn-add-stop {
+            width: 100%; padding: 12px; background: rgba(212,255,0,0.05); color: var(--kc-yellow);
+            border: 1px dashed var(--kc-yellow); border-radius: 16px; font-family: 'Space Grotesk';
+            font-weight: 800; font-size: 12px; cursor: pointer; margin-bottom: 20px;
+        }
+
+        .battery-row { display: flex; align-items: center; gap: 15px; margin-bottom: 25px; padding-top: 15px; border-top: 1px dashed #333; }
+        .bat-input { width: 100%; padding: 12px; background: #000; border: 1px solid #333; border-radius: 12px; font-family: 'Space Grotesk'; font-weight: 900; font-size: 18px; color: var(--kc-yellow); text-align: center; }
+
+        .btn-calculate {
+            width: 100%; padding: 18px; background: var(--kc-yellow);
+            color: black; border: none; border-radius: 20px; font-family: 'Space Grotesk'; font-weight: 900;
+            font-size: 14px; cursor: pointer; box-shadow: 0 10px 25px rgba(212,255,0,0.3);
+            text-transform: uppercase; letter-spacing: 1px; transition: 0.3s;
+        }
+        .btn-calculate:active { transform: scale(0.97); }
+
+        /* MAP RESULT (PETA TETAP TERANG) */
+        #map-container { display: none; margin-top: 25px; border-radius: 25px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.8); border: 2px solid #333; }
+        #map { height: 350px; width: 100%; z-index: 1; }
+
+        /* RESULT CARD */
+        .result-card { 
+            background: #111; border-radius: 25px; padding: 25px; margin-top: 20px; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8); display: none; border: 1px solid #333;
+        }
+        .res-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px dashed #333; }
+        .res-title { font-family: 'Outfit'; font-size: 18px; font-weight: 900; color: var(--kc-yellow); }
+        
+        .timeline { position: relative; padding-left: 20px; border-left: 2px dashed #444; margin-left: 10px; }
+        .t-node { position: relative; margin-bottom: 25px; }
+        .t-dot { position: absolute; left: -26px; top: 5px; width: 10px; height: 10px; background: black; border: 3px solid var(--kc-yellow); border-radius: 50%; }
+        .t-dot.charge { border-color: var(--kc-green); background: var(--kc-green); box-shadow: 0 0 10px rgba(16,185,129,0.5); }
+        
+        .t-content { background: #000; padding: 15px; border-radius: 15px; border: 1px solid #222; }
+        .t-name { font-weight: 800; font-size: 13px; color: white; margin-bottom: 5px; }
+        .t-stats { display: flex; justify-content: space-between; font-size: 11px; font-weight: 600; color: var(--text-muted); }
+        .bat-val { font-family: 'Space Grotesk'; font-weight: 900; }
+        .bat-ok { color: var(--kc-green); } .bat-low { color: var(--danger); }
+
+        .btn-nav-gmaps { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 15px; background: rgba(212,255,0,0.1); color: var(--kc-yellow); border-radius: 16px; font-weight: 800; text-decoration: none; margin-top: 20px; font-size: 13px; font-family: 'Space Grotesk'; border: 1px solid rgba(212,255,0,0.2);}
+
+        /* BACK NAV */
+        .back-nav { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 1000; width: 85%; max-width: 350px; }
+        .btn-premium-back { background: #111; border: 1px solid #333; color: var(--kc-yellow); padding: 16px; border-radius: 50px; font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 800; cursor: pointer; box-shadow: 0 10px 30px rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; transition: 0.3s; }
+        
+        /* LOADER */
+        #loader { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 9999; display: none; align-items: center; justify-content: center; flex-direction: column; backdrop-filter: blur(5px);}
+        .spinner { width: 40px; height: 40px; border: 4px solid #222; border-top: 4px solid var(--kc-yellow); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div id="loader">
+        <div class="spinner"></div>
+        <div style="font-family:'Space Grotesk'; font-weight:800; color:var(--kc-yellow); margin-top:15px;">MENGHITUNG RUTE...</div>
+    </div>
+
+    <header class="hero-header">
+        <div class="header-tag">NAVIGATION INTELLIGENCE</div>
+        <h1 class="main-title">TRIP PLANNER</h1>
+    </header>
+
+    <div class="planner-container">
+        <div class="form-card">
+            <div id="waypoints">
+                <div class="input-box">
+                    <div class="input-label">START</div>
+                    <input type="text" id="start-input" class="form-control loc-input" placeholder="Lokasi Awal">
+                    <button class="btn-gps" onclick="useCurrentLocation()"><i class="fas fa-crosshairs"></i></button>
+                </div>
+                <div class="input-box">
+                    <div class="input-label">DEST.</div>
+                    <input type="text" class="form-control loc-input" placeholder="Tujuan Akhir">
+                </div>
+            </div>
+            
+            <button class="btn-add-stop" onclick="addStop()">+ TAMBAH TITIK HENTI</button>
+
+            <div class="battery-row">
+                <i class="fas fa-battery-three-quarters" style="font-size:24px; color:var(--kc-green);"></i>
+                <div style="flex:1;">
+                    <div style="font-size:10px; font-weight:800; color:var(--text-muted); margin-bottom:5px;">SISA BATERAI (%)</div>
+                    <input type="number" id="battery" class="bat-input" value="100" max="100" min="1">
+                </div>
+            </div>
+
+            <button class="btn-calculate" onclick="calculateRoute()">KALKULASI PERJALANAN</button>
+        </div>
+
+        <div id="map-container">
+            <div id="map"></div>
+        </div>
+
+        <div id="result-area" class="result-card"></div>
+    </div>
+
+    <div class="back-nav">
+        <a href="dashboard_kc.html" class="btn-premium-back"><i class="fas fa-home"></i> KEMBALI KE HOME</a>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+
+    <script>
+        // INIT MAP (TETAP PUTIH/TERANG)
+        const map = L.map('map', {zoomControl: false}).setView([-6.2, 106.8], 10);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
+        
+        let fcLocations = [];
+        let mapLayers = L.layerGroup().addTo(map);
+        const SHEET_ID = '1EJOTMMfGpBMFPqR0LzbMbh7tZUcTCZld4x387OO9aJM'; 
+        const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Sheet1`;
+        let gpsStartCoords = null; 
+
+        // LOAD DATA STASIUN DARI GOOGLE SHEETS
+        window.onload = function() {
+            Papa.parse(CSV_URL, {
+                download: true, header: true,
+                complete: function(res) {
+                    res.data.forEach(row => {
+                        let lat = null, lng = null, name = "FC Station";
+                        Object.values(row).forEach(val => {
+                            if(val) {
+                                let num = parseFloat(val.toString().replace(',','.'));
+                                if(!isNaN(num)) {
+                                    if(num < -5 && num > -11) lat = num;
+                                    if(num > 95 && num < 141) lng = num;
+                                }
+                            }
+                        });
+                        const keys = Object.keys(row);
+                        for(let k of keys) {
+                            let cleanKey = k.toLowerCase().trim();
+                            if(cleanKey.includes('nama') || cleanKey.includes('lokasi')) {
+                                if(row[k] && row[k].trim() !== "") { name = row[k]; break; }
+                            }
+                        }
+                        if(lat && lng) fcLocations.push({ name, lat, lng });
+                    });
+                }
+            });
+        };
+
+        // GPS
+        async function useCurrentLocation() {
+            const input = document.getElementById('start-input');
+            if(!navigator.geolocation) return alert("Browser tidak support GPS");
+            
+            input.value = "Mencari...";
+            navigator.geolocation.getCurrentPosition(async (pos) => {
+                const { latitude, longitude } = pos.coords;
+                gpsStartCoords = { lat: latitude, lon: longitude, name: "Posisi Saya" };
+                input.value = "📍 LOKASI SAYA AKTIF"; 
+                input.classList.add('gps-active'); 
+            }, () => { alert("Gagal mengambil GPS."); input.value = ""; }, { enableHighAccuracy: true });
+        }
+
+        function addStop() {
+            const div = document.createElement('div');
+            div.className = 'input-box';
+            div.innerHTML = `<div class="input-label" style="color:#94A3B8;">STOP</div><input type="text" class="form-control loc-input" placeholder="Titik Singgah"><div style="position:absolute; right:15px; top:15px; color:#EF4444; font-weight:bold; cursor:pointer;" onclick="this.parentElement.remove()">✕</div>`;
+            document.getElementById('waypoints').insertBefore(div, document.getElementById('waypoints').lastElementChild);
+        }
+
+        // --- CALCULATE ROUTE ---
+        async function calculateRoute() {
+            const inputs = document.querySelectorAll('.loc-input');
+            const batStart = parseInt(document.getElementById('battery').value);
+            const resArea = document.getElementById('result-area');
+            const loading = document.getElementById('loader');
+            const mapContainer = document.getElementById('map-container');
+            
+            let inputTexts = [];
+            inputs.forEach(i => { let val = i.value.trim(); if(val) inputTexts.push(val); });
+            
+            if(inputTexts.length < 2) return alert("Min. 2 lokasi diperlukan!");
+
+            loading.style.display = 'flex';
+            mapLayers.clearLayers();
+            resArea.style.display = 'none';
+            mapContainer.style.display = 'none';
+
+            try {
+                let points = [];
+                for(let i=0; i<inputTexts.length; i++) {
+                    const txt = inputTexts[i];
+                    if(i === 0 && gpsStartCoords && txt.includes("LOKASI SAYA")) {
+                        points.push(gpsStartCoords);
+                    } else {
+                        const c = await getGeo(txt);
+                        if(!c) throw new Error(`Lokasi tidak ditemukan: ${txt}`);
+                        points.push(c);
+                    }
+                }
+
+                // Kalkulasi Dasar
+                const directRoute = await getOSRM(points);
+                const totalDistKm = directRoute.distance / 1000;
+                const needed = Math.ceil(totalDistKm); // Asumsi 1% = 1KM
+                const finalBat = batStart - needed;
+
+                if (finalBat >= 10) {
+                    renderResult('RUTE AMAN', points, batStart, null);
+                    drawMap(points, '#D4FF00'); // Garis rute jadi warna kuning KC
+                } else {
+                    const bestCharger = await findBestCharger(points[0], points[points.length-1], batStart);
+                    if (bestCharger) {
+                        renderResult('REKOMENDASI CHARGING', points, batStart, bestCharger);
+                        drawComplexRoute(points[0], bestCharger, points[points.length-1]);
+                    } else {
+                        renderResult('PERINGATAN: BATERAI KURANG', points, batStart, null);
+                        drawMap(points, '#EF4444');
+                    }
+                }
+                
+                mapContainer.style.display = 'block';
+                resArea.style.display = 'block';
+                setTimeout(() => map.invalidateSize(), 500);
+
+            } catch (e) { alert(e.message); } 
+            finally { loading.style.display = 'none'; }
+        }
+
+        async function findBestCharger(start, end, currentBat) {
+            let candidates = [];
+            for (let fc of fcLocations) {
+                const dist = getCrowDist(start.lat, start.lon, fc.lat, fc.lng);
+                if (dist <= (currentBat - 5)) candidates.push({ ...fc });
+            }
+            if (candidates.length === 0) return null; 
+
+            // Cari yang paling efisien ke tujuan
+            let bestFC = null; let minTotalDist = 999999;
+            for(let i=0; i<Math.min(candidates.length, 5); i++) {
+                const fc = candidates[i];
+                const route = await getOSRM([start, {lat: fc.lat, lon: fc.lng}, end]);
+                const dist = route.distance / 1000;
+                if (dist < minTotalDist) { minTotalDist = dist; bestFC = fc; }
+            }
+            return bestFC;
+        }
+
+        async function renderResult(title, points, startBat, charger) {
+            const area = document.getElementById('result-area');
+            let html = `<div class="res-header"><div class="res-title">${title}</div></div><div class="timeline">`;
+
+            let stops = charger ? [points[0], {name: charger.name, lat: charger.lat, lon: charger.lng, isCharge: true}, points[points.length-1]] : points;
+            let currentBat = startBat;
+
+            for (let i = 0; i < stops.length; i++) {
+                const pt = stops[i];
+                let distInfo = "Start";
+                let batClass = "bat-ok";
+                let dotClass = pt.isCharge ? 'charge' : '';
+
+                if (i > 0) {
+                    const prev = stops[i-1];
+                    const leg = await getOSRM([prev, pt]);
+                    const dist = leg.distance / 1000;
+                    const used = Math.ceil(dist);
+                    currentBat -= used;
+                    distInfo = `${dist.toFixed(1)} KM (-${used}%)`;
+                }
+
+                if (pt.isCharge) { currentBat = 100; distInfo += ` • <span style="color:#10B981; font-weight:800;">FULL CHARGE</span>`; }
+                if (currentBat < 20) batClass = "bat-low";
+
+                html += `
+                    <div class="t-node">
+                        <div class="t-dot ${dotClass}"></div>
+                        <div class="t-content">
+                            <div class="t-name">${pt.name}</div>
+                            <div class="t-stats"><span>${distInfo}</span><span class="bat-val ${batClass}">${currentBat}%</span></div>
+                        </div>
+                    </div>`;
+            }
+
+            let gmapsLink = `https://www.google.com/maps/dir/`;
+            stops.forEach(s => gmapsLink += `${s.lat},${s.lon}/`);
+            html += `</div><a href="${gmapsLink}" target="_blank" class="btn-nav-gmaps"><i class="fas fa-location-arrow"></i> BUKA GOOGLE MAPS</a>`;
+            area.innerHTML = html;
+        }
+
+        async function drawMap(points, color) {
+            const r = await getOSRM(points);
+            const coords = decodePolyline(r.geometry);
+            L.polyline(coords, {color: color, weight: 6, opacity: 0.8}).addTo(mapLayers);
+            points.forEach((p, i) => {
+                L.marker([p.lat, p.lon]).addTo(mapLayers).bindPopup(`<b>${p.name}</b>`);
+            });
+            map.fitBounds(L.polyline(coords).getBounds(), {padding:[30,30]});
+        }
+
+        async function drawComplexRoute(start, mid, end) {
+            drawMap([start, {lat:mid.lat, lon:mid.lng, name:mid.name}, end], '#D4FF00');
+        }
+
+        async function getGeo(q) {
+            try {
+                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=id&limit=1`;
+                const r = await fetch(url);
+                const d = await r.json();
+                if(d[0]) return { lat: parseFloat(d[0].lat), lon: parseFloat(d[0].lon), name: d[0].display_name.split(',')[0] };
+            } catch(e) {}
+            return null;
+        }
+
+        async function getOSRM(pts) {
+            const s = pts.map(p => `${p.lon},${p.lat}`).join(';');
+            const r = await fetch(`https://router.project-osrm.org/route/v1/driving/${s}?overview=full`);
+            const d = await r.json();
+            return d.routes[0];
+        }
+
+        function getCrowDist(lat1, lon1, lat2, lon2) {
+            const R = 6371; const p = Math.PI/180;
+            const a = 0.5 - Math.cos((lat2-lat1)*p)/2 + Math.cos(lat1*p)*Math.cos(lat2*p)*(1-Math.cos((lon2-lon1)*p))/2;
+            return 2 * R * Math.asin(Math.sqrt(a));
+        }
+
+        function decodePolyline(str) {
+            let index=0,lat=0,lng=0,coordinates=[],shift=0,result=0,byte=null,latitude_change,longitude_change,factor=1e5;
+            while(index<str.length){
+                byte=null;shift=0;result=0;
+                do{byte=str.charCodeAt(index++)-63;result|=(byte&0x1f)<<shift;shift+=5;}while(byte>=0x20);
+                latitude_change=((result&1)?~(result>>1):(result>>1)); shift=result=0;
+                do{byte=str.charCodeAt(index++)-63;result|=(byte&0x1f)<<shift;shift+=5;}while(byte>=0x20);
+                longitude_change=((result&1)?~(result>>1):(result>>1));
+                lat+=latitude_change;lng+=longitude_change;
+                coordinates.push([lat/factor,lng/factor]);
+            }
+            return coordinates;
+        }
+    </script>
+</body>
+</html>
