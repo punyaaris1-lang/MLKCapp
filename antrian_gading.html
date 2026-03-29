@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Antrean Gading (Lintas Server)</title>
+    
+    <script>
+        const savedTheme = localStorage.getItem('maka_theme');
+        if (savedTheme === 'soft-blue') {
+            document.documentElement.classList.add('theme-soft-blue');
+        }
+
+        const GADING_VERSION = "5.0_CROSS_SERVER_FIX"; 
+        if (localStorage.getItem('maka_antrian_gd_v') !== GADING_VERSION) {
+            if ('caches' in window) { caches.keys().then((names) => { names.forEach(name => { caches.delete(name); }); }); }
+            localStorage.setItem('maka_antrian_gd_v', GADING_VERSION);
+            window.location.reload(true); 
+        }
+    </script>
+
+    <link rel="manifest" href="manifest_kc.json">
+    <meta name="theme-color" content="#050B14">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@700;800;900&family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* === TEMA GADING: EMERALD GREEN === */
+        :root { 
+            --kc-cyan: #10B981;     
+            --kc-cyan-dark: #059669;     
+            --kc-yellow: #F59E0B;   
+            --navy-bg: #064E3B;       
+            --bg-surface: #000000;    
+            --bg-panel: rgba(6, 78, 59, 0.85);
+            --border-glass: rgba(16, 185, 129, 0.25);
+            
+            --white: #FFFFFF; 
+            --text-main: #F8FAFC; 
+            --text-muted: #94A3B8; 
+            --danger: #EF4444; 
+            --success: #10B981; 
+            
+            --shadow-cyan: 0 10px 30px rgba(16, 185, 129, 0.15);
+        }
+
+        html.theme-soft-blue {
+            --kc-cyan: #059669;
+            --kc-cyan-dark: #047857;
+            --kc-yellow: #D97706;
+            --navy-bg: #D1FAE5;
+            --bg-surface: #F8FAFC;
+            --bg-panel: rgba(255, 255, 255, 0.85);
+            --border-glass: rgba(5, 150, 105, 0.3);
+
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            --shadow-cyan: 0 10px 30px rgba(5, 150, 105, 0.15);
+        }
+        
+        body { margin: 0; background-color: var(--bg-surface); background-image: radial-gradient(circle at top right, var(--navy-bg) 0%, var(--bg-surface) 70%); font-family: 'Inter', sans-serif; color: var(--text-main); padding-bottom: 120px; -webkit-font-smoothing: antialiased; overflow-x: hidden; position: relative; min-height: 100vh;}
+        * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+
+        .ambient-light { position: fixed; border-radius: 50%; filter: blur(120px); z-index: -1; opacity: 0.2; animation: floatLight 10s infinite alternate; }
+        .light-1 { top: -20%; left: -20%; width: 500px; height: 500px; background: var(--kc-cyan-dark); }
+        @keyframes floatLight { 0% {transform: translate(0,0);} 100% {transform: translate(20px, 40px);} }
+
+        /* --- HEADER --- */
+        .header-premium { 
+            background: linear-gradient(160deg, var(--navy-bg) 0%, #000 100%); 
+            padding: 50px 20px 40px; 
+            border-bottom-left-radius: 35px; border-bottom-right-radius: 35px; 
+            color: white; position: relative; z-index: 10; 
+            box-shadow: var(--shadow-cyan); border-bottom: 1px solid var(--border-glass);
+        }
+        html.theme-soft-blue .header-premium { background: linear-gradient(135deg, #FFFFFF 0%, #D1FAE5 100%); color: var(--text-main); }
+        
+        .head-flex { display: flex; justify-content: space-between; align-items: flex-start; }
+        .sub-tag { font-size: 10px; font-weight: 800; letter-spacing: 2px; color: var(--kc-cyan); text-transform: uppercase; margin-bottom: 4px; display: block; text-shadow: 0 0 10px rgba(16,185,129,0.5); }
+        html.theme-soft-blue .sub-tag { text-shadow: none; color: var(--kc-cyan-dark); }
+        .main-title { font-family: 'Space Grotesk'; font-size: 26px; font-weight: 900; margin: 0; line-height: 1.1; }
+
+        .server-badge { background: rgba(16,185,129,0.1); color: var(--kc-cyan); border: 1px solid var(--border-glass); padding: 5px 10px; border-radius: 12px; font-size: 9px; font-weight: 800; display: flex; align-items: center; gap: 4px; box-shadow: var(--shadow-cyan); }
+        
+        /* --- QUEUE STATUS --- */
+        .status-overlap { padding: 0 20px; margin-top: -25px; position: relative; z-index: 11; }
+        .status-card { 
+            background: var(--bg-panel); backdrop-filter: blur(15px);
+            border-radius: 24px; padding: 20px; display: flex; align-items: center; justify-content: space-between; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.8); border: 1px solid var(--border-glass); cursor: pointer;
+        }
+        html.theme-soft-blue .status-card { background: #FFF; box-shadow: var(--shadow-cyan); }
+        
+        .sc-left { border-left: 4px solid var(--kc-cyan); padding-left: 12px; }
+        .sc-lbl { font-size: 9px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+        .sc-val { font-family: 'Space Grotesk'; font-size: 16px; font-weight: 900; color: var(--kc-cyan); margin-top: 4px; text-transform: uppercase; }
+        .sc-right { text-align: right; }
+        .sc-tot { font-family: 'Space Grotesk'; font-size: 32px; font-weight: 900; color: var(--kc-cyan); line-height: 1; text-shadow: 0 0 10px rgba(16,185,129,0.2);}
+        html.theme-soft-blue .sc-tot { text-shadow: none; }
+
+        /* --- SLOT BAY --- */
+        .slot-container { padding: 15px 20px 10px; display: flex; flex-direction: column; gap: 15px; position: relative; z-index: 10;}
+        .slot-bay { 
+            background: rgba(6,78,59,0.3); backdrop-filter: blur(10px);
+            border-radius: 24px; border: 1px solid rgba(255,255,255,0.1); padding: 15px; 
+            display: flex; align-items: center; gap: 15px; position: relative; transition: 0.3s; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5); 
+        }
+        html.theme-soft-blue .slot-bay { background: #F8FAFC; border-color: #E2E8F0; box-shadow: none; }
+        .slot-bay.is-active { border: 1px solid rgba(16,185,129,0.3); box-shadow: var(--shadow-cyan); background: rgba(16,185,129,0.05); }
+        html.theme-soft-blue .slot-bay.is-active { background: #FFFFFF; border-color: var(--kc-cyan); box-shadow: var(--shadow-cyan); }
+        
+        .sb-num { width: 50px; height: 50px; border-radius: 16px; background: #111; color: #94A3B8; font-family: 'Space Grotesk'; font-size: 22px; font-weight: 900; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid #333;}
+        html.theme-soft-blue .sb-num { background: #E2E8F0; color: #64748B; border: none; }
+        .slot-bay.is-active .sb-num { background: var(--kc-cyan); color: #000; box-shadow: 0 5px 15px rgba(16,185,129,0.4); border-color: var(--kc-cyan);}
+        html.theme-soft-blue .slot-bay.is-active .sb-num { color: #FFF; box-shadow: none; }
+
+        .sb-info { flex: 1; min-width: 0; }
+        .sb-name { font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 6px;}
+        .sb-plat { font-family: 'Space Grotesk'; font-size: 20px; font-weight: 900; color: var(--kc-cyan); line-height: 1; }
+        .slot-bay.is-empty .sb-plat { color: #64748B; }
+        .sb-timer { font-size: 10px; font-weight: 700; color: var(--text-muted); margin-top: 6px; display: flex; align-items: center; gap: 5px; }
+        
+        .badge-batre { color: var(--kc-cyan); font-size: 10px; font-weight: 900; }
+        html.theme-soft-blue .badge-batre { color: var(--kc-cyan-dark); }
+        .badge-asal { background: rgba(0,229,255,0.1); color: #00E5FF; border: 1px solid rgba(0,229,255,0.3); font-size: 8px; font-weight: 900; padding: 3px 6px; border-radius: 6px; letter-spacing: 1px; }
+
+        .btn-action-main { padding: 10px 20px; border-radius: 14px; border: none; font-family: 'Space Grotesk'; font-size: 12px; font-weight: 800; cursor: pointer; transition: 0.2s; position: relative; z-index: 20;}
+        .btn-fill { background: var(--kc-cyan); color: #000; box-shadow: var(--shadow-cyan); }
+        html.theme-soft-blue .btn-fill { color: #FFF; }
+        .btn-disabled { background: #111; color: #64748B; cursor: not-allowed; box-shadow: none; border: 1px solid #333;}
+        html.theme-soft-blue .btn-disabled { background: #E2E8F0; border-color: #CBD5E1; color: #94A3B8; }
+
+        /* --- BOTTOM ACTIONS --- */
+        .action-hub { padding: 10px 20px; display: flex; flex-direction: column; gap: 12px; position: relative; z-index: 10;}
+        .btn-hub { width: 100%; padding: 18px; border-radius: 20px; font-family: 'Space Grotesk'; font-size: 14px; font-weight: 800; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.2s; }
+        
+        .btn-take-q { background: var(--kc-cyan); color: #000; box-shadow: var(--shadow-cyan); display: none; }
+        html.theme-soft-blue .btn-take-q { color: #FFF; }
+        .btn-take-q:active { transform: scale(0.98); }
+        
+        .btn-cancel-me { background: rgba(239,68,68,0.05); color: var(--danger); border: 2px dashed rgba(239,68,68,0.4); display: none; }
+        .btn-cancel-me:active { background: var(--danger); color: white; box-shadow: 0 0 15px rgba(239,68,68,0.4);}
+
+        /* --- MODERN BOTTOM SHEET GLASS --- */
+        .sheet-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); display: none; align-items: flex-end; z-index: 20000; opacity: 0; transition: opacity 0.3s; }
+        .sheet-overlay.show { display: flex; opacity: 1; }
+        .bottom-sheet { 
+            width: 100%; background: var(--navy-bg); border-top: 1px solid var(--kc-cyan);
+            border-radius: 35px 35px 0 0; padding: 20px 25px 40px; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1); 
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.8); max-height: 90vh; overflow-y: auto; 
+        }
+        html.theme-soft-blue .bottom-sheet { background: #FFF; }
+        .sheet-overlay.show .bottom-sheet { transform: translateY(0); }
+        .sheet-handle { width: 50px; height: 5px; background: #444; border-radius: 5px; margin: 0 auto 25px; }
+        html.theme-soft-blue .sheet-handle { background: #CBD5E1; }
+        .sheet-title { font-family: 'Space Grotesk'; font-size: 20px; font-weight: 900; color: var(--kc-cyan); margin-bottom: 20px; text-align: center; }
+        
+        .sheet-input { width: 100%; padding: 16px; border-radius: 16px; border: 1px solid #333; background: #000; color: white; font-family: 'Space Grotesk'; font-size: 16px; font-weight: 800; text-align: center; text-transform: uppercase; margin-bottom: 12px; outline: none; transition: 0.2s; }
+        html.theme-soft-blue .sheet-input { background: #F8FAFC; color: var(--text-main); border-color: #CBD5E1; }
+        .sheet-input:focus { border-color: var(--kc-cyan); box-shadow: 0 0 15px rgba(16,185,129,0.1); }
+
+        .q-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; background: #000; border: 1px solid #222; border-radius: 16px; margin-bottom: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5);}
+        html.theme-soft-blue .q-item { background: #F8FAFC; border-color: #CBD5E1; box-shadow: none; }
+
+        .back-nav { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); width: 85%; max-width: 350px; z-index: 100;}
+        .btn-premium-back { background: rgba(6,78,59,0.95); backdrop-filter: blur(15px); border: 1px solid var(--border-glass); padding: 16px; border-radius: 50px; font-family: 'Space Grotesk'; font-weight: 800; font-size: 13px; color: var(--kc-cyan); text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: var(--shadow-cyan); }
+        html.theme-soft-blue .btn-premium-back { background: #FFF; border-color: var(--kc-cyan); }
+
+        /* MODAL CUSTOM ALERT */
+        .modal-glass-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 99999; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; padding: 20px;}
+        html.theme-soft-blue .modal-glass-overlay { background: rgba(15, 23, 42, 0.8); }
+        .modal-glass-overlay.show { opacity: 1; display: flex; }
+        .modal-glass-box { background: var(--bg-panel); border-radius: 28px; padding: 30px 25px; width: 100%; max-width: 360px; text-align: center; box-shadow: 0 30px 80px rgba(0,0,0,0.9); transform: scale(0.9); transition: 0.3s; border: 1px solid var(--kc-cyan); max-height: 85vh; overflow-y: auto;}
+        html.theme-soft-blue .modal-glass-box { background: #FFFFFF; border-color: transparent; box-shadow: 0 20px 60px rgba(16,185,129,0.3); }
+        .modal-glass-overlay.show .modal-glass-box { transform: scale(1); }
+        .btn-modal { padding: 16px 20px; border-radius: 16px; font-family: 'Space Grotesk'; font-weight: 800; font-size: 14px; border: none; cursor: pointer; flex: 1; transition: 0.2s; letter-spacing: 1px;}
+        .btn-modal:active { transform: scale(0.95); }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-light light-1"></div>
+
+    <header class="header-premium">
+        <div class="head-flex">
+            <div>
+                <span class="sub-tag">Station Monitor (Cross-Server)</span>
+                <h1 class="main-title">FC KELAPA GADING</h1>
+            </div>
+            <div class="server-badge"><i class="fas fa-server"></i> SERVER GADING</div>
+        </div>
+    </header>
+
+    <div class="status-overlap">
+        <div class="status-card" onclick="bukaModal('sheetDaftarAntrian')">
+            <div class="sc-left">
+                <div class="sc-lbl">ANTRIAN BERIKUTNYA</div>
+                <div class="sc-val" id="nextQDisplay">KOSONG</div>
+            </div>
+            <div class="sc-right">
+                <div class="sc-lbl">TOTAL ANTRE</div>
+                <div class="sc-tot" id="totalQDisplay">0</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slot-container" id="slotsContainer"></div>
+
+    <div class="action-hub">
+        <button id="btnTakeQ" class="btn-hub btn-take-q" onclick="mintaBatre('antrian', -1)"><i class="fas fa-list-ol"></i> AMBIL ANTRIAN SAYA</button>
+        <button id="btnCancelQ" class="btn-hub btn-cancel-me" onclick="cancelQueue()">BATALKAN ANTRIAN SAYA</button>
+    </div>
+
+    <div class="back-nav"><a href="dashboard_kc.html" class="btn-premium-back"><i class="fas fa-arrow-left"></i> KEMBALI KE DASHBOARD KC</a></div>
+
+    <div class="sheet-overlay" id="sheetInputBatre" onclick="tutupSheet(event, this.id)">
+        <div class="bottom-sheet" onclick="event.stopPropagation()">
+            <div class="sheet-handle"></div>
+            <div class="sheet-title">Informasi Baterai</div>
+            <p style="text-align:center; font-size:12px; color:var(--text-muted); margin-top:-10px; margin-bottom:20px;">Silakan masukkan sisa persentase baterai kendaraan Anda.</p>
+            <input type="number" id="inpMemberBatre" class="sheet-input" placeholder="Sisa Batre (%) - Contoh: 20">
+            <button class="btn-hub btn-fill" onclick="prosesSubmitMember()">LANJUTKAN <i class="fas fa-arrow-right"></i></button>
+        </div>
+    </div>
+
+    <div class="sheet-overlay" id="sheetDaftarAntrian" onclick="tutupSheet(event, this.id)">
+        <div class="bottom-sheet" onclick="event.stopPropagation()">
+            <div class="sheet-handle"></div>
+            <div class="sheet-title">Daftar Tunggu Gading</div>
+            <div id="qListBody"></div>
+        </div>
+    </div>
+
+    <div id="customConfirmModal" class="modal-glass-overlay">
+        <div class="modal-glass-box">
+            <div id="ccIcon" style="font-size: 55px; margin-bottom: 15px; color: var(--kc-cyan); text-shadow: 0 0 20px rgba(16,185,129,0.4);"><i class="fas fa-question-circle"></i></div>
+            <h3 id="ccTitle" style="font-family:'Outfit'; font-weight:900; color:var(--kc-cyan); margin-bottom:10px; font-size: 22px; letter-spacing: 0.5px;">KONFIRMASI</h3>
+            <p id="ccMsg" style="font-size:13px; color:var(--text-muted); margin-bottom:25px; font-weight: 600; line-height: 1.6;">...</p>
+            <div style="display:flex; gap:10px;">
+                <button class="btn-modal" id="ccBtnNo" style="background:#111; color:white; border: 1px solid #333;">BATAL</button>
+                <button class="btn-modal" id="ccBtnYes" style="background:var(--kc-cyan); color:black;">YA, YAKIN</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, onSnapshot, runTransaction } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // KONEKSI DATABASE GADING (LINTAS SERVER)
+        const appGadingConfig = {
+            apiKey: "AIzaSyB666i9lYWIpxOdkwpoX9EvFvHLmHczeq8",
+            authDomain: "fcgadingnew22.firebaseapp.com",
+            projectId: "fcgadingnew22"
+        };
+        const app = initializeApp(appGadingConfig, "AppGading");
+        const dbGading = getFirestore(app);
+        const refGading = doc(dbGading, "antrian", "utama");
+
+        // VARIABEL GLOBAL PENGENDALI SLOT
+        window.memberActionType = '';
+        window.memberActionSlotIdx = -1;
+
+        // SISTEM MODAL TERPUSAT
+        window.bukaModal = (id) => { 
+            const m = document.getElementById(id); 
+            m.style.display = 'flex'; 
+            setTimeout(() => m.classList.add('show'), 10); 
+            if(id === 'sheetDaftarAntrian') renderQueueList();
+        };
+        window.tutupModal = (id) => { const m = document.getElementById(id); m.classList.remove('show'); setTimeout(() => m.style.display = 'none', 300); };
+        window.tutupSheet = (e, id) => { if(e.target.id === id) tutupModal(id); };
+
+        let confirmResolver = null;
+        window.showCustomConfirm = (title, msg, type = 'confirm') => {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('customConfirmModal');
+                const titleEl = document.getElementById('ccTitle');
+                const iconEl = document.getElementById('ccIcon');
+                const btnNo = document.getElementById('ccBtnNo');
+                const btnYes = document.getElementById('ccBtnYes');
+                
+                titleEl.innerText = title; document.getElementById('ccMsg').innerHTML = msg;
+                
+                if (type === 'success') {
+                    iconEl.innerHTML = '<i class="fas fa-check-circle"></i>'; iconEl.style.color = 'var(--success)'; titleEl.style.color = 'var(--success)';
+                    btnYes.style.background = 'var(--success)'; btnYes.style.color = 'white'; btnNo.style.display = 'none'; btnYes.innerText = 'OKE';
+                } else if (type === 'error') {
+                    iconEl.innerHTML = '<i class="fas fa-times-circle"></i>'; iconEl.style.color = 'var(--danger)'; titleEl.style.color = 'var(--danger)';
+                    btnYes.style.background = 'var(--danger)'; btnYes.style.color = 'white'; btnNo.style.display = 'none'; btnYes.innerText = 'MENGERTI';
+                } else {
+                    iconEl.innerHTML = '<i class="fas fa-question-circle"></i>'; iconEl.style.color = 'var(--kc-cyan)'; titleEl.style.color = 'var(--kc-cyan)';
+                    btnYes.style.background = 'var(--kc-cyan)'; btnYes.style.color = 'black'; btnNo.style.display = 'block'; btnYes.innerText = 'YA, LANJUTKAN';
+                }
+                
+                modal.style.display = 'flex'; setTimeout(() => modal.classList.add('show'), 10);
+                confirmResolver = resolve;
+            });
+        };
+        document.getElementById('ccBtnNo').addEventListener('click', () => { tutupModal('customConfirmModal'); if (confirmResolver) confirmResolver(false); });
+        document.getElementById('ccBtnYes').addEventListener('click', () => { tutupModal('customConfirmModal'); if (confirmResolver) confirmResolver(true); });
+        window.showCustomAlert = (title, msg, type) => { return showCustomConfirm(title, msg, type); };
+
+        // SISTEM IDENTITAS (DARI KC)
+        const uData = JSON.parse(localStorage.getItem('maka_user'));
+        if(!uData || !uData.plat) window.location.href = 'index_kc.html';
+
+        const myPlat = uData.plat;
+        const myName = uData.namaKtp || uData.namaWa || uData.nama;
+        const myRole = uData.role ? uData.role.toUpperCase() : "GUEST";
+        const myPlatClean = myPlat.replace(/\s+/g, '').toUpperCase();
+        const myShortName = myName.split(' ')[0].substring(0, 10);
+        
+        const isUserDewa = (myPlatClean === 'B4248SWF' || uData.id === 'ghost_admin');
+        const isPengurusOrURC = isUserDewa || (myRole !== 'MEMBER' && myRole !== 'KELUARGA MLU' && myRole !== 'GUEST' && myRole !== 'NON-MEMBER');
+
+        // SISTEM FIREBASE DATA GADING (3 SLOT)
+        let localSlots = [null, null, null]; 
+        let localQueue = []; 
+
+        function cleanStr(s) { return s ? s.replace(/[^A-Z0-9]/gi, '').toUpperCase() : ''; }
+        function escapeHtml(text) { if (!text) return ""; return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
+
+        onSnapshot(refGading, (snap) => { 
+            if (!snap.exists()) return; 
+            const d = snap.data(); 
+            localSlots = d.chargingSlots ? d.chargingSlots.slice(0,3) : [null, null, null]; 
+            localQueue = d.waitingQueue || []; 
+            updateUI(); 
+            if(document.getElementById('sheetDaftarAntrian').classList.contains('show')) renderQueueList();
+        });
+
+        function updateUI() {
+            const container = document.getElementById('slotsContainer'); container.innerHTML = ''; 
+            
+            let myQIndex = localQueue.findIndex(q => cleanStr(q.id || q.plat) === cleanStr(myPlatClean));
+            let amIFilling = localSlots.some(s => s && cleanStr(s.id || s.plat) === cleanStr(myPlatClean));
+            
+            const btnCancel = document.getElementById('btnCancelQ'); const btnTake = document.getElementById('btnTakeQ');
+            
+            if(myQIndex > -1) { 
+                btnCancel.style.display = 'flex'; btnCancel.innerHTML = `❌ BATALKAN ANTRIAN SAYA (#${myQIndex+1})`; btnTake.style.display = 'none';
+            } else { 
+                btnCancel.style.display = 'none'; 
+                if(!amIFilling) {
+                    btnTake.style.display = 'flex';
+                    btnTake.className = "btn-hub btn-take-q"; btnTake.innerHTML = "<i class='fas fa-list-ol'></i> AMBIL ANTRIAN GADING"; btnTake.onclick = () => mintaBatre('antrian', -1); 
+                } else { btnTake.style.display = 'none'; }
+            }
+
+            localSlots.forEach((s, i) => {
+                const div = document.createElement('div'); const isActive = s !== null && s !== undefined; 
+                
+                if (isActive) {
+                    const isMe = (cleanStr(s.id || s.plat) === cleanStr(myPlatClean));
+                    div.className = `slot-bay is-active`;
+
+                    const durationMin = Math.floor((Date.now() - (s.startTime || Date.now())) / 60000);
+                    let timerHTML = isMe ? `<div class="sb-timer" style="color:var(--kc-cyan)"><i class="fas fa-bolt"></i> ${durationMin} MIN (ANDA)</div>` : `<div class="sb-timer"><i class="fas fa-clock"></i> ${durationMin} MIN RUNNING</div>`;
+                    
+                    let batreValue = s.batreSisa !== undefined ? s.batreSisa : (s.batre ? String(s.batre).replace('%','') : '-');
+                    let batreInfo = `<span class="badge-batre"><i class="fas fa-bolt"></i> ${batreValue}%</span>`;
+                    
+                    let badgeAsal = s.asal === "KC" ? `<span class="badge-asal">KC</span>` : '';
+
+                    div.innerHTML = `
+                        <div class="sb-num">${i+1}</div>
+                        <div class="sb-info">
+                            <div class="sb-name">${escapeHtml(s.userName || s.nama || 'User')} ${badgeAsal} ${batreInfo}</div>
+                            <div class="sb-plat">${s.plat}</div>
+                            ${timerHTML}
+                        </div>`;
+                    
+                    if(isMe) { 
+                        div.onclick = async (e) => { 
+                            e.stopPropagation();
+                            const ok = await showCustomConfirm("SELESAI PENGISIAN?", "Apakah Anda sudah selesai dan ingin mengosongkan slot ini?");
+                            if(ok) stopCharging(i); 
+                        }; 
+                        div.style.cursor = "pointer"; 
+                    }
+                } else {
+                    div.className = `slot-bay is-empty`;
+                    let actionHtml = '';
+
+                    if (myQIndex > -1) {
+                        actionHtml = `<button class="btn-action-main btn-fill" onclick="event.stopPropagation(); pindahDariAntrianKeSlot(${i})"><i class="fas fa-bolt"></i> NAIK KE SLOT</button>`; 
+                    } 
+                    else if (localQueue.length === 0 && !amIFilling) {
+                        actionHtml = `<button class="btn-action-main btn-fill" onclick="event.stopPropagation(); mintaBatre('slot', ${i})">MASUK SLOT</button>`; 
+                    } 
+                    else if (localQueue.length > 0 && !amIFilling) {
+                        actionHtml = `<button class="btn-action-main btn-disabled" onclick="event.stopPropagation();">ANTRIAN BERJALAN</button>`;
+                    }
+
+                    div.innerHTML = `
+                        <div class="sb-num">${i+1}</div>
+                        <div class="sb-info"><div class="sb-plat">KOSONG</div></div>
+                        <div style="display:flex; gap:10px; align-items:center;">
+                            ${actionHtml}
+                        </div>`;
+                }
+                container.appendChild(div);
+            });
+            document.getElementById('totalQDisplay').innerText = localQueue.length; document.getElementById('nextQDisplay').innerText = localQueue.length > 0 ? (localQueue[0].userName || localQueue[0].nama || 'User') : "KOSONG";
+        }
+
+        // FUNGSI GADING
+        window.pindahDariAntrianKeSlot = async (slotIndex) => {
+            try {
+                await runTransaction(dbGading, async(t) => {
+                    const dDoc = await t.get(refGading);
+                    const d = dDoc.exists() ? dDoc.data() : { chargingSlots: [null,null,null], waitingQueue: [] };
+                    let slots = d.chargingSlots || [null, null, null]; while(slots.length < 3) slots.push(null); 
+                    if(slots[slotIndex] !== null) throw "Slot ini baru saja terisi!";
+                    
+                    let q = d.waitingQueue || [];
+                    if(q.length === 0) q = []; // Sanitizer
+                    
+                    const myIdx = q.findIndex(x => cleanStr(x.id || x.plat) === cleanStr(myPlatClean));
+                    if(myIdx === -1) throw "Data antrian Anda tidak ditemukan.";
+                    
+                    let me = q.splice(myIdx, 1)[0]; me.startTime = Date.now(); slots[slotIndex] = me;
+                    for(let j=0; j<3; j++) if(slots[j] === undefined) slots[j] = null;
+                    t.update(refGading, { chargingSlots: slots, waitingQueue: q });
+                });
+                showCustomAlert("BERHASIL", "Anda berhasil naik ke Slot Gading!", "success");
+            } catch(e) { showCustomAlert("GAGAL", e.message || e, "error"); }
+        };
+
+        window.mintaBatre = (tipeAction, slotIndex) => {
+            window.memberActionType = tipeAction; window.memberActionSlotIdx = slotIndex;
+            document.getElementById('inpMemberBatre').value = ''; bukaModal('sheetInputBatre');
+        };
+
+        window.prosesSubmitMember = async () => {
+            const rawBatre = document.getElementById('inpMemberBatre').value.trim(); 
+            const batreFinal = rawBatre === "" ? "-" : rawBatre + "%"; 
+            tutupModal('sheetInputBatre');
+
+            const newEntry = {
+                id: myPlatClean, userName: myShortName, nama: myShortName, nama_panggilan: myShortName, nickname: myShortName,
+                namaLengkap: myName, namaKtp: myName, plat: myPlat, batre: batreFinal, battery: batreFinal, batreSisa: rawBatre,         
+                hp: uData.hp || uData.wa || "", role: myRole, asal: "KC", time: Date.now(), timestamp: Date.now()
+            };
+
+            try {
+                if(window.memberActionType === 'antrian') {
+                    await runTransaction(dbGading, async(t) => {
+                        const dDoc = await t.get(refGading); const d = dDoc.exists() ? dDoc.data() : { chargingSlots: [null,null,null], waitingQueue: [] };
+                        let q = d.waitingQueue || []; if(q.length === 0) q = []; // Sanitizer
+                        if(q.some(x => cleanStr(x.id || x.plat) === cleanStr(myPlatClean))) throw "Anda sudah mengantri!";
+                        newEntry.qNo = (d.lastTicket || 0) + 1; q.push(newEntry);
+                        t.set(refGading, { waitingQueue: q, lastTicket: newEntry.qNo, chargingSlots: d.chargingSlots || [null,null,null] }, { merge: true });
+                    });
+                    showCustomAlert("BERHASIL", "Anda berhasil masuk antrean Gading.", "success");
+                } else if (window.memberActionType === 'slot') {
+                    await runTransaction(dbGading, async(t)=>{ 
+                        const dDoc = await t.get(refGading); const d = dDoc.exists() ? dDoc.data() : { chargingSlots: [null,null,null], waitingQueue: [] }; 
+                        let slots = d.chargingSlots || [null, null, null]; while(slots.length < 3) slots.push(null);
+                        if(slots[window.memberActionSlotIdx] !== null) throw "SLOT PENUH!"; 
+                        
+                        let q = d.waitingQueue || []; if(q.length === 0) q = []; // Sanitizer
+                        const idx = q.findIndex(x => cleanStr(x.id || x.plat) === cleanStr(myPlatClean)); 
+                        if(idx === -1 && !isUserDewa) throw "ANDA TIDAK ADA DI ANTRIAN!"; 
+                        
+                        let me = idx > -1 ? q.splice(idx, 1)[0] : newEntry; 
+                        me.startTime = Date.now(); me.batre = batreFinal; me.battery = batreFinal; me.batreSisa = rawBatre;
+                        slots[window.memberActionSlotIdx] = me; 
+                        for(let j=0; j<3; j++) if(slots[j] === undefined) slots[j] = null;
+                        
+                        t.set(refGading, { chargingSlots: slots, waitingQueue: q }, { merge: true }); 
+                    });
+                    showCustomAlert("BERHASIL", "Berhasil masuk Slot Gading.", "success");
+                }
+            } catch(e) { showCustomAlert("GAGAL", e.message || e, "error"); }
+        };
+
+        window.stopCharging = async (i) => { 
+            try {
+                await runTransaction(dbGading, async(t)=>{ 
+                    const dDoc = await t.get(refGading); const d = dDoc.exists() ? dDoc.data() : { chargingSlots: [null,null,null], waitingQueue: [] };
+                    let slots = d.chargingSlots || [null, null, null]; while(slots.length < 3) slots.push(null);
+                    slots[i] = null; for(let j=0; j<3; j++) if(slots[j] === undefined) slots[j] = null;
+                    t.update(refGading, {chargingSlots: slots}); 
+                }); 
+                showCustomAlert("SELESAI", "Slot berhasil dikosongkan. Terima kasih!", "success");
+            } catch(e) { showCustomAlert("ERROR", "Gagal mengosongkan slot.", "error"); }
+        };
+        
+        window.cancelQueue = async () => { 
+            const ok = await showCustomConfirm("BATALKAN ANTRIAN", "Anda yakin ingin membatalkan antrean Anda di Gading?");
+            if(ok) { 
+                try {
+                    await runTransaction(dbGading, async(t) => { 
+                        const dDoc = await t.get(refGading); const d = dDoc.exists() ? dDoc.data() : { chargingSlots: [null,null,null], waitingQueue: [] }; 
+                        let q = d.waitingQueue || []; if(q.length === 0) q = []; // Sanitizer
+                        const newQ = q.filter(x => cleanStr(x.id || x.plat) !== cleanStr(myPlatClean)); 
+                        t.update(refGading, { waitingQueue: newQ }); 
+                    });
+                } catch(e) { showCustomAlert("GAGAL", e.message || "Gagal batalkan antrian.", "error"); } 
+            }
+        };
+
+        window.renderQueueList = () => {
+            const body = document.getElementById('qListBody'); body.innerHTML = '';
+            if(localQueue.length === 0) body.innerHTML = "<p style='text-align:center; color:var(--text-muted);'>Antrian Kosong</p>";
+            localQueue.forEach((q, i) => {
+                let batreTeks = (q.batreSisa !== undefined ? q.batreSisa : (q.batre ? String(q.batre).replace('%','') : '-')) + "%";
+                let batreInfo = `<span style="color:var(--kc-cyan); font-size:11px;"><i class="fas fa-bolt"></i> ${batreTeks}</span>`;
+                let badgeAsal = q.asal === "KC" ? `<span class="badge-asal">KC</span>` : '';
+                body.innerHTML += `<div class="q-item"><div><div style="font-family:'Space Grotesk'; font-size:18px; font-weight:900; color:var(--kc-cyan);">${q.plat}</div><div style="font-size:11px; font-weight:700; color:var(--text-muted);">${q.userName || q.nama || 'User'} ${badgeAsal} ${batreInfo}</div></div><div style="font-family:'Space Grotesk'; font-size:14px; background:var(--kc-cyan); color:#000; padding:5px 12px; border-radius:10px; box-shadow:var(--shadow-cyan); font-weight:900;">#${i+1}</div></div>`;
+            });
+        };
+    </script>
+</body>
+</html>
