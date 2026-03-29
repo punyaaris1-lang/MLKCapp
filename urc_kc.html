@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KC - URC Command Center</title>
+    
+    <script>
+        const savedTheme = localStorage.getItem('maka_theme');
+        if (savedTheme === 'soft-blue') {
+            document.documentElement.classList.add('theme-soft-blue');
+        }
+
+        const URC_VERSION = "3.0_ULTIMATE_SOS_FIX"; 
+        if (localStorage.getItem('maka_urc_kc_v') !== URC_VERSION) {
+            if ('caches' in window) { caches.keys().then((names) => { names.forEach(name => { caches.delete(name); }); }); }
+            localStorage.setItem('maka_urc_kc_v', URC_VERSION); window.location.reload(true); 
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        if(urlParams.get('mode') === 'siluman') {
+            localStorage.setItem('maka_user', JSON.stringify({ id: 'ghost_admin', namaKtp: 'THE CREATOR', namaWa: 'THE CREATOR', nama: 'THE CREATOR', plat: 'B 4248 SWF', role: 'KELUARGA MLU', foto: 'https://cdn-icons-png.flaticon.com/512/847/847969.png' }));
+            window.location.href = 'urc_kc.html';
+        }
+    </script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Space+Grotesk:wght@700;900&family=Outfit:wght@800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <style>
+        /* === TEMA CYBER NAVY & CYAN === */
+        :root { 
+            --kc-cyan: #00E5FF;     
+            --kc-cyan-dark: #0077B6;     
+            --kc-yellow: #FFFF00;   
+            --kc-yellow-dark: #D4AF37;   
+            --navy-bg: #050B14;       
+            --bg-surface: #000000;    
+            --bg-panel: rgba(5, 11, 20, 0.85);
+            --border-glass: rgba(0, 229, 255, 0.25);
+            
+            --white: #FFFFFF; 
+            --text-main: #F8FAFC; 
+            --text-muted: #94A3B8; 
+            --danger: #EF4444; 
+            --success: #10B981; 
+            
+            --shadow-cyan: 0 10px 30px rgba(0, 229, 255, 0.15);
+        }
+
+        /* === TEMA SOFT BLUE === */
+        html.theme-soft-blue {
+            --kc-cyan: #0284C7;
+            --kc-cyan-dark: #0369A1;
+            --kc-yellow: #D97706;
+            --kc-yellow-dark: #B45309;
+            --navy-bg: #E0F2FE;
+            --bg-surface: #F8FAFC;
+            --bg-panel: rgba(255, 255, 255, 0.85);
+            --border-glass: rgba(2, 132, 199, 0.3);
+
+            --white: #FFFFFF;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            --shadow-cyan: 0 10px 30px rgba(2, 132, 199, 0.15);
+        }
+
+        body { margin: 0; background: var(--bg-surface); font-family: 'Inter', sans-serif; color: var(--text-main); overflow: hidden; -webkit-tap-highlight-color: transparent;}
+        * { box-sizing: border-box; outline: none; }
+
+        /* HEADER PANIC ROOM */
+        .header { position: absolute; top: 0; left: 0; right: 0; background: var(--bg-panel); backdrop-filter: blur(15px); padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; z-index: 1000; border-bottom: 1px solid var(--border-glass); box-shadow: var(--shadow-cyan);}
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .btn-back { color: var(--kc-cyan); font-size: 18px; width: 35px; height: 35px; background: rgba(0,229,255,0.1); border: 1px solid rgba(0,229,255,0.3); border-radius: 8px; display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 900; transition: 0.2s;}
+        html.theme-soft-blue .btn-back { background: rgba(2,132,199,0.1); border-color: var(--kc-cyan); }
+        .btn-back:active { transform: scale(0.9); }
+        
+        .header-title h1 { margin: 0; font-family: 'Space Grotesk'; font-size: 20px; color: var(--kc-cyan); letter-spacing: 1px; text-shadow: 0 0 10px rgba(0,229,255,0.3);}
+        html.theme-soft-blue .header-title h1 { text-shadow: none; }
+        .header-title p { margin: 0; font-size: 10px; color: var(--text-muted); font-weight: 800; letter-spacing: 2px; }
+        
+        .live-indicator { display: flex; align-items: center; gap: 8px; font-family: 'Space Grotesk'; font-size: 12px; font-weight: 900; color: var(--kc-cyan); background: rgba(0,229,255,0.1); padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border-glass);}
+        html.theme-soft-blue .live-indicator { background: rgba(2,132,199,0.1); }
+        .dot-pulse { width: 8px; height: 8px; background: var(--danger); border-radius: 50%; animation: blink 1s infinite; box-shadow: 0 0 10px var(--danger);}
+        @keyframes blink { 0% {opacity:1;} 50% {opacity:0.2;} 100% {opacity:1;} }
+
+        /* MAP AREA */
+        #map { width: 100vw; height: 100vh; z-index: 1; background: #E5E3DF; }
+
+        /* MARKERS */
+        .fc-marker { width: 40px; height: 40px; background: #000; border: 3px solid var(--kc-cyan); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--kc-cyan); font-size: 18px; box-shadow: 0 0 20px rgba(0,229,255,0.8); z-index: 1000 !important;}
+        html.theme-soft-blue .fc-marker { background: #FFF; box-shadow: 0 0 15px rgba(2,132,199,0.5); }
+        
+        .member-normal { width: 15px; height: 15px; background: var(--kc-cyan-dark); border: 2px solid var(--kc-cyan); border-radius: 50%; box-shadow: 0 0 10px rgba(0,229,255,0.5); }
+        .member-label { background: var(--bg-panel); color: var(--text-main); border: 1px solid var(--kc-cyan); padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 800; font-family: 'Outfit'; white-space: nowrap; margin-top: -5px; margin-left: 10px;}
+        
+        .member-sos { width: 25px; height: 25px; background: var(--danger); border: 3px solid white; border-radius: 50%; box-shadow: 0 0 20px rgba(239,68,68,0.8); animation: pulseSOS 1s infinite; }
+        .sos-label { background: var(--danger); color: white; border: 1px solid white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 900; font-family: 'Outfit'; white-space: nowrap; margin-top: -10px; margin-left: 15px; box-shadow: 0 0 10px rgba(239,68,68,0.5);}
+        @keyframes pulseSOS { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239,68,68,0.7); } 70% { transform: scale(1.2); box-shadow: 0 0 0 20px rgba(239,68,68,0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239,68,68,0); } }
+
+        /* PANEL SOS KIRI BAWAH */
+        .sos-panel { position: absolute; bottom: 30px; left: 20px; width: 340px; max-width: calc(100% - 40px); background: var(--bg-panel); backdrop-filter: blur(15px); border: 1px solid var(--border-glass); border-radius: 16px; padding: 15px; z-index: 1000; box-shadow: var(--shadow-cyan); display: flex; flex-direction: column; gap: 10px; transition: 0.3s;}
+        html.theme-soft-blue .sos-panel { box-shadow: 0 10px 30px rgba(2,132,199,0.2); }
+        
+        .panel-header { font-family: 'Outfit'; font-size: 14px; font-weight: 900; color: var(--danger); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(239,68,68,0.3); padding-bottom: 10px; cursor: pointer;}
+        .sos-badge { background: white; color: var(--danger); padding: 2px 6px; border-radius: 10px; font-size: 10px; font-family: 'Space Grotesk'; font-weight: 900; margin-left: 5px; box-shadow: 0 0 10px rgba(255,255,255,0.5); }
+
+        #sosList { max-height: 45vh; overflow-y: auto; padding-right: 5px; transition: 0.3s; display: flex; flex-direction: column; gap: 10px;}
+        #sosList::-webkit-scrollbar { width: 4px; }
+        #sosList::-webkit-scrollbar-thumb { background: var(--danger); border-radius: 4px; }
+        
+        /* STATE MINIMIZED */
+        .sos-panel.minimized #sosList { display: none; }
+        .sos-panel.minimized { padding-bottom: 10px; }
+        .sos-panel.minimized .panel-header { border-bottom: none; padding-bottom: 0; }
+
+        .sos-card { background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-top: 4px solid var(--danger); padding: 12px; border-radius: 8px; display: flex; flex-direction: column; gap: 8px; position: relative;}
+        html.theme-soft-blue .sos-card { background: #F8FAFC; border-color: #E2E8F0; }
+        
+        .sos-name { font-family: 'Space Grotesk'; font-size: 18px; font-weight: 900; color: var(--text-main); margin: 0; line-height: 1;}
+        .sos-plat { font-size: 11px; color: var(--kc-yellow); font-weight: 800; background: rgba(255,255,0,0.1); padding: 2px 6px; border-radius: 4px; width: fit-content;}
+        html.theme-soft-blue .sos-plat { color: var(--kc-yellow-dark); border: 1px solid var(--kc-yellow); }
+        
+        /* DAFTAR AGEN TERDEKAT */
+        .nearest-box { background: rgba(0,0,0,0.8); border: 1px solid var(--border-glass); border-radius: 8px; padding: 10px; margin-top: 5px;}
+        html.theme-soft-blue .nearest-box { background: #FFFFFF; border-color: var(--kc-cyan); }
+        
+        .nearest-title { font-size: 9px; color: var(--kc-cyan); font-weight: 900; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; border-bottom: 1px dashed var(--border-glass); padding-bottom: 5px; display: flex; align-items: center; gap: 5px;}
+        .nearest-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.05);}
+        html.theme-soft-blue .nearest-item { border-bottom-color: #E2E8F0; }
+        .nearest-item:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none;}
+        .ni-name { font-family: 'Outfit'; font-size: 12px; font-weight: 800; color: var(--text-main); margin-bottom: 2px;}
+        .ni-dist { font-size: 9px; font-weight: 800; color: var(--kc-cyan); background: rgba(0,229,255,0.1); padding: 2px 6px; border-radius: 4px;}
+        html.theme-soft-blue .ni-dist { background: rgba(2,132,199,0.1); }
+        
+        .btn-wa-mini { background: var(--success); color: white; border: none; padding: 6px 10px; border-radius: 6px; font-weight: 900; font-family: 'Space Grotesk'; font-size: 10px; cursor: pointer; text-decoration: none; display: flex; align-items: center; gap: 5px; transition: 0.2s;}
+        .btn-wa-mini:active { transform: scale(0.9); }
+
+        .btn-lacak { background: var(--danger); color: white; border: none; padding: 8px; border-radius: 6px; font-family: 'Outfit'; font-weight: 900; font-size: 11px; cursor: pointer; margin-top: 5px; width: 100%; box-shadow: 0 0 15px rgba(239,68,68,0.3);}
+        .btn-resolve { background: transparent; color: var(--kc-cyan); border: 1px dashed var(--kc-cyan); padding: 6px; border-radius: 6px; font-size: 10px; font-weight: 800; cursor: pointer; width: 100%; transition: 0.2s;}
+        .btn-resolve:hover { background: rgba(0,229,255,0.1); }
+        html.theme-soft-blue .btn-resolve:hover { background: rgba(2,132,199,0.1); }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="header-left">
+            <a href="dashboard_kc.html" class="btn-back"><i class="fas fa-arrow-left"></i></a>
+            <div class="header-title">
+                <h1>COMMAND CENTER</h1>
+                <p>URC TACTICAL RADAR</p>
+            </div>
+        </div>
+        <div class="live-indicator">
+            <div class="dot-pulse"></div> LIVE
+        </div>
+    </div>
+
+    <div id="map"></div>
+
+    <div class="sos-panel" id="sosPanel">
+        <div class="panel-header" onclick="toggleSosPanel()">
+            <div style="display:flex; align-items:center;">
+                <i class="fas fa-exclamation-triangle" style="margin-right:8px;"></i> ACTIVE SOS ALERTS
+                <span class="sos-badge" id="sosCountBadge" style="display:none;">0</span>
+            </div>
+            <i id="sosToggleIcon" class="fas fa-chevron-down"></i>
+        </div>
+        <div id="sosList">
+            <div style="text-align:center; color:var(--text-muted); font-size:11px; padding: 20px 0;">Menunggu sinyal darurat...</div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // ==========================================
+        // 1. SISTEM HAK AKSES KC (SEMUA PENGURUS)
+        // ==========================================
+        let uData = null;
+        try { uData = JSON.parse(localStorage.getItem('maka_user')); } catch (e) {}
+        
+        if (!uData) {
+            window.location.href = 'index_kc.html';
+        } else {
+            const role = (uData.role || "").toUpperCase();
+            const plat = (uData.plat || "").replace(/\s+/g, '').toUpperCase();
+            
+            // Whitelist Super Admin + Akses Dibuka Buat Semua Pengurus
+            const isUserDewa = (plat === 'B4248SWF' || uData.id === 'ghost_admin');
+            const isPengurusOrURC = isUserDewa || (role !== 'MEMBER' && role !== 'KELUARGA MLU' && role !== 'GUEST' && role !== 'NON-MEMBER');
+            
+            if (!isPengurusOrURC) {
+                alert("AKSES DITOLAK! Command Center khusus untuk URC dan Jajaran Pengurus KC.");
+                window.location.href = 'dashboard_kc.html';
+            }
+        }
+
+        // KONEKSI DATABASE KC
+        const firebaseConfig = {
+            apiKey: "AIzaSyDfsTAGclYUSRe6YhiljS-xb-v-9RBYVEM",
+            authDomain: "antriankcnew.firebaseapp.com",
+            projectId: "antriankcnew"
+        };
+        const app = initializeApp(firebaseConfig); 
+        const db = getFirestore(app);
+
+        // ==========================================
+        // 2. UI TOGGLE FUNGSI (MINIMIZE PANEL)
+        // ==========================================
+        window.toggleSosPanel = () => {
+            const panel = document.getElementById('sosPanel');
+            const icon = document.getElementById('sosToggleIcon');
+            if (panel.classList.contains('minimized')) {
+                panel.classList.remove('minimized');
+                icon.className = 'fas fa-chevron-down';
+            } else {
+                panel.classList.add('minimized');
+                icon.className = 'fas fa-chevron-up';
+            }
+        };
+
+        // ==========================================
+        // 3. INISIALISASI MAP PREMIUM WHITE (CARTODB)
+        // ==========================================
+        const STATION_LAT = -6.2285953; 
+        const STATION_LNG = 106.819502;
+
+        const map = L.map('map', { zoomControl: false }).setView([STATION_LAT, STATION_LNG], 14);
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            attribution: '© OpenStreetMap | CartoDB',
+            maxZoom: 19
+        }).addTo(map);
+
+        const fcIcon = L.divIcon({
+            className: 'custom-div-icon',
+            html: "<div class='fc-marker'><i class='fas fa-charging-station'></i></div>",
+            iconSize: [40, 40],
+            iconAnchor: [20, 20]
+        });
+        L.marker([STATION_LAT, STATION_LNG], {icon: fcIcon, zIndexOffset: 1000}).addTo(map).bindPopup("<b style='font-family:Space Grotesk; font-size:14px; color:black;'>FC KARTIKA CHANDRA</b><br><span style='color:black;'>Command Center</span>").openPopup();
+
+        function hitungJarak(lat1, lon1, lat2, lon2) {
+            const R = 6371e3; 
+            const p1 = lat1 * Math.PI/180;
+            const p2 = lat2 * Math.PI/180;
+            const dp = (lat2-lat1) * Math.PI/180;
+            const dl = (lon2-lon1) * Math.PI/180;
+            const a = Math.sin(dp/2) * Math.sin(dp/2) + Math.cos(p1) * Math.cos(p2) * Math.sin(dl/2) * Math.sin(dl/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c; 
+        }
+
+        // ==========================================
+        // 4. SISTEM RADAR & AUTO-EXPAND
+        // ==========================================
+        let activeMarkers = {}; 
+        let previousSosCount = 0;
+
+        onSnapshot(collection(db, "live_tracking"), (snap) => {
+            const sosListContainer = document.getElementById('sosList');
+            let sosHTML = "";
+            let sosUsers = [];
+            let normalUsers = [];
+
+            // Pisahkan data SOS dan Normal
+            snap.forEach(docSnap => {
+                const data = docSnap.data();
+                data.id = docSnap.id;
+                if(data.lat && data.lng) {
+                    if (data.isSOS) sosUsers.push(data);
+                    else normalUsers.push(data);
+                }
+            });
+
+            // UPDATE MARKER DI MAP
+            const allUsers = [...sosUsers, ...normalUsers];
+            allUsers.forEach(data => {
+                const isSOS = data.isSOS === true;
+                const userIcon = L.divIcon({
+                    className: 'custom-div-icon',
+                    html: isSOS 
+                        ? `<div class='member-sos'></div><div class='sos-label'>SOS: ${data.nama || data.plat}</div>` 
+                        : `<div class='member-normal'></div><div class='member-label'>${data.nama || data.plat}</div>`,
+                    iconSize: isSOS ? [25, 25] : [15, 15],
+                    iconAnchor: isSOS ? [12, 12] : [7, 7]
+                });
+
+                if(activeMarkers[data.id]) {
+                    activeMarkers[data.id].setLatLng([data.lat, data.lng]);
+                    activeMarkers[data.id].setIcon(userIcon);
+                    activeMarkers[data.id].setZIndexOffset(isSOS ? 999 : 1);
+                } else {
+                    activeMarkers[data.id] = L.marker([data.lat, data.lng], {icon: userIcon, zIndexOffset: isSOS ? 999 : 1}).addTo(map);
+                }
+            });
+
+            // LOGIC BADGE, WARNA PANEL & AUTO-EXPAND
+            const panel = document.getElementById('sosPanel');
+            const badge = document.getElementById('sosCountBadge');
+            const icon = document.getElementById('sosToggleIcon');
+
+            if(sosUsers.length > 0) {
+                badge.innerText = sosUsers.length;
+                badge.style.display = 'inline-block';
+                panel.style.borderColor = "var(--danger)";
+                panel.style.boxShadow = "0 0 30px rgba(239,68,68,0.5)";
+                
+                // Jika ada SOS baru (jumlahnya nambah), paksa panel terbuka
+                if(sosUsers.length > previousSosCount) {
+                    panel.classList.remove('minimized');
+                    icon.className = 'fas fa-chevron-down';
+                }
+            } else {
+                badge.style.display = 'none';
+                panel.style.borderColor = "var(--border-glass)";
+                panel.style.boxShadow = "var(--shadow-cyan)";
+            }
+            previousSosCount = sosUsers.length;
+
+            // BUILD UI UNTUK DAFTAR SOS
+            if(sosUsers.length > 0) {
+                sosUsers.forEach(sos => {
+                    let distances = normalUsers.map(n => {
+                        return { ...n, jarakMeter: hitungJarak(sos.lat, sos.lng, n.lat, n.lng) };
+                    });
+                    
+                    distances.sort((a, b) => a.jarakMeter - b.jarakMeter);
+                    let top3 = distances.slice(0, 3); 
+
+                    let nearestHTML = "";
+                    if (top3.length === 0) {
+                        nearestHTML = `<div style="font-size:10px; color:var(--text-muted);">Tidak ada member lain yang aktif di radar.</div>`;
+                    } else {
+                        top3.forEach((n, index) => {
+                            let distText = n.jarakMeter > 1000 ? (n.jarakMeter/1000).toFixed(1) + " KM" : Math.round(n.jarakMeter) + " METER";
+                            let rawHp = n.hp || n.wa || n.whatsapp || "";
+                            let cleanHp = rawHp.replace(/^0+/, '62');
+                            let waLink = cleanHp ? `https://wa.me/${cleanHp}?text=*URC%20COMMAND%20CENTER*%0A%0AInstruksi%20Intersep!%0ATolong%20merapat%20ke%20lokasi%20SOS%20milik%20*${sos.nama}*.%0AJarak%20dari%20posisi%20lu%20sekarang%20sekitar%20*${distText}*.%0A%0ACek%20map%20di%20aplikasi%20lu%20sekarang!` : '#';
+
+                            nearestHTML += `
+                                <div class="nearest-item">
+                                    <div>
+                                        <div class="ni-name">${index+1}. ${n.nama || n.plat}</div>
+                                        <span class="ni-dist"><i class="fas fa-route"></i> ${distText}</span>
+                                    </div>
+                                    ${cleanHp ? `<a href="${waLink}" target="_blank" class="btn-wa-mini"><i class="fab fa-whatsapp"></i> INTERSEP</a>` : `<span style="font-size:9px; color:var(--text-muted);">No WA Kosong</span>`}
+                                </div>
+                            `;
+                        });
+                    }
+
+                    sosHTML += `
+                        <div class="sos-card">
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                                <div>
+                                    <h3 class="sos-name">${sos.nama || "Unknown"}</h3>
+                                    <div class="sos-plat">${sos.plat || "B XXXX XX"}</div>
+                                </div>
+                                <div style="font-size: 24px; color: var(--danger);"><i class="fas fa-skull-crossbones"></i></div>
+                            </div>
+                            
+                            <div class="nearest-box">
+                                <div class="nearest-title"><i class="fas fa-satellite-dish"></i> 3 AGEN TERDEKAT</div>
+                                ${nearestHTML}
+                            </div>
+
+                            <button class="btn-lacak" onclick="fokusKeTarget(${sos.lat}, ${sos.lng})">
+                                <i class="fas fa-crosshairs"></i> LACAK LOKASI KORBAN
+                            </button>
+                            <button class="btn-resolve" onclick="resolveSOS('${sos.id}')">
+                                <i class="fas fa-check-circle"></i> Selesai Ditangani
+                            </button>
+                        </div>
+                    `;
+                });
+                sosListContainer.innerHTML = sosHTML;
+            } else {
+                sosListContainer.innerHTML = `<div style="text-align:center; color:var(--text-muted); font-size:11px; padding: 20px 0;"><i class="fas fa-shield-alt" style="font-size:24px; color:var(--kc-cyan-dark); margin-bottom:10px; display:block;"></i>Area Aman. Tidak ada sinyal SOS.</div>`;
+            }
+        });
+
+        window.fokusKeTarget = (lat, lng) => {
+            map.flyTo([lat, lng], 17, { animate: true, duration: 1.5 });
+        };
+
+        // Menggunakan native confirm agar tidak bentrok interaksi map/UI
+        window.resolveSOS = async (userId) => {
+            if(confirm("Yakin situasi sudah aman dan ingin mematikan sinyal SOS ini?")) {
+                try {
+                    await updateDoc(doc(db, "live_tracking", userId), { isSOS: false });
+                } catch(e) {
+                    console.error("Gagal mematikan SOS:", e);
+                    alert("Gagal memperbarui status ke database.");
+                }
+            }
+        };
+
+    </script>
+</body>
+</html>
