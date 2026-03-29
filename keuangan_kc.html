@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KC Finance - Transparency Report</title>
+    
+    <script>
+        const savedTheme = localStorage.getItem('maka_theme');
+        if (savedTheme === 'soft-blue') {
+            document.documentElement.classList.add('theme-soft-blue');
+        }
+
+        const KAS_VERSION = "2.0_STRICT_FINAL"; 
+        if (localStorage.getItem('maka_kas_v') !== KAS_VERSION) {
+            if ('caches' in window) { caches.keys().then((names) => { names.forEach(name => { caches.delete(name); }); }); }
+            localStorage.setItem('maka_kas_v', KAS_VERSION); window.location.reload(true); 
+        }
+    </script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@700;800;900&family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* === TEMA DEFAULT: DARK CYBER NAVY === */
+        :root { 
+            --kc-cyan: #00E5FF;
+            --kc-cyan-dark: #0077B6;
+            --kc-yellow: #FFFF00;
+            --kc-yellow-dark: #D4AF37;
+            
+            --bg-surface: #050B14;
+            --bg-panel: rgba(5, 11, 20, 0.85);
+            --border-glass: rgba(0, 229, 255, 0.4);
+            
+            --text-main: #FFFFFF;
+            --text-muted: #94A3B8;
+            --danger: #EF4444;
+            --success: #10B981;
+            
+            --shadow-soft: 0 15px 40px rgba(0, 229, 255, 0.25);
+        }
+
+        /* === TEMA KEDUA: SOFT BLUE === */
+        html.theme-soft-blue {
+            --kc-cyan: #0284C7;
+            --kc-cyan-dark: #0369A1;
+            --kc-yellow: #D97706;
+            --kc-yellow-dark: #B45309;
+            
+            --bg-surface: #F0F4F8;
+            --bg-panel: rgba(255, 255, 255, 0.85);
+            --border-glass: rgba(2, 132, 199, 0.3);
+            
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            
+            --shadow-soft: 0 15px 40px rgba(2, 132, 199, 0.08);
+        }
+        
+        body { 
+            margin: 0; background-color: var(--bg-surface); background-image: radial-gradient(circle at top right, var(--navy-bg) 0%, var(--bg-surface) 70%);
+            font-family: 'Inter', sans-serif; color: var(--text-main); padding-bottom: 120px; overflow-x: hidden; position: relative; -webkit-tap-highlight-color: transparent; min-height: 100vh;
+        }
+        * { box-sizing: border-box; outline: none; text-decoration: none; }
+
+        .ambient-light { position: fixed; border-radius: 50%; filter: blur(120px); z-index: -1; opacity: 0.25; animation: floatLight 10s infinite alternate; }
+        .light-1 { top: -20%; left: -20%; width: 500px; height: 500px; background: var(--kc-cyan-dark); }
+        .light-2 { top: 40%; right: -30%; width: 400px; height: 400px; background: var(--kc-cyan); animation-delay: 2s; opacity: 0.15; }
+        html.theme-soft-blue .ambient-light { opacity: 0.5; }
+        @keyframes floatLight { 0% {transform: translate(0,0);} 100% {transform: translate(20px, 40px);} }
+
+        /* HEADER */
+        .header-finance { 
+            background: linear-gradient(160deg, #0A1128 0%, var(--kc-cyan-dark) 100%); 
+            padding: 50px 25px 90px; border-bottom-left-radius: 35px; border-bottom-right-radius: 35px; 
+            text-align: center; position: relative;
+            box-shadow: var(--shadow-soft); border-bottom: 1px solid var(--border-glass);
+        }
+        html.theme-soft-blue .header-finance { background: linear-gradient(135deg, #FFFFFF 0%, #E0F2FE 100%); }
+
+        .date-label { font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--kc-yellow);}
+        html.theme-soft-blue .date-label { color: var(--kc-cyan-dark); }
+        .total-balance { font-family: 'Space Grotesk'; font-size: 38px; font-weight: 900; margin: 5px 0; color: white;}
+        html.theme-soft-blue .total-balance { color: var(--text-main); }
+
+        /* SUMMARY CARD */
+        .card-overlap { padding: 0 20px; margin-top: -40px; position: relative; z-index: 10; }
+        .summary-card { 
+            background: var(--bg-panel); backdrop-filter: blur(15px);
+            border-radius: 24px; padding: 25px; display: flex; justify-content: space-between; 
+            box-shadow: var(--shadow-soft); border: 1px solid var(--border-glass); 
+        }
+        html.theme-soft-blue .summary-card { background: #FFFFFF; }
+        
+        .stat-box { text-align: center; width: 48%; }
+        .stat-lbl { font-size:9px; font-weight:900; color:var(--text-muted); text-transform:uppercase; letter-spacing: 1px;}
+        .stat-val { font-family: 'Space Grotesk'; font-size: 18px; font-weight: 900; margin-top: 5px; }
+
+        /* TOMBOL QRIS */
+        .qris-btn-area { padding: 0 20px; margin-top: 20px; }
+        .btn-bayar-qris { 
+            width: 100%; background: var(--kc-cyan); color: black; border: none; padding: 18px; border-radius: 16px; 
+            font-family: 'Space Grotesk'; font-size: 14px; font-weight: 900; 
+            display: flex; align-items: center; justify-content: center; gap: 10px; 
+            cursor: pointer; box-shadow: var(--shadow-soft); letter-spacing: 1px; transition: 0.2s;
+        }
+        .btn-bayar-qris:active { transform: scale(0.97); }
+
+        /* TAB NAVIGATION */
+        .tab-wrapper { display: flex; margin: 25px 20px 15px; background: var(--bg-panel); border-radius: 16px; padding: 6px; border: 1px solid var(--border-glass); }
+        html.theme-soft-blue .tab-wrapper { background: #FFFFFF; }
+        .tab-btn { flex: 1; padding: 12px; text-align: center; font-family: 'Space Grotesk'; font-size: 11px; font-weight: 900; color: var(--text-muted); cursor: pointer; border-radius: 12px; transition: 0.3s; text-transform: uppercase;}
+        .tab-btn.active { background: rgba(0, 229, 255, 0.1); color: var(--kc-cyan); border: 1px solid var(--border-glass);}
+        html.theme-soft-blue .tab-btn.active { background: rgba(2, 132, 199, 0.1); color: var(--kc-cyan); }
+
+        /* LIST SECTION */
+        .list-section { padding: 0 20px 30px; }
+        .month-divider { display: flex; justify-content: space-between; align-items: flex-end; font-family: 'Space Grotesk'; font-size: 11px; font-weight: 900; color: var(--kc-cyan); text-transform: uppercase; border-bottom: 2px dashed var(--border-glass); padding-bottom: 8px; margin: 25px 0 15px 0; letter-spacing: 1px; }
+        .m-total { font-size: 13px; font-weight: 900; }
+
+        .tx-card { 
+            background: var(--bg-panel); backdrop-filter: blur(10px);
+            border-radius: 16px; padding: 18px; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 15px; 
+            border: 1px solid var(--border-glass); position: relative; box-shadow: var(--shadow-soft);
+        }
+        html.theme-soft-blue .tx-card { background: #FFFFFF; }
+
+        .icon-box { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink:0; }
+        .bg-in { background: rgba(16, 185, 129, 0.1); color: var(--success); } 
+        .bg-out { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+        
+        .tx-info { flex: 1; padding-bottom: 15px; }
+        .tx-title { font-weight: 900; font-size: 14px; color: var(--text-main); line-height: 1.3;}
+        .tx-meta { font-size: 11px; color: var(--text-muted); font-weight: 600; margin-top: 4px; }
+        
+        .tx-amount { font-family: 'Space Grotesk'; font-weight: 900; font-size: 15px; text-align:right;}
+        
+        .audit-trail { font-size: 9px; color: var(--text-muted); font-weight: 800; margin-top: 10px; display: flex; align-items: center; gap: 4px; border-top: 1px dashed var(--border-glass); padding-top: 8px;}
+        
+        /* ACTION BUTTONS */
+        .btn-edit { position: absolute; right: 48px; bottom: 12px; font-size: 12px; color: var(--kc-cyan); background: rgba(0,229,255,0.1); border: 1px solid var(--border-glass); width: 28px; height: 28px; border-radius: 8px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s;}
+        .btn-edit:active { transform: scale(0.9); }
+        .btn-del { position: absolute; right: 15px; bottom: 12px; font-size: 12px; color: var(--danger); background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); width: 28px; height: 28px; border-radius: 8px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s;}
+        .btn-del:active { transform: scale(0.9); }
+
+        .btn-lihat-kolektif { background: rgba(0,229,255,0.1); color: var(--kc-cyan); border: 1px solid var(--border-glass); padding: 6px 12px; border-radius: 8px; font-size: 10px; font-weight: 900; font-family: 'Inter'; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; margin-top: 8px; transition: 0.2s; text-transform: uppercase;}
+        .btn-lihat-struk { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239,68,68,0.2); padding: 6px 12px; border-radius: 8px; font-size: 10px; font-weight: 900; font-family: 'Inter'; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; margin-top: 8px; transition: 0.2s; text-transform: uppercase;}
+
+        .fab-admin { position: fixed; bottom: 100px; right: 20px; width: 60px; height: 60px; background: var(--kc-cyan); color: black; border-radius: 18px; display: none; align-items: center; justify-content: center; font-size: 24px; box-shadow: var(--shadow-soft); border: none; cursor: pointer; z-index: 1000; transition: 0.2s;}
+        .fab-admin:active { transform: scale(0.9); }
+        
+        .back-nav { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); width: 85%; max-width: 350px; z-index: 1000;}
+        .btn-premium-back { background: var(--bg-panel); backdrop-filter: blur(15px); border: 1px solid var(--border-glass); padding: 14px 25px; border-radius: 50px; font-family: 'Space Grotesk'; font-weight: 900; font-size: 12px; color: var(--kc-cyan); text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: var(--shadow-soft); transition: 0.2s;}
+        html.theme-soft-blue .btn-premium-back { background: #FFFFFF; }
+
+        /* MODAL TRANSAKSI */
+        .modal-glass-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 9999; padding: 20px;}
+        .modal-glass-overlay.show { opacity: 1; display: flex; }
+        .modal-glass-box { 
+            background: var(--bg-panel); width: 100%; max-width: 380px; 
+            border-radius: 25px; padding: 25px; 
+            transform: scale(0.9); transition: 0.3s; max-height: 85vh; overflow-y: auto;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.9); border: 1px solid var(--kc-cyan); text-align: left;
+        }
+        html.theme-soft-blue .modal-glass-box { background: #FFFFFF; }
+        .modal-glass-overlay.show .modal-glass-box { transform: scale(1); }
+        
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-title { font-family: 'Space Grotesk'; font-size: 20px; font-weight: 900; color: var(--kc-cyan); }
+        .btn-close { background: rgba(255,255,255,0.1); border: none; width: 35px; height: 35px; border-radius: 50%; font-size: 16px; cursor: pointer; color: var(--text-main); transition: 0.2s;}
+        html.theme-soft-blue .btn-close { background: #F1F5F9; color: #64748B; }
+        
+        .form-group { margin-bottom: 15px; }
+        .form-label { display: block; font-size: 11px; font-weight: 900; color: var(--kc-cyan); text-transform: uppercase; margin-bottom: 6px; letter-spacing: 1px;}
+        .form-input { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #333; background: #000; font-family: 'Inter'; font-weight: 600; font-size: 14px; color: white; outline: none; transition: 0.2s;}
+        html.theme-soft-blue .form-input { background: #F8FAFC; color: var(--text-main); border-color: #CBD5E1; }
+        .form-input:focus { border-color: var(--kc-cyan); }
+        
+        .btn-submit { width: 100%; padding: 16px; border: none; border-radius: 14px; background: var(--kc-cyan); color: black; font-family: 'Space Grotesk'; font-size: 14px; font-weight: 900; margin-top: 10px; cursor: pointer; letter-spacing: 1px; transition: 0.2s;}
+        .btn-submit:active { transform: scale(0.95); }
+
+        /* UPLOAD STRUK AREA */
+        .upload-struk-area { border: 2px dashed var(--kc-cyan); border-radius: 16px; padding: 15px; text-align: center; background: rgba(0,229,255,0.05); cursor: pointer; position: relative; margin-bottom: 15px; transition: 0.2s;}
+        html.theme-soft-blue .upload-struk-area { background: #F8FAFC; }
+        .upload-struk-area input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+        .struk-preview { width: 100%; max-height: 150px; border-radius: 10px; object-fit: contain; display: none; margin-top: 10px; border: 1px solid var(--kc-cyan); }
+
+        /* LIGHTBOX STRUK */
+        .photo-viewer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 100000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(10px); padding: 20px;}
+        .pv-container { position: relative; max-width: 400px; width: 100%; text-align: center; }
+        .pv-container img { width: 100%; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); object-fit: contain; max-height: 80vh; border: 2px solid var(--kc-cyan); background: #000; }
+        .pv-close { position: absolute; top: -15px; right: -15px; width: 40px; height: 40px; border-radius: 50%; background: var(--danger); color: white; border: none; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+
+        /* QRIS MODAL */
+        .qris-img-container { background: #000; border: 2px dashed var(--kc-cyan); padding: 20px; border-radius: 20px; margin: 0 auto 20px; width: fit-content;}
+        html.theme-soft-blue .qris-img-container { background: #F8FAFC; }
+        .qris-img-container img { width: 220px; height: auto; border-radius: 15px; }
+        .rek-manual { background: rgba(0, 229, 255, 0.05); border: 1px solid var(--border-glass); padding: 15px; border-radius: 16px; text-align: center; margin-top: 15px; }
+        .rek-manual .b-number { font-family: 'Space Grotesk'; font-size: 24px; font-weight: 900; color: var(--kc-cyan); margin-bottom: 5px; letter-spacing: 2px;}
+        .btn-copy { background: var(--bg-panel); border: 1px solid var(--border-glass); color: var(--text-main); padding: 8px 16px; border-radius: 10px; font-size: 11px; font-weight: 900; cursor: pointer; margin-top: 10px; transition: 0.2s;}
+
+        /* KOLEKTIF UI */
+        .coll-area { display: none; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 15px; margin-bottom: 15px; }
+        html.theme-soft-blue .coll-area { background: #F8FAFC; border-color: #E2E8F0; }
+        .coll-item { background: #000; border: 1px solid #333; padding: 15px; border-radius: 12px; margin-bottom: 12px; position: relative; }
+        html.theme-soft-blue .coll-item { background: #FFFFFF; border-color: #CBD5E1; }
+        .coll-row-flex { display: flex; gap: 8px; margin-bottom: 8px; padding-right: 35px; }
+        .btn-del-coll { position: absolute; top: 15px; right: 15px; background: rgba(239,68,68,0.1); color: var(--danger); border: 1px solid rgba(239,68,68,0.2); width: 30px; height: 30px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center;}
+
+        /* CUSTOM ALERT */
+        .modal-alert-box { background: var(--bg-panel); border-radius: 25px; padding: 25px; width: 85%; max-width: 350px; text-align: center; box-shadow: 0 30px 80px rgba(0,0,0,0.9); transform: scale(0.9); transition: 0.3s; border: 1px solid var(--kc-cyan);}
+        html.theme-soft-blue .modal-alert-box { background: #FFFFFF; }
+        .modal-glass-overlay.show .modal-alert-box { transform: scale(1); }
+        .btn-modal-custom { padding: 14px 25px; border-radius: 14px; font-weight: 800; font-size: 14px; border: none; cursor: pointer; flex: 1; margin: 0 5px; transition: 0.2s;}
+        .btn-modal-custom:active { transform: scale(0.95); }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-light light-1"></div>
+    <div class="ambient-light light-2"></div>
+
+    <header class="header-finance">
+        <div class="date-label" id="lblDate">SALDO KAS KC</div>
+        <h1 class="total-balance" id="totalCash">Rp 0</h1>
+    </header>
+
+    <div class="card-overlap">
+        <div class="summary-card">
+            <div class="stat-box">
+                <div class="stat-lbl">Total Masuk</div>
+                <div class="stat-val" style="color:var(--success);" id="totalIn">Rp 0</div>
+            </div>
+            <div style="width:1px; background:var(--border-glass);"></div>
+            <div class="stat-box">
+                <div class="stat-lbl">Total Keluar</div>
+                <div class="stat-val" style="color:var(--danger);" id="totalOut">Rp 0</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="qris-btn-area">
+        <button class="btn-bayar-qris" onclick="bukaModalQris()">
+            <i class="fas fa-qrcode" style="font-size: 20px;"></i> BAYAR KAS / TRANSFER
+        </button>
+    </div>
+
+    <div class="tab-wrapper">
+        <div class="tab-btn active" id="tabBtnIn" onclick="switchTab('IN')">Pemasukan Kas</div>
+        <div class="tab-btn" id="tabBtnOut" onclick="switchTab('OUT')">Pengeluaran Kas</div>
+    </div>
+
+    <main class="list-section">
+        <div id="txInContainer"></div>
+        <div id="txOutContainer" style="display:none;"></div>
+    </main>
+
+    <button class="fab-admin" id="btnAddTx" onclick="openTxModal()"><i class="fas fa-plus"></i></button>
+    <div class="back-nav"><a href="dashboard_kc.html" class="btn-premium-back"><i class="fas fa-arrow-left"></i> KEMBALI KE DASHBOARD</a></div>
+
+    <div class="photo-viewer-overlay" id="photoViewer" onclick="closePhoto()">
+        <div class="pv-container" onclick="event.stopPropagation()">
+            <img id="pvImage" src="">
+            <button class="pv-close" onclick="closePhoto()"><i class="fas fa-times"></i></button>
+        </div>
+    </div>
+
+    <div class="modal-glass-overlay" id="qrisModal">
+        <div class="modal-glass-box" style="text-align: center;">
+            <div class="modal-header">
+                <div class="modal-title"><i class="fas fa-wallet"></i> PEMBAYARAN KAS</div>
+                <button class="btn-close" onclick="tutupModalQris()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="qris-img-container">
+                <img src="qris_kc.jpg" alt="QRIS KC" onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=\'padding:40px; color:#EF4444; font-weight:bold;\'>Gambar qris_kc.jpg tidak ditemukan.</div>'">
+            </div>
+            <div class="rek-manual">
+                <div style="font-size:11px; color:var(--text-muted); font-weight:900;">ATAU TRANSFER MANUAL:</div>
+                <div class="b-number" id="rekNumber">5020380146</div>
+                <div style="font-size:12px; font-weight:800; color:var(--text-main);">Bank BCA a.n. ALFIAN</div>
+                <button class="btn-copy" onclick="copyRekening()"><i class="fas fa-copy"></i> SALIN REKENING</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-glass-overlay" id="txModal">
+        <div class="modal-glass-box">
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitleText">Catat Transaksi</div>
+                <button class="btn-close" onclick="closeTxModal()"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <input type="hidden" id="formEditId">
+
+            <div class="form-group">
+                <label class="form-label">Jenis Transaksi</label>
+                <select id="formTxType" class="form-input" style="font-weight: 800;" onchange="toggleFormType()">
+                    <option value="IN" style="color:var(--kc-cyan);">PEMASUKAN KAS</option>
+                    <option value="IN_COLLECTIVE" style="color:var(--kc-yellow);">PEMASUKAN KOLEKTIF (KOPDAR)</option>
+                    <option value="OUT" style="color:var(--danger);">PENGELUARAN KAS</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Keterangan</label>
+                <input type="text" id="formTxDesc" class="form-input" placeholder="Contoh: Iuran Kopdar / Beli Kopi">
+            </div>
+
+            <div id="strukArea" style="display:none;">
+                <div class="upload-struk-area">
+                    <i class="fas fa-receipt" style="font-size:24px; color:var(--text-muted); margin-bottom:5px; display:block;"></i>
+                    <div style="font-size:11px; font-weight:800; color:var(--text-muted);">Tap untuk Upload Foto Struk/Bon</div>
+                    <input type="file" id="formStrukFoto" accept="image/*" onchange="previewStruk(this)">
+                    <img id="previewStrukImg" class="struk-preview">
+                </div>
+            </div>
+
+            <div class="form-group" id="formNormalAmount">
+                <label class="form-label">Jumlah Nominal (Rp)</label>
+                <input type="number" id="formTxAmount" class="form-input" style="font-family:'Space Grotesk'; font-size:18px;">
+            </div>
+
+            <div class="coll-area" id="formCollective">
+                <label style="font-size:10px; font-weight:900; color:var(--kc-yellow); margin-bottom:10px; display:block;">DAFTAR PENYUMBANG</label>
+                <div id="collList"></div>
+                <button type="button" style="width:100%; padding:12px; margin-top:5px; border:1px dashed var(--kc-yellow); background:rgba(255,255,0,0.05); color:var(--kc-yellow); border-radius:12px; font-weight:900; cursor:pointer;" onclick="addCollRow()">+ TAMBAH ANGGOTA</button>
+                <div style="margin-top:15px; text-align:right; font-family:'Space Grotesk'; font-size:16px; font-weight:900; color:var(--success);">TOTAL: Rp <span id="collTotalDisplay">0</span></div>
+            </div>
+            
+            <button class="btn-submit" id="btnSaveTx" onclick="saveTxData()">SIMPAN TRANSAKSI</button>
+        </div>
+    </div>
+
+    <div class="modal-glass-overlay" id="detailModal">
+        <div class="modal-glass-box">
+            <div class="modal-header">
+                <div class="modal-title">Rincian Pemasukan</div>
+                <button class="btn-close" onclick="document.getElementById('detailModal').classList.remove('show'); setTimeout(()=>document.getElementById('detailModal').style.display='none',300);"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="detailListBody" style="background:var(--bg-surface); border:1px solid var(--border-glass); border-radius:16px; max-height: 50vh; overflow-y:auto;"></div>
+        </div>
+    </div>
+
+    <div class="modal-glass-overlay" id="customAlertModal">
+        <div class="modal-alert-box">
+            <div id="alertIcon" style="font-size: 40px; margin-bottom: 15px;"></div>
+            <h3 id="alertTitle" style="font-family:'Outfit'; margin-top:0; margin-bottom:10px; font-size: 20px; color: var(--kc-cyan);">TITLE</h3>
+            <p id="alertMessage" style="font-size:12px; color:var(--text-main); margin-bottom:20px; line-height: 1.5; font-weight:600;"></p>
+            <div style="display:flex; gap:10px;" id="alertBtnGroup">
+                <button class="btn-modal-custom" id="btnAlertCancel" style="background:#333; color:white; display:none;">BATAL</button>
+                <button class="btn-modal-custom" id="btnAlertOk" style="background:var(--kc-cyan); color:black; width:100%;">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, query, orderBy, addDoc, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // KONEKSI DATABASE KC BARU
+        const firebaseConfig = {
+            apiKey: "AIzaSyDfsTAGclYUSRe6YhiljS-xb-v-9RBYVEM",
+            authDomain: "antriankcnew.firebaseapp.com",
+            projectId: "antriankcnew"
+        };
+        const app = initializeApp(firebaseConfig); 
+        const db = getFirestore(app);
+
+        window.showCustomAlert = (title, message, type = 'info') => {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('customAlertModal');
+                const icon = document.getElementById('alertIcon');
+                const titleEl = document.getElementById('alertTitle');
+                const btnCancel = document.getElementById('btnAlertCancel');
+                const btnOk = document.getElementById('btnAlertOk');
+                
+                btnCancel.style.display = 'none';
+                btnOk.style.width = '100%';
+                btnOk.innerText = 'SAYA MENGERTI';
+                
+                titleEl.innerText = title;
+                document.getElementById('alertMessage').innerHTML = message;
+                
+                if (type === 'success') {
+                    icon.innerHTML = '<i class="fas fa-check-circle" style="color: var(--success);"></i>';
+                    titleEl.style.color = 'var(--success)';
+                    btnOk.style.background = 'var(--success)';
+                    btnOk.style.color = 'white';
+                } else if (type === 'error') {
+                    icon.innerHTML = '<i class="fas fa-times-circle" style="color: var(--danger);"></i>';
+                    titleEl.style.color = 'var(--danger)';
+                    btnOk.style.background = 'var(--danger)';
+                    btnOk.style.color = 'white';
+                } else {
+                    icon.innerHTML = '<i class="fas fa-info-circle" style="color: var(--kc-cyan);"></i>';
+                    titleEl.style.color = 'var(--kc-cyan)';
+                    btnOk.style.background = 'var(--kc-cyan)';
+                    btnOk.style.color = 'black';
+                }
+                
+                modal.style.display = 'flex';
+                setTimeout(() => modal.classList.add('show'), 10);
+                
+                btnOk.onclick = () => {
+                    modal.classList.remove('show');
+                    setTimeout(() => modal.style.display = 'none', 300);
+                    resolve(true);
+                };
+            });
+        };
+
+        window.showCustomConfirm = (title, message) => {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('customAlertModal');
+                const icon = document.getElementById('alertIcon');
+                const titleEl = document.getElementById('alertTitle');
+                const btnCancel = document.getElementById('btnAlertCancel');
+                const btnOk = document.getElementById('btnAlertOk');
+                
+                icon.innerHTML = '<i class="fas fa-question-circle" style="color: var(--kc-cyan);"></i>';
+                titleEl.style.color = 'var(--kc-cyan)';
+                titleEl.innerText = title;
+                document.getElementById('alertMessage').innerHTML = message;
+                
+                btnCancel.style.display = 'block';
+                btnOk.style.width = 'auto';
+                btnOk.innerText = 'YA, LANJUTKAN';
+                btnOk.style.background = 'var(--danger)';
+                btnOk.style.color = 'white';
+                
+                modal.style.display = 'flex';
+                setTimeout(() => modal.classList.add('show'), 10);
+                
+                btnCancel.onclick = () => {
+                    modal.classList.remove('show');
+                    setTimeout(() => modal.style.display = 'none', 300);
+                    resolve(false);
+                };
+                
+                btnOk.onclick = () => {
+                    modal.classList.remove('show');
+                    setTimeout(() => modal.style.display = 'none', 300);
+                    resolve(true);
+                };
+            });
+        };
+
+        const u = JSON.parse(localStorage.getItem('maka_user')) || {};
+        const myPlatClean = (u.plat || "").replace(/\s+/g, '').toUpperCase();
+        
+        let isAdmin = false;
+        
+        // HAK AKSES PENGURUS KAS (AGUS, RIFKY, ALFIAN, SUPERADMIN)
+        const kasAdmins = [
+            "B4124SWI", // Agus Sukmana
+            "B4426SWF", // Rifky
+            "B4959SWF", // Alfian
+            "B4248SWF"  // Admin Super / Lu
+        ];
+
+        if (kasAdmins.includes(myPlatClean) || u.id === 'ghost_admin') {
+            isAdmin = true;
+            document.getElementById('btnAddTx').style.display = 'flex';
+        }
+
+        document.getElementById('lblDate').innerText = `SALDO KAS KC PER ${new Date().toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'}).toUpperCase()}`;
+
+        let currentStrukBase64 = "";
+
+        window.bukaModalQris = () => {
+            const m = document.getElementById('qrisModal'); m.style.display = 'flex'; setTimeout(() => m.classList.add('show'), 10);
+        }
+        window.tutupModalQris = () => {
+            const m = document.getElementById('qrisModal'); m.classList.remove('show'); setTimeout(() => m.style.display = 'none', 300);
+        }
+
+        window.copyRekening = async () => { 
+            navigator.clipboard.writeText(document.getElementById('rekNumber').innerText)
+            .then(() => showCustomAlert("BERHASIL", "Nomor rekening tersalin ke clipboard!", "success"))
+            .catch(()=>{}); 
+        };
+        
+        window.switchTab = (type) => {
+            if (type === 'IN') {
+                document.getElementById('tabBtnIn').classList.add('active'); document.getElementById('tabBtnOut').classList.remove('active');
+                document.getElementById('txInContainer').style.display = 'block'; document.getElementById('txOutContainer').style.display = 'none';
+            } else {
+                document.getElementById('tabBtnOut').classList.add('active'); document.getElementById('tabBtnIn').classList.remove('active');
+                document.getElementById('txOutContainer').style.display = 'block'; document.getElementById('txInContainer').style.display = 'none';
+            }
+        };
+
+        window.previewStruk = (input) => {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const cvs = document.createElement('canvas'); const ctx = cvs.getContext('2d');
+                        let w = img.width; let h = img.height;
+                        if(w>800){ h*=800/w; w=800; } 
+                        cvs.width=w; cvs.height=h; ctx.drawImage(img,0,0,w,h);
+                        currentStrukBase64 = cvs.toDataURL('image/jpeg', 0.8);
+                        document.getElementById('previewStrukImg').src = currentStrukBase64;
+                        document.getElementById('previewStrukImg').style.display = 'block';
+                    }
+                    img.src = e.target.result;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        };
+
+        window.viewPhoto = (src) => { document.getElementById('pvImage').src = src; document.getElementById('photoViewer').style.display = 'flex'; };
+        window.closePhoto = () => { document.getElementById('photoViewer').style.display = 'none'; };
+
+        window.txGlobalMap = {};
+
+        onSnapshot(query(collection(db, "kas_kc"), orderBy("timestamp", "desc")), (snap) => {
+            let balance = 0, globalIn = 0, globalOut = 0;
+            let groupIn = new Map(); let groupOut = new Map();
+            window.txGlobalMap = {}; 
+
+            snap.forEach(docSnap => {
+                const d = docSnap.data();
+                const amt = d.amount || 0;
+                window.txGlobalMap[docSnap.id] = { id: docSnap.id, ...d }; 
+                
+                const type = d.type === 'IN_COLLECTIVE' ? 'IN' : d.type; 
+                const monthYear = new Date(d.timestamp).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+
+                if (type === 'IN') { 
+                    globalIn += amt; balance += amt; 
+                    if(!groupIn.has(monthYear)) groupIn.set(monthYear, { total: 0, items: [] });
+                    groupIn.get(monthYear).total += amt; groupIn.get(monthYear).items.push({ id: docSnap.id, ...d });
+                } else { 
+                    globalOut += amt; balance -= amt; 
+                    if(!groupOut.has(monthYear)) groupOut.set(monthYear, { total: 0, items: [] });
+                    groupOut.get(monthYear).total += amt; groupOut.get(monthYear).items.push({ id: docSnap.id, ...d });
+                }
+            });
+
+            document.getElementById('totalCash').innerText = "Rp " + balance.toLocaleString('id-ID');
+            document.getElementById('totalIn').innerText = "Rp " + globalIn.toLocaleString('id-ID');
+            document.getElementById('totalOut').innerText = "Rp " + globalOut.toLocaleString('id-ID');
+
+            const renderGroupHtml = (mapData, isMasuk) => {
+                if(mapData.size === 0) return `<div style="text-align:center; padding:40px; color:var(--text-muted); font-weight:600;">Belum ada catatan.</div>`;
+                let html = '';
+                const colorTotal = isMasuk ? 'var(--success)' : 'var(--danger)';
+                
+                mapData.forEach((val, monthName) => {
+                    html += `<div class="month-divider"><span>${monthName}</span><span class="m-total" style="color:${colorTotal}">Rp ${val.total.toLocaleString('id-ID')}</span></div>`;
+                    val.items.forEach(d => {
+                        let subHtml = '';
+                        
+                        if (!isMasuk && d.strukImage) {
+                            subHtml += `<button class="btn-lihat-struk" onclick="viewPhoto('${d.strukImage}')"><i class="fas fa-receipt"></i> LIHAT BUKTI</button>`;
+                        }
+                        if (d.isCollective && d.details) {
+                            subHtml += `<button class="btn-lihat-kolektif" onclick="showCollectiveDetail('${encodeURIComponent(JSON.stringify(d.details))}')"><i class="fas fa-users"></i> RINCIAN KOLEKTIF</button>`;
+                        }
+
+                        let actionBtns = isAdmin ? `<button class="btn-edit" onclick="window.editTx('${d.id}')"><i class="fas fa-pen"></i></button><button class="btn-del" onclick="window.delTx('${d.id}')"><i class="fas fa-trash"></i></button>` : '';
+                        
+                        html += `
+                            <div class="tx-card">
+                                <div class="icon-box ${isMasuk ? 'bg-in' : 'bg-out'}"><i class="fas ${isMasuk ? 'fa-arrow-down' : 'fa-arrow-up'}"></i></div>
+                                <div class="tx-info">
+                                    <div style="display:flex; justify-content:space-between;">
+                                        <div class="tx-title">${d.desc || d.description}</div>
+                                        <div class="tx-amount" style="color:${colorTotal}">${isMasuk?'+':'-'} Rp ${d.amount.toLocaleString('id-ID')}</div>
+                                    </div>
+                                    <div class="tx-meta">${d.date || new Date(d.timestamp).toLocaleDateString('id-ID')}</div>
+                                    ${subHtml}
+                                    <div class="audit-trail"><i class="fas fa-user-shield"></i> Input by: ${d.actor || d.inputBy || 'Sistem'}</div>
+                                </div>
+                                ${actionBtns}
+                            </div>`;
+                    });
+                });
+                return html;
+            };
+
+            document.getElementById('txInContainer').innerHTML = renderGroupHtml(groupIn, true);
+            document.getElementById('txOutContainer').innerHTML = renderGroupHtml(groupOut, false);
+        });
+
+        window.toggleFormType = () => {
+            const type = document.getElementById('formTxType').value;
+            if (type === 'IN_COLLECTIVE') {
+                document.getElementById('formNormalAmount').style.display = 'none';
+                document.getElementById('formCollective').style.display = 'block';
+                document.getElementById('strukArea').style.display = 'none';
+                if(document.getElementById('collList').children.length === 0) addCollRow();
+            } else if (type === 'OUT') {
+                document.getElementById('formNormalAmount').style.display = 'block';
+                document.getElementById('formCollective').style.display = 'none';
+                document.getElementById('strukArea').style.display = 'block'; 
+            } else {
+                document.getElementById('formNormalAmount').style.display = 'block';
+                document.getElementById('formCollective').style.display = 'none';
+                document.getElementById('strukArea').style.display = 'none';
+            }
+        };
+
+        window.addCollRow = (n="", a="", no="", dt="") => {
+            if (!dt) dt = new Date().toISOString().split('T')[0];
+            const div = document.createElement('div'); div.className = 'coll-item';
+            div.innerHTML = `<button type="button" class="btn-del-coll" onclick="this.parentElement.remove(); calcCollTotal();"><i class="fas fa-trash"></i></button><div class="coll-row-flex"><input type="text" class="form-input c-name" placeholder="Nama Anggota" value="${n}" style="flex:1; padding:10px;"><input type="number" class="form-input c-amt" placeholder="Rp" value="${a}" onkeyup="calcCollTotal()" style="flex:1; padding:10px;"></div><div class="coll-row-flex"><input type="date" class="form-input c-date" value="${dt}" style="flex:0.6; color:var(--text-muted); padding:10px;"><input type="text" class="form-input c-note" placeholder="Ket (Opsional)" value="${no}" style="flex:1; padding:10px;"></div>`;
+            document.getElementById('collList').appendChild(div);
+        };
+
+        window.calcCollTotal = () => {
+            let t = 0; document.querySelectorAll('.c-amt').forEach(e => t += parseInt(e.value)||0);
+            document.getElementById('collTotalDisplay').innerText = t.toLocaleString('id-ID');
+        };
+
+        window.openTxModal = () => { 
+            document.getElementById('formEditId').value = ''; document.getElementById('modalTitleText').innerText = 'Catat Transaksi';
+            document.getElementById('formTxAmount').value = ''; document.getElementById('formTxDesc').value = '';
+            document.getElementById('collList').innerHTML = ''; document.getElementById('collTotalDisplay').innerText = '0';
+            currentStrukBase64 = ""; document.getElementById('previewStrukImg').style.display='none'; document.getElementById('formStrukFoto').value='';
+            document.getElementById('formTxType').value = 'IN'; toggleFormType();
+            const m = document.getElementById('txModal'); m.style.display = 'flex'; setTimeout(() => m.classList.add('show'), 10);
+        };
+
+        window.editTx = (id) => {
+            const d = window.txGlobalMap[id]; if(!d) return;
+            document.getElementById('formEditId').value = id; document.getElementById('modalTitleText').innerText = 'Edit Transaksi';
+            document.getElementById('formTxDesc').value = d.desc || d.description;
+            
+            if(d.isCollective) {
+                document.getElementById('formTxType').value = 'IN_COLLECTIVE'; toggleFormType();
+                document.getElementById('collList').innerHTML = ''; 
+                (d.details||[]).forEach(x => addCollRow(x.name, x.amount, x.note, x.date));
+                calcCollTotal();
+            } else {
+                document.getElementById('formTxType').value = d.type; toggleFormType();
+                document.getElementById('formTxAmount').value = d.amount;
+                if(d.strukImage) { 
+                    currentStrukBase64 = d.strukImage; 
+                    document.getElementById('previewStrukImg').src = d.strukImage; 
+                    document.getElementById('previewStrukImg').style.display='block'; 
+                }
+            }
+            const m = document.getElementById('txModal'); m.style.display = 'flex'; setTimeout(() => m.classList.add('show'), 10);
+        };
+
+        window.closeTxModal = () => { const m = document.getElementById('txModal'); m.classList.remove('show'); setTimeout(() => m.style.display = 'none', 300); };
+
+        window.showCollectiveDetail = (enc) => {
+            const data = JSON.parse(decodeURIComponent(enc));
+            const body = document.getElementById('detailListBody'); body.innerHTML = '';
+            data.sort((a,b)=>new Date(b.date||0)-new Date(a.date||0));
+            data.forEach((d,i)=>{
+                body.innerHTML += `<div style="padding:15px; border-bottom:1px dashed var(--border-glass); display:flex; justify-content:space-between; align-items:center;"><div><div style="font-weight:900; color:var(--text-main); text-transform:uppercase;">${i+1}. ${d.name}</div><div style="font-size:10px; color:var(--text-muted);">${d.note||'Iuran'} • ${d.date||'-'}</div></div><div style="font-family:'Space Grotesk'; font-weight:900; color:var(--success);">Rp ${d.amount.toLocaleString('id-ID')}</div></div>`;
+            });
+            const m = document.getElementById('detailModal'); m.style.display='flex'; setTimeout(() => m.classList.add('show'), 10);
+        }
+
+        window.saveTxData = async () => {
+            const id = document.getElementById('formEditId').value;
+            const typeRaw = document.getElementById('formTxType').value;
+            const desc = document.getElementById('formTxDesc').value.trim();
+            if(!desc) return showCustomAlert("PERHATIAN", "Keterangan wajib diisi!", "error");
+
+            let amount = 0, details = [], isColl = false, finalType = typeRaw;
+
+            if (typeRaw === 'IN_COLLECTIVE') {
+                isColl = true; finalType = 'IN';
+                document.querySelectorAll('.coll-item').forEach(r => {
+                    let n=r.querySelector('.c-name').value, a=parseInt(r.querySelector('.c-amt').value)||0, no=r.querySelector('.c-note').value, dt=r.querySelector('.c-date').value;
+                    if(n && a>0) { details.push({name:n, amount:a, note:no, date:dt}); amount+=a; }
+                });
+                if(details.length===0) return showCustomAlert("PERHATIAN", "Data penyumbang masih kosong!", "error");
+            } else {
+                amount = parseInt(document.getElementById('formTxAmount').value);
+                if(!amount) return showCustomAlert("PERHATIAN", "Nominal wajib diisi!", "error");
+            }
+
+            const btn = document.getElementById('btnSaveTx'); btn.innerText = "MENYIMPAN..."; btn.style.opacity = '0.7';
+
+            try {
+                let payload = { type: finalType, amount: amount, desc: desc, isCollective: isColl };
+                if(isColl) payload.details = details;
+                if(currentStrukBase64 && typeRaw === 'OUT') payload.strukImage = currentStrukBase64; 
+
+                if (id) await updateDoc(doc(db, "kas_kc", id), payload);
+                else {
+                    payload.date = new Date().toLocaleDateString('id-ID'); payload.timestamp = Date.now();
+                    payload.actor = `${u.namaKtp||u.nama||"Admin KC"} (${u.plat||""})`;
+                    await addDoc(collection(db, "kas_kc"), payload);
+                }
+                closeTxModal();
+                showCustomAlert("BERHASIL", "Transaksi kas berhasil disimpan.", "success");
+            } catch (e) { showCustomAlert("GAGAL", "Gagal menyimpan: " + e.message, "error"); } 
+            finally { btn.innerText = "SIMPAN TRANSAKSI"; btn.style.opacity = '1'; }
+        };
+
+        window.delTx = async (id) => { 
+            const ok = await showCustomConfirm("HAPUS MUTASI", "Yakin ingin menghapus riwayat kas ini?<br><span style='color:var(--danger); font-size:11px;'>Saldo akan menyesuaikan otomatis.</span>");
+            if(ok) await deleteDoc(doc(db, "kas_kc", id)); 
+        };
+    </script>
+</body>
+</html>
