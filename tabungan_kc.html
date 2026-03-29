@@ -11,7 +11,7 @@
             document.documentElement.classList.add('theme-soft-blue');
         }
 
-        const TABUNGAN_VERSION = "4.0_THEME_FIX"; 
+        const TABUNGAN_VERSION = "5.0_ULTIMATE_SECURE"; 
         if (localStorage.getItem('maka_tabungan_v') !== TABUNGAN_VERSION) {
             if ('caches' in window) {
                 caches.keys().then((names) => { names.forEach(name => { caches.delete(name); }); });
@@ -23,6 +23,7 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Space+Grotesk:wght@700;800;900&family=Outfit:wght@500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 
     <style>
@@ -61,7 +62,7 @@
             --success: #059669;
             --warning: #D97706;
             
-            --glass-bg: rgba(255, 255, 255, 0.7); 
+            --glass-bg: rgba(255, 255, 255, 0.85); 
             --glass-border: rgba(2, 132, 199, 0.3);
             --shadow-cyan: 0 10px 30px rgba(2, 132, 199, 0.15);
         }
@@ -77,49 +78,54 @@
         html.theme-soft-blue .ambient-light { opacity: 0.4; }
         @keyframes floatLight { 0% {transform: translate(0,0);} 100% {transform: translate(20px, 40px);} }
 
-        /* SECURITY UI (FACE & PIN) */
-        #securityScreen { position: fixed; inset: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(10px); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; transition: opacity 0.5s; }
+        /* --- SECURITY UI (FACE & PIN SCREEN) --- */
+        #securityScreen { position: fixed; inset: 0; background: rgba(5,11,20,0.95); backdrop-filter: blur(15px); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; transition: opacity 0.5s; }
         html.theme-soft-blue #securityScreen { background: rgba(255,255,255,0.95); }
         
-        .sec-icon-box { width: 90px; height: 90px; border-radius: 50%; background: #050B14; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-cyan); margin-bottom: 20px; position: relative; overflow: hidden; border: 1px solid rgba(0,229,255,0.3);}
-        html.theme-soft-blue .sec-icon-box { background: #F8FAFC; border-color: var(--cyan-logo); }
+        .sec-icon-box { width: 90px; height: 90px; border-radius: 50%; background: #000; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-cyan); margin-bottom: 20px; position: relative; overflow: hidden; border: 2px solid var(--cyan-logo);}
+        html.theme-soft-blue .sec-icon-box { background: #F8FAFC; }
         .sec-icon-box i { font-size: 35px; color: var(--cyan-logo); z-index: 2; }
         .scan-laser { position: absolute; width: 100%; height: 3px; background: var(--cyan-logo); top: 0; animation: scanDown 1.5s infinite; opacity: 0.7; box-shadow: 0 0 15px var(--cyan-logo); z-index: 1; }
         @keyframes scanDown { 0% {top:0;} 50% {top:100%;} 100% {top:0;} }
         
-        .sec-title { font-family:'Outfit'; font-weight:900; font-size:24px; color:var(--cyan-logo); letter-spacing:1px; text-shadow:0 0 15px rgba(0,229,255,0.5); }
-        html.theme-soft-blue .sec-title { text-shadow: none; }
-        .sec-desc { font-size:12px; color:var(--text-muted); margin-bottom:20px; }
+        .sec-title { font-family:'Outfit'; font-weight:900; font-size:24px; color:var(--cyan-logo); letter-spacing:1px; text-shadow:0 0 15px rgba(0,229,255,0.5); margin-bottom: 5px;}
+        html.theme-soft-blue .sec-title { text-shadow: none; color: var(--cyan-dark); }
+        .sec-desc { font-size:12px; color:var(--text-muted); margin-bottom:20px; font-weight: 800;}
         
         .camera-container { width: 220px; height: 220px; border-radius: 40px; overflow: hidden; position: relative; border: 4px solid #111; box-shadow: 0 20px 60px rgba(0,0,0,0.9); background: #000; display: none; margin-bottom: 20px; }
         html.theme-soft-blue .camera-container { border-color: #CBD5E1; box-shadow: 0 20px 60px rgba(2,132,199,0.2); background: #F8FAFC; }
         #videoInput { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
         
         .face-frame { position: absolute; inset: 15px; border: 3px dashed rgba(255,255,255,0.4); border-radius: 30px; transition: all 0.3s; pointer-events: none; }
+        html.theme-soft-blue .face-frame { border-color: rgba(2,132,199,0.4); }
         .face-frame.scanning { border: 4px solid var(--cyan-logo); box-shadow: 0 0 30px rgba(0,229,255,0.5), inset 0 0 30px rgba(0,229,255,0.5); animation: facePulse 0.8s infinite alternate; }
         @keyframes facePulse { 0% { transform: scale(0.98); opacity: 0.7;} 100% { transform: scale(1.02); opacity: 1;} }
 
         .btn-action { width: 100%; max-width: 250px; padding: 16px; border: none; border-radius: 16px; font-family: 'Space Grotesk'; font-weight: 800; font-size: 14px; cursor: pointer; box-shadow: var(--shadow-cyan); background: var(--cyan-logo); color: black; transition: 0.2s;}
-        html.theme-soft-blue .btn-action { color: #FFF; }
+        html.theme-soft-blue .btn-action { color: #FFF; box-shadow: 0 10px 25px rgba(2,132,199,0.3); }
         .btn-action:active { transform: scale(0.95); }
         .btn-outline { background: rgba(0,229,255,0.05); color: var(--cyan-logo); border: 2px solid var(--cyan-logo); box-shadow: none; padding: 14px; }
-        .btn-ghost { background: transparent; color: var(--text-muted); box-shadow: none; font-size: 12px; margin-top: 5px; }
+        html.theme-soft-blue .btn-outline { background: #FFFFFF; color: var(--cyan-dark); }
+        .btn-ghost { background: transparent; color: var(--danger); box-shadow: none; font-size: 12px; margin-top: 5px; border: 1px dashed var(--danger); padding: 12px; border-radius: 12px;}
 
-        /* PIN PAD */
-        .pin-area { display: none; width: 100%; max-width: 280px; flex-direction: column; align-items: center; }
-        .pin-display { display: flex; gap: 10px; margin-bottom: 30px; }
-        .pin-dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--cyan-logo); transition: 0.2s; }
+        /* --- PIN PAD --- */
+        .pin-area { display: none; width: 100%; max-width: 280px; flex-direction: column; align-items: center; margin-top: 10px;}
+        .pin-display { display: flex; gap: 15px; margin-bottom: 30px; }
+        .pin-dot { width: 15px; height: 15px; border-radius: 50%; border: 2px solid var(--cyan-logo); transition: 0.2s; }
+        html.theme-soft-blue .pin-dot { border-color: var(--cyan-dark); }
         .pin-dot.filled { background: var(--cyan-logo); box-shadow: 0 0 10px var(--cyan-logo); }
-        .pin-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; width: 100%; }
-        .pin-key { width: 65px; height: 65px; border-radius: 50%; background: rgba(5,11,20,0.8); border: 1px solid rgba(0,229,255,0.2); display: flex; align-items: center; justify-content: center; font-family: 'Space Grotesk'; font-size: 22px; font-weight: 800; color: white; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.5); transition: 0.2s;}
-        html.theme-soft-blue .pin-key { background: #FFFFFF; color: #0F172A; border-color: #CBD5E1; box-shadow: 0 5px 15px rgba(2, 132, 199, 0.1); }
-        .pin-key:active { background: rgba(0,229,255,0.2); transform: scale(0.95); border-color: var(--cyan-logo); color: var(--cyan-logo);}
-        html.theme-soft-blue .pin-key:active { background: #E0F2FE; }
+        html.theme-soft-blue .pin-dot.filled { background: var(--cyan-dark); box-shadow: 0 0 10px rgba(2,132,199,0.5); }
+        
+        .pin-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; width: 100%; }
+        .pin-key { width: 70px; height: 70px; border-radius: 50%; background: #0A1128; border: 2px solid rgba(0,229,255,0.2); display: flex; align-items: center; justify-content: center; font-family: 'Space Grotesk'; font-size: 24px; font-weight: 900; color: white; cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.5); transition: 0.2s;}
+        html.theme-soft-blue .pin-key { background: #FFFFFF; color: var(--text-main); border-color: #CBD5E1; box-shadow: 0 5px 15px rgba(2, 132, 199, 0.1); }
+        .pin-key:active { background: rgba(0,229,255,0.2); transform: scale(0.9); border-color: var(--cyan-logo); color: var(--cyan-logo);}
+        html.theme-soft-blue .pin-key:active { background: #E0F2FE; border-color: var(--cyan-dark); color: var(--cyan-dark); }
 
         /* APP UI */
         #mainApp { display: none; padding-bottom: 90px; }
-        .header-main { background: linear-gradient(160deg, var(--navy-bg) 0%, #000 100%); padding: 35px 20px 80px; border-bottom-left-radius:30px; border-bottom-right-radius:30px; color:white; text-align:center; box-shadow: var(--shadow-cyan); border-bottom: 1px solid rgba(0,229,255,0.2);}
-        html.theme-soft-blue .header-main { background: linear-gradient(135deg, #FFFFFF 0%, #E0F2FE 100%); color: var(--text-main); border-bottom: 1px solid var(--border-glass);}
+        .header-main { background: linear-gradient(160deg, var(--navy-bg) 0%, #000 100%); padding: 35px 20px 80px; border-bottom-left-radius:30px; border-bottom-right-radius:30px; color:white; text-align:center; box-shadow: var(--shadow-cyan); border-bottom: 1px solid var(--border-glass);}
+        html.theme-soft-blue .header-main { background: linear-gradient(135deg, #FFFFFF 0%, #E0F2FE 100%); color: var(--text-main); }
         .main-title { font-family:'Outfit'; font-size:24px; font-weight:900; margin:0; color: var(--cyan-logo); letter-spacing: 1px; text-shadow: 0 0 15px rgba(0,229,255,0.3);}
         html.theme-soft-blue .header-main .main-title { color: var(--text-main); text-shadow: none; }
         .sub-tag { font-size:10px; font-weight:800; display:block; margin-top:5px; font-family:'Space Grotesk'; letter-spacing:3px; color: var(--text-muted); text-transform: uppercase;}
@@ -136,17 +142,18 @@
         
         /* SALDO PRIBADI */
         .saldo-card { background: var(--glass-bg); backdrop-filter: blur(15px); padding: 25px; border-radius: 24px; color: white; text-align: center; margin-bottom: 15px; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid var(--glass-border);}
-        html.theme-soft-blue .saldo-card { background: #FFFFFF; color: var(--text-main); box-shadow: 0 10px 30px rgba(2,132,199,0.15); }
+        html.theme-soft-blue .saldo-card { background: #FFFFFF; color: var(--text-main); box-shadow: 0 10px 30px rgba(2,132,199,0.15); border-color: var(--border-glass);}
         .saldo-val { font-family:'Space Grotesk'; font-size:36px; font-weight:900; margin:10px 0; color: var(--cyan-logo); text-shadow: 0 0 15px rgba(0,229,255,0.4);}
         html.theme-soft-blue .saldo-val { color: var(--cyan-dark); text-shadow: none; }
-        .btn-nabung { background: var(--yellow-logo); border: none; color: black; padding: 12px 10px; border-radius: 12px; font-size: 11px; font-weight: 800; font-family: 'Space Grotesk'; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin: 15px auto 0; width: 100%; box-shadow: 0 10px 25px rgba(255,255,0,0.25); transition: 0.2s; letter-spacing: 1px;}
+        .btn-nabung { background: var(--yellow-logo); border: none; color: black; padding: 14px 10px; border-radius: 12px; font-size: 11px; font-weight: 800; font-family: 'Space Grotesk'; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin: 15px auto 0; width: 100%; box-shadow: 0 10px 25px rgba(255,255,0,0.25); transition: 0.2s; letter-spacing: 1px;}
         html.theme-soft-blue .saldo-card .btn-nabung { color: #FFF; }
         .btn-nabung:active { transform: scale(0.96); box-shadow: 0 5px 15px rgba(255,255,0,0.3); }
         
         /* KOTAK TOTAL GLOBAL */
         .global-vault-card { background: var(--glass-bg); backdrop-filter: blur(10px); border-radius: 20px; padding: 20px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid var(--glass-border); color: white; display: none; }
-        html.theme-soft-blue .global-vault-card { background: #FFFFFF; color: var(--text-main); box-shadow: 0 10px 30px rgba(2,132,199,0.1); }
+        html.theme-soft-blue .global-vault-card { background: #FFFFFF; color: var(--text-main); box-shadow: 0 10px 30px rgba(2,132,199,0.1); border-color: var(--border-glass);}
         .gvc-icon { width: 45px; height: 45px; border-radius: 14px; background: rgba(0,229,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--cyan-logo); border: 1px solid rgba(0,229,255,0.3); }
+        html.theme-soft-blue .gvc-icon { background: rgba(2,132,199,0.1); color: var(--cyan-dark); border-color: var(--border-glass); }
 
         .trx-item { background: rgba(5,11,20,0.8); backdrop-filter: blur(10px); padding: 15px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); }
         html.theme-soft-blue .trx-item { background: #FFFFFF; color: var(--text-main); box-shadow: 0 5px 15px rgba(2,132,199,0.1); border-color: #CBD5E1; }
@@ -157,17 +164,20 @@
         html.theme-soft-blue .m-plat { color: var(--text-muted); }
         
         .btn-plus { width:40px; height:40px; background:var(--yellow-logo); color:black; border-radius:12px; display:flex; align-items:center; justify-content:center; border:none; cursor:pointer; font-size:16px; box-shadow:0 5px 15px rgba(255,255,0,0.3);}
+        html.theme-soft-blue .btn-plus { color: #FFF; }
         .btn-reset { width:40px; height:40px; background:rgba(245,158,11,0.1); color:var(--warning); border-radius:12px; display:flex; align-items:center; justify-content:center; border:1px solid rgba(245,158,11,0.3); cursor:pointer; font-size:16px; margin-right: 8px;}
         
         .app-card { background:rgba(5,11,20,0.8); backdrop-filter: blur(10px); padding:15px; border-radius:16px; margin-bottom:12px; box-shadow:0 5px 15px rgba(0,0,0,0.3); display:flex; justify-content:space-between; align-items:center; border: 1px solid rgba(255,255,255,0.05);}
         html.theme-soft-blue .app-card { background: #FFFFFF; color: var(--text-main); box-shadow: 0 5px 15px rgba(2,132,199,0.1); border-color: #CBD5E1; }
         html.theme-soft-blue .app-card h4 { color: var(--text-main); }
 
-        .admin-info-box { background:rgba(0,229,255,0.05); padding:15px; border-radius:16px; border:1px dashed rgba(0,229,255,0.3); font-size:11px; color:var(--cyan-logo); margin-bottom:20px; line-height: 1.5; }
-        html.theme-soft-blue .admin-info-box { background: rgba(2, 132, 199, 0.05); border-color: var(--border-glass); color: var(--cyan-dark); }
+        .admin-info-box { background:rgba(0,229,255,0.05); padding:15px; border-radius:16px; border:1px dashed var(--border-glass); font-size:11px; color:var(--cyan-logo); margin-bottom:20px; line-height: 1.5; }
+        html.theme-soft-blue .admin-info-box { background: rgba(2, 132, 199, 0.05); color: var(--cyan-dark); }
         
         /* MODALS */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 10000; display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(8px); }
+        html.theme-soft-blue .modal-overlay { background: rgba(15, 23, 42, 0.8); }
+        
         .modal-box { background: var(--navy-bg); width: 100%; max-width: 380px; border-radius: 25px; padding: 30px 25px; text-align: center; box-shadow: 0 30px 80px rgba(0,0,0,0.9); max-height: 85vh; overflow-y: auto; animation: zoomIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 1px solid var(--cyan-logo);}
         html.theme-soft-blue .modal-box { background: #FFFFFF; border-color: transparent; box-shadow: 0 20px 60px rgba(2,132,199,0.2); }
         @keyframes zoomIn { from {transform:scale(0.8); opacity:0;} to {transform:scale(1); opacity:1;} }
@@ -184,23 +194,17 @@
         .btn-outline-modal { background: rgba(0,0,0,0.5); color: var(--cyan-logo); border: 1px solid var(--cyan-logo); font-family: 'Space Grotesk'; font-weight: 800; cursor: pointer; transition: 0.2s;}
         
         .bg-sukses { background:var(--cyan-logo); box-shadow: var(--shadow-cyan); } 
+        html.theme-soft-blue .bg-sukses { color: #FFF; }
         .bg-cancel { background:#111; color:#fff; border: 1px solid #333; box-shadow:none; }
+        html.theme-soft-blue .bg-cancel { background: #F1F5F9; color: #64748B; border-color: #CBD5E1; }
         
         .agree-box { height:160px; overflow-y:auto; text-align:left; font-size:12px; color:var(--text-muted); margin-bottom:25px; background:rgba(0,0,0,0.5); border:1px solid #333; padding:15px; border-radius:12px; line-height: 1.6; }
         html.theme-soft-blue .agree-box { background: #F8FAFC; border-color: #CBD5E1; color: var(--text-main); }
 
-        /* ADMIN TRX LIST ITEM */
-        .admin-hist-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px dashed #222; text-align: left; }
-        html.theme-soft-blue .admin-hist-item { border-bottom-color: #CBD5E1; }
-        .admin-hist-item:last-child { border-bottom: none; }
-        .btn-edit { background: rgba(0,229,255,0.1); border: 1px solid rgba(0,229,255,0.3); color: var(--cyan-logo); cursor: pointer; width: 35px; height: 35px; border-radius: 10px; font-size: 14px; display:flex; align-items:center; justify-content:center; transition:0.2s;}
-        .btn-edit:active { transform:scale(0.9); }
-        
-        .btn-danger-reset { display: none; width: 100%; padding: 15px; margin-top: 30px; background: rgba(239,68,68,0.1); color: var(--danger); border: 1px solid rgba(239,68,68,0.3); border-radius: 12px; font-weight: 800; cursor: pointer; font-size: 11px; letter-spacing: 1px; }
-
         .back-nav { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); width: 85%; max-width: 350px; z-index: 1000;}
         .btn-premium-back { background: rgba(10, 15, 25, 0.95); backdrop-filter: blur(15px); border: 1px solid var(--border-glass); padding: 14px 25px; border-radius: 50px; font-family: 'Space Grotesk'; font-weight: 800; font-size: 13px; color: var(--cyan-logo); text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: var(--shadow-cyan); }
-        html.theme-soft-blue .btn-premium-back { background: #FFFFFF; }
+        html.theme-soft-blue .btn-premium-back { background: #FFFFFF; color: var(--cyan-dark); }
+        .btn-premium-back:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
@@ -225,10 +229,13 @@
         </div>
 
         <button class="btn-action" id="btnMainAction" style="display:none;" onclick="handleAction()">MULAI SCAN</button>
-        <div id="scanStatus" style="font-size:12px; font-weight:800; color:var(--cyan-logo); height:20px; letter-spacing:1px;"></div>
+        <div id="scanStatus" style="font-size:12px; font-weight:800; color:var(--cyan-logo); height:20px; letter-spacing:1px; margin-bottom: 10px;"></div>
         
         <div class="pin-area" id="pinArea">
-            <div class="pin-display"><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div></div>
+            <div class="pin-display">
+                <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+                <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+            </div>
             <div class="pin-grid">
                 <div class="pin-key" onclick="pressPin(1)">1</div><div class="pin-key" onclick="pressPin(2)">2</div><div class="pin-key" onclick="pressPin(3)">3</div>
                 <div class="pin-key" onclick="pressPin(4)">4</div><div class="pin-key" onclick="pressPin(5)">5</div><div class="pin-key" onclick="pressPin(6)">6</div>
@@ -239,20 +246,20 @@
             </div>
         </div>
 
-        <div style="display:flex; flex-direction:column; gap:8px; width:100%; max-width:250px; margin-top:20px;" id="btnBawahKamera">
-            <button class="btn-action btn-outline" id="btnSwitch" onclick="switchMode()">Gunakan PIN (6 Digit)</button>
-            <button class="btn-action btn-ghost" onclick="window.location.href='dashboard_kc.html'">BATAL / KEMBALI KE DASHBOARD</button>
+        <div style="display:flex; flex-direction:column; gap:8px; width:100%; max-width:280px; margin-top:30px;" id="btnBawahKamera">
+            <button class="btn-action btn-outline" id="btnSwitch" onclick="switchMode()">Ganti Mode Login</button>
+            <button class="btn-action btn-ghost" onclick="window.location.href='dashboard_kc.html'"><i class="fas fa-arrow-left"></i> KEMBALI KE DASHBOARD</button>
         </div>
     </div>
 
     <div class="modal-overlay" id="customAlertModal" style="z-index: 30000;">
         <div class="modal-box">
-            <div id="camTitle" style="font-family:'Outfit'; font-size:20px; color:var(--cyan-logo); margin-bottom:15px; font-weight:900; letter-spacing:1px;"></div>
-            <div id="camMsg" style="font-size:13px; color:var(--text-main); margin-bottom:25px; line-height:1.6;"></div>
+            <div id="camTitle" style="font-family:'Outfit'; font-size:20px; color:var(--cyan-logo); margin-bottom:15px; font-weight:900; letter-spacing:1px; text-transform: uppercase;"></div>
+            <div id="camMsg" style="font-size:13px; color:var(--text-muted); margin-bottom:25px; line-height:1.6; font-weight: 600;"></div>
             <input type="password" id="camInput" class="form-input" style="display:none; margin-bottom:20px; text-align:center; font-size:20px; letter-spacing:5px;" placeholder="Password">
             <div style="display:flex; gap:10px;">
                 <button class="btn-submit bg-cancel" id="camBtnCancel">BATAL</button>
-                <button class="btn-submit bg-sukses" id="camBtnOk">OK</button>
+                <button class="btn-submit bg-sukses" id="camBtnOk">SAYA MENGERTI</button>
             </div>
         </div>
     </div>
@@ -261,7 +268,7 @@
         <div class="modal-box">
             <div style="font-family:'Outfit'; font-weight:900; font-size:20px; color:var(--cyan-logo); margin-bottom:15px;">AKTIVASI DOMPET KC</div>
             <div class="agree-box">
-                <b>PENTING:</b><br><br>1. PIN ini KHUSUS TABUNGAN (6 Digit).<br>2. BERBEDA DENGAN PIN LOGIN Aplikasi (4 Digit).<br>3. Wajah Anda akan direkam sebagai kunci ganda biometrik.<br>4. Sistem ini dikunci dan Saldo Anda Dijamin Aman 100%.
+                <b>PENTING:</b><br><br>1. Buat PIN BARU khusus TABUNGAN (6 Digit).<br>2. BERBEDA DENGAN PIN LOGIN Aplikasi (4 Digit).<br>3. Wajah Anda opsional bisa direkam sebagai kunci ganda biometrik.<br>4. Sistem ini dikunci dan Saldo Anda Dijamin Aman 100%.
             </div>
             <button class="btn-submit" style="background:var(--cyan-logo); color:black;" onclick="acceptAgreement()">BUAT KUNCI SEKARANG</button>
         </div>
@@ -275,25 +282,25 @@
 
         <div class="tab-container">
             <button class="tab-btn active" onclick="switchTab('member')">SAYA</button>
-            <button class="tab-btn" onclick="switchTab('admin')" id="btnTabAdmin" style="display:none; color:var(--cyan-logo); border-color:rgba(0,229,255,0.3);">INPUT SETORAN</button>
+            <button class="tab-btn" onclick="switchTab('admin')" id="btnTabAdmin" style="display:none; color:var(--cyan-logo); border-color:var(--border-glass);">INPUT SETORAN</button>
             <button class="tab-btn" onclick="switchTab('approval')" id="btnTabApprove" style="display:none; color:var(--yellow-logo); border-color:rgba(255,255,0,0.3);">VALIDASI</button>
         </div>
 
         <div id="viewMember" class="content-area active">
             
             <div class="saldo-card">
-                <button onclick="changePinSelf()" style="position:absolute; top:20px; right:20px; background:rgba(255,255,255,0.1); color:white; padding:6px 12px; border-radius:8px; font-size:9px; font-weight:800; cursor:pointer; border:1px solid rgba(255,255,255,0.2); transition:0.2s;">GANTI KUNCI</button>
+                <button onclick="changePinSelf()" style="position:absolute; top:20px; right:20px; background:rgba(255,255,255,0.1); color:var(--text-main); padding:6px 12px; border-radius:8px; font-size:9px; font-weight:800; cursor:pointer; border:1px solid var(--border-glass); transition:0.2s;">GANTI KUNCI</button>
                 <div style="font-size:10px; opacity:0.8; letter-spacing:2px; color:var(--text-muted); font-weight: 800;">SALDO PRIBADI SAYA</div>
                 <div class="saldo-val" id="myBalance">Rp 0</div>
                 <div style="font-size:10px; font-weight:800; background:rgba(16,185,129,0.1); color:var(--success); padding:6px 12px; border-radius:8px; display:inline-block; border: 1px solid rgba(16,185,129,0.3); letter-spacing: 1px;">
                     <i class="fas fa-shield-check"></i> SECURED ASSET
                 </div>
                 
-                <div style="display:flex; gap:10px; margin-top:15px;">
-                    <button class="btn-nabung" style="flex:1; margin:0;" onclick="document.getElementById('modalQris').style.display='flex'">
+                <div style="display:flex; gap:10px; margin-top:20px;">
+                    <button class="btn-nabung" style="flex:1; margin:0; background:var(--success); color: white;" onclick="document.getElementById('modalQris').style.display='flex'">
                         <i class="fas fa-qrcode" style="font-size:14px;"></i> SETOR DANA
                     </button>
-                    <button class="btn-nabung" style="flex:1; margin:0; background:var(--danger); border:1px solid var(--danger); box-shadow: 0 5px 15px rgba(239,68,68,0.2);" onclick="bukaModalTarik()">
+                    <button class="btn-nabung" style="flex:1; margin:0; background:var(--danger); color: white; border:1px solid var(--danger); box-shadow: 0 5px 15px rgba(239,68,68,0.2);" onclick="bukaModalTarik()">
                         <i class="fas fa-hand-holding-usd" style="font-size:14px;"></i> TARIK DANA
                     </button>
                 </div>
@@ -313,13 +320,9 @@
                 </div>
             </div>
 
-            <button onclick="document.getElementById('videoModal').style.display='flex'" style="width: 100%; margin-bottom: 20px; padding: 16px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); font-family: 'Outfit'; font-weight: 800; font-size: 13px; color: white; display: flex; align-items: center; justify-content: center; gap: 10px; background: rgba(5,11,20,0.8); box-shadow: 0 10px 20px rgba(0,0,0,0.5); cursor: pointer; transition: 0.2s;">
-                <i class="fab fa-tiktok" style="font-size: 20px; color: #fff; filter: drop-shadow(2px 0px 0px var(--cyan-logo)) drop-shadow(-2px 0px 0px #fe0979);"></i> LIHAT TUTORIAL
-            </button>
-            
             <div style="font-family:'Outfit'; font-size:16px; font-weight:800; color:var(--cyan-logo); margin-bottom:15px; padding-left:5px; border-left: 3px solid var(--cyan-logo);">Mutasi Terakhir</div>
             <div class="trx-list" id="historyList">
-                <div style="text-align:center; padding:30px; color:#94A3B8; font-size:12px;">Memuat riwayat...</div>
+                <div style="text-align:center; padding:30px; color:var(--text-muted); font-size:12px;">Memuat riwayat...</div>
             </div>
         </div>
 
@@ -337,7 +340,7 @@
 
         <div id="viewApproval" class="content-area">
             <div id="approvalList">
-                <div style="text-align:center; padding:30px; color:#94A3B8; font-size:11px;">Memuat antrean validasi...</div>
+                <div style="text-align:center; padding:30px; color:var(--text-muted); font-size:11px;">Memuat antrean validasi...</div>
             </div>
         </div>
 
@@ -420,14 +423,14 @@
     <div class="modal-overlay" id="modalDeposit">
         <div class="modal-box">
             <h3 style="margin-top:0; color:var(--cyan-logo); font-family:'Outfit'; font-size:20px; margin-bottom:5px;">INPUT SETORAN MANUAL</h3>
-            <p id="depMemberName" style="font-size:12px; color:var(--text-main); margin-bottom:25px; font-weight:800; border-bottom:1px dashed #333; padding-bottom:10px;"></p>
+            <p id="depMemberName" style="font-size:12px; color:var(--text-main); margin-bottom:25px; font-weight:800; border-bottom:1px dashed var(--border-glass); padding-bottom:10px;"></p>
             <input type="hidden" id="depMemberId">
             <div class="form-group"><label class="form-label">Nominal (Rp)</label><input type="number" id="depAmount" class="form-input" placeholder="Contoh: 20000"></div>
             <div style="display:flex; gap:10px;"><button class="btn-submit bg-cancel" onclick="document.getElementById('modalDeposit').style.display='none'">BATAL</button><button class="btn-submit bg-sukses" onclick="processDeposit()">SIMPAN DATA</button></div>
             
-            <div style="margin-top:25px; border-top:1px dashed #333; padding-top:15px;">
+            <div style="margin-top:25px; border-top:1px dashed var(--border-glass); padding-top:15px;">
                 <div style="font-size:10px; font-weight:800; color:var(--text-muted); margin-bottom:10px; text-transform:uppercase;">Transaksi Terakhir (Edit/Hapus)</div>
-                <div id="adminRecentTrx" style="max-height:180px; overflow-y:auto; background:rgba(0,0,0,0.3); border-radius:12px; padding:5px; border: 1px solid #222;"></div>
+                <div id="adminRecentTrx" style="max-height:180px; overflow-y:auto; background:rgba(0,0,0,0.3); border-radius:12px; padding:5px; border: 1px solid var(--border-glass);"></div>
             </div>
         </div>
     </div>
@@ -455,7 +458,7 @@
                 <div style="font-size:10px; color:var(--cyan-logo);">(Sudah termasuk Kode Unik Anda: <b id="kodeUnikTxt">***</b>)</div>
             </div>
             
-            <div style="border:1px solid #333; padding:15px; border-radius:16px; margin-bottom:20px; background: rgba(0,0,0,0.5);">
+            <div style="border:1px solid var(--border-glass); padding:15px; border-radius:16px; margin-bottom:20px; background: rgba(0,0,0,0.5);">
                 <img src="qris_kc.jpg" style="width:100%; border-radius:8px;" alt="QRIS KC" onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=\'padding:20px; color:#EF4444; font-weight:bold; text-align:center;\'>Gambar qris_kc.jpg tidak ditemukan.</div>'">
             </div>
             
@@ -466,19 +469,6 @@
         </div>
     </div>
 
-    <div class="modal-overlay" id="videoModal" style="z-index: 25000;">
-        <div class="modal-box" style="padding: 20px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <div style="font-family:'Outfit'; font-weight:900; color:var(--text-main); font-size: 16px;"><i class="fab fa-tiktok" style="color:var(--cyan-logo);"></i> TUTORIAL SETORAN</div>
-                <button onclick="document.getElementById('videoModal').style.display='none'" style="background:rgba(239,68,68,0.1); color:var(--danger); border:1px solid rgba(239,68,68,0.3); width:35px; height:35px; border-radius:10px; font-size:16px; cursor:pointer;"><i class="fas fa-times"></i></button>
-            </div>
-            <div style="position: relative; width: 100%; max-width: 320px; margin: 0 auto; border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); background: #000;">
-                <iframe style="width: 100%; height: 500px; display: block;" src="https://www.tiktok.com/embed/v2/7616071100727971092" title="Tutorial Menabung MLU" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-            </div>
-            <button class="btn-submit bg-cancel" style="margin-top:15px; font-weight: 800;" onclick="document.getElementById('videoModal').style.display='none'">TUTUP VIDEO</button>
-        </div>
-    </div>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, doc, onSnapshot, updateDoc, collection, query, where, getDocs, runTransaction, deleteDoc, addDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -486,12 +476,10 @@
         const firebaseConfig = {
             apiKey: "AIzaSyDfsTAGclYUSRe6YhiljS-xb-v-9RBYVEM",
             authDomain: "antriankcnew.firebaseapp.com",
-            projectId: "antriankcnew",
-            storageBucket: "antriankcnew.firebasestorage.app",
-            messagingSenderId: "348986439499",
-            appId: "1:348986439499:web:99578753dc9547d727dace"
+            projectId: "antriankcnew"
         };
-        const app = initializeApp(firebaseConfig); const db = getFirestore(app);
+        const app = initializeApp(firebaseConfig); 
+        const db = getFirestore(app);
 
         let uData = null;
         try { uData = JSON.parse(localStorage.getItem('maka_user')); } catch (e) {}
@@ -502,6 +490,7 @@
         const userId = uData.id || myPlat.replace(/\s+/g, '').toUpperCase();
         const cleanPlat = myPlat.replace(/\s+/g, '').toUpperCase();
 
+        // --- SISTEM MODAL PENGGANTI ALERT ---
         window.showCustomConfirm = (title, msg, isPrompt = false) => {
             return new Promise((resolve) => {
                 const modal = document.getElementById('customAlertModal');
@@ -511,12 +500,14 @@
                 const btnCancel = document.getElementById('camBtnCancel');
                 const btnOk = document.getElementById('camBtnOk');
                 
-                if(isPrompt) { input.style.display = 'block'; input.value = ''; input.focus(); }
+                if(isPrompt) { input.style.display = 'block'; input.value = ''; setTimeout(()=>input.focus(), 300); }
                 else { input.style.display = 'none'; }
                 
                 btnCancel.style.display = 'block';
-                btnOk.style.background = 'var(--cyan-logo)';
-                btnOk.style.color = 'black';
+                btnOk.style.background = 'var(--danger)';
+                btnOk.style.color = 'white';
+                btnOk.innerText = 'LANJUTKAN';
+                
                 modal.style.display = 'flex';
 
                 btnCancel.onclick = () => { modal.style.display = 'none'; resolve(false); };
@@ -537,6 +528,7 @@
                 else if (type === 'error') { btnOk.style.background = 'var(--danger)'; btnOk.style.color = 'white'; }
                 else { btnOk.style.background = 'var(--cyan-logo)'; btnOk.style.color = 'black'; }
 
+                btnOk.innerText = 'SAYA MENGERTI';
                 modal.style.display = 'flex';
                 btnOk.onclick = () => { modal.style.display = 'none'; resolve(true); };
             });
@@ -558,7 +550,7 @@
         window.myKodeUnik = 999; 
         let faceApiLoaded = false;
         
-        // BUG FIX: Perisai Anti-Crash Face API
+        // BUG FIX 1: PERISAI FACE API (MENCEGAH STUCK DI LOADING)
         async function initApp() {
             try {
                 if (typeof faceapi !== 'undefined') {
@@ -573,10 +565,11 @@
                     faceApiLoaded = false;
                 }
             } catch (e) {
-                console.error("Face API tidak dapat dimuat, fallback ke PIN mode:", e);
+                console.error("Face API Error:", e);
                 faceApiLoaded = false;
             }
             
+            // Lanjut ke pengecekan status user tanpa menunggu Face API sukses/gagal
             checkUserStatus(); 
             if(isTrueAdmin) listenGlobalSaldo(); 
         }
@@ -614,12 +607,12 @@
                 window.myKodeUnik = idx + 1; 
                 document.getElementById('kodeUnikTxt').innerText = window.myKodeUnik.toString().padStart(3, '0');
             } catch(e) {
-                console.log("Gagal hitung kode unik: ", e);
                 window.myKodeUnik = 999;
                 document.getElementById('kodeUnikTxt').innerText = "999";
             }
         }
 
+        // BUG FIX 1 LANJUTAN: PENANGANAN ALUR PIN SAAT FACE API GAGAL
         function checkUserStatus() {
             onSnapshot(doc(db, "anggota", userId), async (docSnap) => {
                 if(docSnap.exists()) {
@@ -636,16 +629,21 @@
                     if(isSuperAdmin) document.getElementById('btnResetData').style.display = 'block';
 
                     if (d.pin_tabungan) {
-                        userPinTabungan = d.pin_tabungan; isSetupMode = false; 
+                        userPinTabungan = d.pin_tabungan; 
+                        isSetupMode = false; 
+                        
                         if(d.faceDescriptor && faceApiLoaded) { 
                             userFaceDesc = new Float32Array(Object.values(d.faceDescriptor)); 
                             showLoginScreen(); 
                         } else { 
+                            // Langsung tembak ke input PIN jika tidak ada/gagal muat Face ID
+                            document.getElementById('securityScreen').style.display = 'flex';
                             document.getElementById('btnBawahKamera').style.display = 'none'; 
                             isFaceMode = true; 
                             window.switchMode(true); 
                         }
                     } else { 
+                        // MUNCULKAN POPUP AKTIVASI JIKA BELUM SET PIN 6 ANGKA
                         isSetupMode = true; 
                         showActivationScreen(); 
                     }
@@ -740,7 +738,10 @@
             document.getElementById('btnTabApprove').style.display = display;
         }
 
-        function showActivationScreen() { document.getElementById('agreeModal').style.display = 'flex'; }
+        function showActivationScreen() { 
+            document.getElementById('securityScreen').style.display = 'flex';
+            document.getElementById('agreeModal').style.display = 'flex'; 
+        }
         
         window.acceptAgreement = () => { 
             document.getElementById('agreeModal').style.display = 'none'; 
@@ -761,7 +762,12 @@
             }
         };
 
-        function showLoginScreen() { document.getElementById('secTitle').innerText = "VERIFIKASI WAJAH"; document.getElementById('btnMainAction').style.display = 'none'; startCamera(); }
+        function showLoginScreen() { 
+            document.getElementById('securityScreen').style.display = 'flex';
+            document.getElementById('secTitle').innerText = "VERIFIKASI WAJAH"; 
+            document.getElementById('btnMainAction').style.display = 'none'; 
+            startCamera(); 
+        }
 
         async function startCamera() {
             document.getElementById('camWrap').style.display = 'block'; document.getElementById('pinArea').style.display = 'none'; isFaceMode = true;
@@ -803,9 +809,9 @@
             if (forcePin) isFaceMode = true; 
             isFaceMode = !isFaceMode; 
             
-            if (isFaceMode) { 
+            if (isFaceMode && faceApiLoaded) { 
                 startCamera(); 
-                document.getElementById('btnSwitch').innerText = "Gunakan PIN (6 Digit)"; 
+                document.getElementById('btnSwitch').innerText = "Ganti Mode Login"; 
                 document.getElementById('btnSwitch').classList.add('btn-outline'); 
                 document.getElementById('btnSwitch').style.background='rgba(0,229,255,0.05)'; 
                 document.getElementById('btnSwitch').style.color='var(--cyan-logo)'; 
@@ -864,7 +870,7 @@
             const qApp = query(collection(db, "tabungan_trx"), where("status", "in", ["PENDING", "PENDING_APPROVAL", "WAITING_TRANSFER", "WAITING_CONFIRMATION"]));
             onSnapshot(qApp, (snap) => {
                 const cont = document.getElementById('approvalList'); cont.innerHTML = "";
-                if(snap.empty) { cont.innerHTML = `<div style="text-align:center; padding:30px; color:#94A3B8; font-size:11px;">Tidak ada antrean validasi pengajuan.</div>`; return;}
+                if(snap.empty) { cont.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-muted); font-size:11px; font-weight:700;">Tidak ada antrean validasi pengajuan.</div>`; return;}
                 let arrApp = []; snap.forEach(d => arrApp.push({id: d.id, ...d.data()}));
                 arrApp.sort((a,b) => a.timestamp - b.timestamp);
                 
@@ -875,7 +881,7 @@
                     
                     let infoTransferHtml = '';
                     if(!isNabung) {
-                        infoTransferHtml = `<div style="font-size:11px; color:var(--text-muted); margin-top:4px; background:rgba(0,0,0,0.5); padding:5px; border-radius:6px; display:inline-block; border:1px solid #333;"><b>Metode:</b> ${data.metodeTransfer || '-'} | <b>Rek:</b> ${data.noRekening || '-'}</div>`;
+                        infoTransferHtml = `<div style="font-size:11px; color:var(--text-main); margin-top:4px; background:rgba(0,0,0,0.5); padding:5px; border-radius:6px; display:inline-block; border:1px solid rgba(255,255,255,0.1);"><b>Metode:</b> ${data.metodeTransfer || '-'} | <b>Rek:</b> ${data.noRekening || '-'}</div>`;
                     }
 
                     let actionHtml = '';
@@ -883,8 +889,8 @@
                     if(isNabung) {
                         actionHtml = `
                         <div style="display:flex; flex-direction:column; gap:5px; margin-top:10px;">
-                            <button class="btn-submit" style="background:${color}; padding:8px 15px; margin:0; color:white;" onclick="window.approveKlaim('${data.id}', '${data.type}', ${data.amount}, '${data.memberId}')">VALIDASI SETORAN</button>
-                            <button class="btn-submit bg-cancel" style="padding:8px 15px; margin:0; border:1px solid #333;" onclick="window.rejectKlaim('${data.id}')">TOLAK</button>
+                            <button class="btn-submit" style="background:${color}; padding:10px 15px; margin:0; color:white;" onclick="window.approveKlaim('${data.id}', '${data.type}', ${data.amount}, '${data.memberId}')">VALIDASI SETORAN</button>
+                            <button class="btn-submit bg-cancel" style="padding:10px 15px; margin:0;" onclick="window.rejectKlaim('${data.id}')">TOLAK</button>
                         </div>`;
                     } else {
                         if (data.status === 'PENDING_APPROVAL') {
@@ -893,10 +899,10 @@
                             
                             let btnKetum = (!data.apprKetum && (isKetum || isSuperAdmin)) ? `<button class="btn-submit" style="background:var(--cyan-logo); color:black; padding:8px; margin:0; font-size:11px;" onclick="window.approveTarik('${data.id}', 'KETUM', ${data.amount}, '${data.memberId}')">ACC KETUM</button>` : '';
                             let btnWaketum = (!data.apprWaketum && (isWaketum || isSuperAdmin)) ? `<button class="btn-submit" style="background:var(--warning); color:black; padding:8px; margin:0; font-size:11px;" onclick="window.approveTarik('${data.id}', 'WAKETUM', ${data.amount}, '${data.memberId}')">ACC WAKETUM</button>` : '';
-                            let btnTolak = `<button class="btn-submit bg-cancel" style="padding:8px; margin:0; font-size:11px; flex:0.5; border:1px solid #333;" onclick="window.rejectKlaim('${data.id}')">TOLAK</button>`;
+                            let btnTolak = `<button class="btn-submit bg-cancel" style="padding:8px; margin:0; font-size:11px; flex:0.5;" onclick="window.rejectKlaim('${data.id}')">TOLAK</button>`;
 
                             actionHtml = `
-                            <div style="font-size:11px; background:rgba(0,0,0,0.5); padding:8px; border-radius:8px; margin-top:10px; margin-bottom:8px; border:1px solid #333; text-align:center; color:white;">
+                            <div style="font-size:11px; background:rgba(0,0,0,0.5); padding:8px; border-radius:8px; margin-top:10px; margin-bottom:8px; border:1px solid rgba(255,255,255,0.1); text-align:center; color:white;">
                                 <b>Status Persetujuan:</b><br> ${statusKetum} &nbsp;|&nbsp; ${statusWaketum}
                             </div>
                             <div style="display:flex; gap:5px; width:100%;">
@@ -914,7 +920,7 @@
                         else if (data.status === 'WAITING_CONFIRMATION') {
                             actionHtml = `
                             <div style="margin-top:10px; font-size:11px; text-align:center; padding:8px; background:rgba(245,158,11,0.1); color:var(--warning); border-radius:8px; border:1px dashed var(--warning); font-weight:800;">
-                                <i class="fas fa-spinner fa-spin"></i> MENUNGGU USER KONFIRMASI TERIMA DANA
+                                <i class="fas fa-spinner fa-spin"></i> MENUNGGU KORFIRMASI MEMBER
                             </div>`;
                         }
                     }
@@ -1074,7 +1080,7 @@
         };
 
         window.changePinSelf = async () => {
-            const konf = await showCustomConfirm("UBAH SISTEM KEAMANAN", "Anda akan menghapus Data Wajah & PIN lama. Anda akan diminta untuk mendaftarkan ulang pada saat login berikutnya. Lanjutkan?");
+            const konf = await showCustomConfirm("UBAH SISTEM KEAMANAN", "Anda akan menghapus Data Wajah & PIN lama. Anda akan diminta untuk mendaftarkan ulang pada saat masuk tabungan berikutnya. Lanjutkan?");
             if(konf) updateDoc(doc(db, "anggota", userId), { pin_tabungan: null, faceDescriptor: null }).then(() => location.reload());
         }
 
@@ -1193,9 +1199,9 @@
                     else if (d.status === 'WAITING_CONFIRMATION') {
                         pendingTag = 'DANA DIKIRIM';
                         actionBtn = `
-                        <div style="display:flex; gap:5px; margin-top:10px; border-top:1px dashed var(--border-glass); padding-top:10px;">
-                            <button class="btn-outline-modal" style="padding:6px; font-size:10px; border-radius:8px; flex:1;" onclick="window.lihatBukti('${d.buktiTransfer}')"><i class="fas fa-image"></i> LIHAT BUKTI</button>
-                            <button class="btn-submit bg-sukses" style="padding:6px; margin:0; font-size:10px; border-radius:8px; flex:1; color:black;" onclick="window.konfirmasiTerimaDana('${d.id}')"><i class="fas fa-check-circle"></i> TERIMA DANA</button>
+                        <div style="display:flex; gap:5px; margin-top:10px; border-top:1px dashed rgba(255,255,255,0.1); padding-top:10px;">
+                            <button class="btn-outline-modal" style="padding:10px; font-size:11px; border-radius:10px; flex:1;" onclick="window.lihatBukti('${d.buktiTransfer}')"><i class="fas fa-image"></i> BUKTI</button>
+                            <button class="btn-submit bg-sukses" style="padding:10px; margin:0; font-size:11px; border-radius:10px; flex:1.5; color:black;" onclick="window.konfirmasiTerimaDana('${d.id}')"><i class="fas fa-check-circle"></i> TERIMA DANA</button>
                         </div>`;
                     }
 

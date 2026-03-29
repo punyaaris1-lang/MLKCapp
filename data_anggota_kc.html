@@ -17,7 +17,7 @@
         // ==========================================
         // 2. SISTEM AUTO-UPDATE PAKSA (PENGHANCUR CACHE)
         // ==========================================
-        const DATA_VERSION = "3.2"; // Fix PNG Transparency & Hapus Palet
+        const DATA_VERSION = "3.5_THEME_SYNC"; 
         if (localStorage.getItem('maka_data_version') !== DATA_VERSION) {
             if ('caches' in window) {
                 caches.keys().then((names) => { names.forEach(name => { caches.delete(name); }); });
@@ -50,14 +50,14 @@
             --shadow-cyan: 0 10px 30px rgba(0, 229, 255, 0.25);
         }
 
-        /* === TEMA KEDUA: SOFT BLUE (LIGHT MODE KONTRAST TINGGI) === */
+        /* === TEMA KEDUA: SOFT BLUE (STANDAR BIRU LANGIT KC) === */
         html.theme-soft-blue {
             --cyan-logo: #0284C7; 
             --cyan-dark: #0369A1;
             --yellow-logo: #D97706; 
             --yellow-dark: #B45309;
-            --navy-bg: #E0F2FE; 
-            --bg-surface: #F8FAFC; 
+            --navy-bg: #82C3E9; 
+            --bg-surface: #E2F1FA; 
             
             --text-main: #0F172A; 
             --text-muted: #334155; 
@@ -82,25 +82,31 @@
             min-height: 100vh;
         }
 
+        /* Sinkronisasi warna background gradien ke biru langit */
+        html.theme-soft-blue body { background-image: linear-gradient(180deg, #A5D6F7 0%, #F0F8FF 100%); }
+
         * { box-sizing: border-box; outline: none; text-decoration: none; }
 
         /* AMBIENT LIGHTS */
         .ambient-light { position: fixed; border-radius: 50%; filter: blur(120px); z-index: -1; opacity: 0.25; animation: floatLight 10s infinite alternate; }
         .light-1 { top: -20%; left: -20%; width: 500px; height: 500px; background: var(--cyan-dark); }
         .light-2 { top: 40%; right: -30%; width: 400px; height: 400px; background: var(--cyan-logo); animation-delay: 2s; opacity: 0.15; }
-        html.theme-soft-blue .ambient-light { opacity: 0.5; }
+        html.theme-soft-blue .ambient-light { opacity: 0.4; }
         @keyframes floatLight { 0% {transform: translate(0,0);} 100% {transform: translate(20px, 40px);} }
         
         .header-main { padding: 40px 20px 20px; position: relative; z-index: 10; text-align: center; }
         .sub-tag { font-family: 'Space Grotesk'; font-size: 12px; font-weight: 900; letter-spacing: 2px; color: var(--cyan-logo); text-transform: uppercase; margin-bottom: 5px; display: block; }
+        html.theme-soft-blue .sub-tag { color: var(--cyan-dark); }
         .main-title { font-family: 'Outfit'; font-size: 32px; font-weight: 900; color: var(--text-main); margin: 0; letter-spacing: -1px; text-shadow: 0 0 15px rgba(0,229,255,0.4); }
+        html.theme-soft-blue .main-title { text-shadow: none; }
 
         .search-container { padding: 0 20px 20px; position: sticky; top: 0; z-index: 99; margin-top: 10px; }
         .search-box { background: rgba(5, 11, 20, 0.95); backdrop-filter: blur(15px); border-radius: 20px; padding: 5px 20px; display: flex; align-items: center; border: 2px solid rgba(0,229,255,0.3); transition: 0.3s; box-shadow: 0 10px 25px rgba(0,0,0,0.8); }
-        html.theme-soft-blue .search-box { background: rgba(255, 255, 255, 0.95); border: 2px solid var(--cyan-logo); box-shadow: 0 10px 25px rgba(2, 132, 199, 0.2); }
+        html.theme-soft-blue .search-box { background: rgba(255, 255, 255, 0.95); border: 2px solid var(--cyan-logo); box-shadow: 0 10px 25px rgba(2, 132, 199, 0.15); }
         
         .search-box:focus-within { border-color: var(--cyan-logo); box-shadow: var(--shadow-cyan); }
         .search-box i { color: var(--cyan-logo); font-size: 20px; margin-right: 12px; }
+        html.theme-soft-blue .search-box i { color: var(--cyan-dark); }
         .search-box input { flex: 1; border: none; padding: 18px 0; font-family: 'Inter'; font-size: 15px; font-weight: 800; background: transparent; color: var(--text-main); outline: none; }
         .search-box input::placeholder { color: #94A3B8; font-weight: 600; }
         html.theme-soft-blue .search-box input::placeholder { color: #64748B; }
@@ -109,51 +115,59 @@
         
         /* KARTU ANGGOTA GLASS */
         .member-card { background: var(--glass-bg); backdrop-filter: blur(10px); border: 2px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 20px; display: flex; align-items: center; gap: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.8); position: relative;}
-        html.theme-soft-blue .member-card { border: 2px solid var(--glass-border); box-shadow: 0 10px 20px rgba(2, 132, 199, 0.1); }
+        html.theme-soft-blue .member-card { background: #FFFFFF; border: 2px solid var(--glass-border); box-shadow: 0 10px 20px rgba(2, 132, 199, 0.1); }
         
         .member-card.is-pengurus { background: linear-gradient(135deg, rgba(5, 11, 20, 0.95) 0%, rgba(0, 229, 255, 0.1) 100%); border-color: var(--glass-border); border-left: 6px solid var(--cyan-logo); }
-        html.theme-soft-blue .member-card.is-pengurus { background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(2, 132, 199, 0.1) 100%); }
+        html.theme-soft-blue .member-card.is-pengurus { background: linear-gradient(135deg, #FFFFFF 0%, rgba(2, 132, 199, 0.1) 100%); border-left: 6px solid var(--cyan-logo); border-color: var(--glass-border); }
 
         .m-photo-wrap { position: relative; width: 70px; height: 70px; border-radius: 18px; border: 2px solid rgba(255,255,255,0.3); flex-shrink: 0; box-shadow: 0 8px 20px rgba(0,0,0,0.8); overflow: hidden; background: #000; transition: 0.3s;}
-        html.theme-soft-blue .m-photo-wrap { border: 2px solid var(--cyan-logo); box-shadow: 0 8px 20px rgba(2, 132, 199, 0.3); }
+        html.theme-soft-blue .m-photo-wrap { border: 2px solid var(--cyan-logo); box-shadow: 0 8px 20px rgba(2, 132, 199, 0.3); background: #FFF; }
         
         .m-photo-wrap.zoomable { cursor: zoom-in; }
         .is-pengurus .m-photo-wrap { border-color: var(--cyan-logo); box-shadow: 0 0 20px rgba(0,229,255,0.4); }
+        html.theme-soft-blue .is-pengurus .m-photo-wrap { border-color: var(--cyan-logo); box-shadow: 0 0 20px rgba(2,132,199,0.3); }
         
         .m-photo-bg { position: absolute; inset: 0; background-image: url('bg_maka.jpg'); background-size: cover; background-position: center; z-index: 1; opacity: 0.6; }
         .m-photo-img { position: relative; width: 100%; height: 100%; object-fit: cover; z-index: 3; background: transparent;}
         .m-photo-fallback { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 28px; color: rgba(255,255,255,0.8); z-index: 2; font-weight: 900;}
-        html.theme-soft-blue .m-photo-fallback { color: rgba(255,255,255,0.5); }
+        html.theme-soft-blue .m-photo-fallback { color: rgba(2, 132, 199, 0.5); }
         
         .m-info { flex: 1; min-width: 0; }
         .m-name { font-family: 'Outfit'; font-size: 16px; font-weight: 900; color: var(--text-main); text-transform: uppercase; margin-bottom: 4px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
         .m-name-wa { font-size: 11px; font-weight: 800; color: var(--cyan-logo); margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+        html.theme-soft-blue .m-name-wa { color: var(--cyan-dark); }
         
         .m-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
         .badge { font-size: 10px; font-weight: 900; padding: 5px 10px; border-radius: 8px; text-transform: uppercase; letter-spacing: 1px; border: 1px solid transparent; }
         .bg-plat { background: rgba(0, 229, 255, 0.15); color: var(--cyan-logo); border-color: var(--cyan-logo); }
+        html.theme-soft-blue .bg-plat { background: rgba(2, 132, 199, 0.1); color: var(--cyan-dark); border-color: var(--cyan-logo); }
+        
         .bg-role { background: rgba(255,255,255,0.1); color: var(--text-main); border-color: rgba(255,255,255,0.3); }
         html.theme-soft-blue .bg-role { background: rgba(2, 132, 199, 0.1); color: var(--text-main); border-color: var(--cyan-logo); }
+        
         .bg-admin { background: linear-gradient(90deg, var(--yellow-logo) 0%, var(--yellow-dark) 100%); color: #000; box-shadow: 0 0 15px rgba(255,255,0,0.4); font-weight: 900;}
-        html.theme-soft-blue .bg-admin { color: #FFFFFF; }
+        html.theme-soft-blue .bg-admin { color: #FFFFFF; box-shadow: none; }
         
         .m-darurat { font-size: 10px; font-weight: 900; color: white; background: var(--danger); padding: 5px 10px; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; margin-top: 4px; border: 2px solid #B91C1C; box-shadow: 0 0 10px rgba(239,68,68,0.4);}
+        html.theme-soft-blue .m-darurat { box-shadow: none; }
 
         .m-actions { display: flex; flex-direction: column; gap: 10px; }
         .btn-act { width: 42px; height: 42px; border-radius: 12px; border: none; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; font-weight: 900;}
         .btn-call { background: var(--success); color: white; border: 2px solid #047857; box-shadow: 0 0 10px rgba(16,185,129,0.3); }
-        .btn-edit { background: var(--cyan-logo); color: #FFFFFF; border: 2px solid var(--cyan-dark); display: none; box-shadow: 0 0 10px rgba(0,229,255,0.3);}
+        .btn-edit { background: var(--cyan-logo); color: #000; border: 2px solid var(--cyan-dark); display: none; box-shadow: 0 0 10px rgba(0,229,255,0.3);}
+        html.theme-soft-blue .btn-edit { color: #FFF; box-shadow: none; }
         .btn-del { background: var(--danger); color: white; border: 2px solid #991B1B; display: none; box-shadow: 0 0 10px rgba(239,68,68,0.3);}
         .btn-act:active { transform: scale(0.9); }
         
         /* FAB ADD & BACK BUTTON CYBERPUNK */
-        .fab-add { position: fixed; bottom: 100px; right: 25px; width: 65px; height: 65px; background: var(--cyan-logo); color: #FFFFFF; border-radius: 20px; display: none; align-items: center; justify-content: center; font-size: 26px; font-weight: 900; box-shadow: var(--shadow-cyan); border: 2px solid #000; cursor: pointer; z-index: 1000; transition: 0.2s; }
-        html.theme-soft-blue .fab-add { border: 2px solid var(--cyan-dark); color: #FFFFFF; }
+        .fab-add { position: fixed; bottom: 100px; right: 25px; width: 65px; height: 65px; background: var(--cyan-logo); color: #000; border-radius: 20px; display: none; align-items: center; justify-content: center; font-size: 26px; font-weight: 900; box-shadow: var(--shadow-cyan); border: 2px solid #000; cursor: pointer; z-index: 1000; transition: 0.2s; }
+        html.theme-soft-blue .fab-add { border: 2px solid var(--cyan-dark); color: #FFFFFF; box-shadow: 0 10px 25px rgba(2,132,199,0.3); }
         .fab-add:active { transform: scale(0.9); }
         
         .back-nav { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); width: 85%; max-width: 350px; z-index: 100; text-align: center;}
         .btn-premium-back { background: rgba(5, 11, 20, 0.95); backdrop-filter: blur(15px); border: 2px solid var(--glass-border); padding: 16px 25px; border-radius: 50px; font-family: 'Space Grotesk'; font-weight: 900; font-size: 13px; color: var(--cyan-logo); text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 10px; transition: 0.2s; box-shadow: var(--shadow-cyan); letter-spacing: 1px;}
-        html.theme-soft-blue .btn-premium-back { background: #FFFFFF; border: 2px solid var(--cyan-logo); }
+        html.theme-soft-blue .btn-premium-back { background: #FFFFFF; border: 2px solid var(--cyan-logo); color: var(--cyan-dark); box-shadow: 0 10px 25px rgba(2,132,199,0.2);}
+        .btn-premium-back:active { transform: scale(0.95); }
 
         /* MODAL TAMBAH/EDIT DATA */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); backdrop-filter: blur(8px); z-index: 9999; display: none; align-items: center; justify-content: center; padding: 20px; opacity: 0; transition: 0.3s;}
@@ -166,10 +180,12 @@
         .modal-overlay.show .modal-box { transform: scale(1); }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .modal-title { font-family: 'Space Grotesk'; font-size: 20px; font-weight: 900; color: var(--cyan-logo); text-transform: uppercase;}
+        html.theme-soft-blue .modal-title { color: var(--cyan-dark); }
         .btn-close { background: var(--danger); border: 2px solid #991B1B; width: 35px; height: 35px; border-radius: 50%; font-size: 16px; cursor: pointer; color: white; font-weight: 900;}
         
         .form-group { margin-bottom: 18px; text-align: left; }
         .form-label { display: block; font-size: 12px; font-weight: 900; color: var(--cyan-logo); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 1px;}
+        html.theme-soft-blue .form-label { color: var(--cyan-dark); }
         
         .form-input { width: 100%; padding: 15px; border-radius: 12px; border: 2px solid #333; background: #000; font-family: 'Inter'; font-weight: 800; font-size: 15px; color: white; outline: none; transition: 0.2s;}
         html.theme-soft-blue .form-input { background: #FFFFFF; border: 2px solid #CBD5E1; color: var(--text-main); }
@@ -181,16 +197,17 @@
         .upload-area:hover { background: rgba(0,229,255,0.1); }
         .upload-area input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
         .preview-img { width: 100%; max-height: 150px; object-fit: contain; display: none; margin-top: 10px; border-radius: 8px; border: 2px solid var(--cyan-logo);}
-        .btn-submit { width: 100%; padding: 18px; border: none; border-radius: 14px; background: var(--cyan-logo); color: #FFFFFF; font-family: 'Space Grotesk'; font-size: 16px; font-weight: 900; margin-top: 10px; cursor: pointer; letter-spacing: 1px; transition: 0.2s; box-shadow: var(--shadow-cyan);}
+        .btn-submit { width: 100%; padding: 18px; border: none; border-radius: 14px; background: var(--cyan-logo); color: #000; font-family: 'Space Grotesk'; font-size: 16px; font-weight: 900; margin-top: 10px; cursor: pointer; letter-spacing: 1px; transition: 0.2s; box-shadow: var(--shadow-cyan);}
+        html.theme-soft-blue .btn-submit { color: #FFF; box-shadow: 0 10px 25px rgba(2,132,199,0.3); }
         .btn-submit:active { transform: scale(0.95); }
 
         /* CUSTOM MODAL ALERT/CONFIRM */
-        .modal-glass-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(10px); z-index: 100000; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; }
+        .modal-glass-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(10px); z-index: 100000; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; padding: 20px;}
         html.theme-soft-blue .modal-glass-overlay { background: rgba(15, 23, 42, 0.8); }
         
         .modal-glass-overlay.show { opacity: 1; }
         .modal-glass-box { background: var(--navy-bg); border-radius: 25px; padding: 25px; width: 85%; max-width: 350px; text-align: center; box-shadow: 0 30px 80px rgba(0,229,255,0.2); transform: scale(0.9); transition: 0.3s; border: 2px solid var(--cyan-logo);}
-        html.theme-soft-blue .modal-glass-box { background: #FFFFFF; box-shadow: 0 30px 80px rgba(2, 132, 199, 0.3); }
+        html.theme-soft-blue .modal-glass-box { background: #FFFFFF; box-shadow: 0 30px 80px rgba(2, 132, 199, 0.3); border-color: transparent;}
         
         .modal-glass-overlay.show .modal-glass-box { transform: scale(1); }
         .btn-modal-custom { padding: 16px 25px; border-radius: 14px; font-weight: 900; font-size: 14px; border: none; cursor: pointer; flex: 1; margin: 0 5px; transition: 0.2s; font-family: 'Space Grotesk'; letter-spacing: 1px;}
@@ -205,6 +222,7 @@
         .pv-container { position: relative; max-width: 400px; width: 100%; text-align: center; transform: scale(0.8); transition: 0.3s; }
         .photo-viewer-overlay.show .pv-container { transform: scale(1); }
         .pv-container img { width: 100%; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,229,255,0.2); object-fit: contain; max-height: 80vh; border: 3px solid var(--cyan-logo); background: #000;}
+        html.theme-soft-blue .pv-container img { background: #FFF; box-shadow: 0 20px 60px rgba(2,132,199,0.3); }
         .pv-close { position: absolute; top: -15px; right: -15px; width: 45px; height: 45px; border-radius: 50%; background: var(--danger); color: white; border: 3px solid white; font-size: 20px; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(239, 68, 68, 0.6); transition: 0.2s; }
         .pv-close:active { transform: scale(0.9); }
     </style>
@@ -323,7 +341,7 @@
             <input type="text" id="alertInput" class="inp-prompt" placeholder="Ketik di sini...">
             <div style="display:flex; gap:10px;" id="alertBtnGroup">
                 <button class="btn-modal-custom" id="btnAlertCancel" style="background:#333; color:white; display:none; border: 2px solid #555;">BATAL</button>
-                <button class="btn-modal-custom" id="btnAlertOk" style="background:var(--cyan-logo); color:#FFFFFF; width:100%;">OK</button>
+                <button class="btn-modal-custom" id="btnAlertOk" style="background:var(--cyan-logo); color:#000; width:100%;">OK</button>
             </div>
         </div>
     </div>
@@ -344,7 +362,7 @@
         const app = initializeApp(firebaseConfig); const db = getFirestore(app);
 
         // ===============================================
-        // SISTEM HAK AKSES ADMIN DATA ANGGOTA (REVISI KETAT)
+        // SISTEM HAK AKSES ADMIN DATA ANGGOTA
         // ===============================================
         let uData = null;
         let isAdmin = false;
@@ -431,7 +449,7 @@
                     icon.innerHTML = '<i class="fas fa-info-circle" style="color: var(--cyan-logo); filter: drop-shadow(0 0 15px var(--cyan-logo));"></i>';
                     titleEl.style.color = 'var(--cyan-logo)';
                     btnOk.style.background = 'var(--cyan-logo)';
-                    btnOk.style.color = '#FFFFFF';
+                    btnOk.style.color = '#000';
                 }
                 
                 modal.style.display = 'flex';
@@ -507,6 +525,7 @@
         function renderList(data) {
             const list = document.getElementById('memberList'); list.innerHTML = '';
             
+            // SORTING BERDASARKAN KASTA, LALU ABJAD
             data.sort((a, b) => {
                 const rankA = getRank(a.role); const rankB = getRank(b.role);
                 if (rankA !== rankB) return rankA - rankB;
