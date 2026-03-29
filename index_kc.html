@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KC - Secure Login</title>
+
+    <script>
+        // ==========================================
+        // SINKRONISASI TEMA & AUTO-UPDATE
+        // ==========================================
+        const savedTheme = localStorage.getItem('maka_theme');
+        if (savedTheme === 'soft-blue') {
+            document.documentElement.classList.add('theme-soft-blue');
+        }
+
+        const CURRENT_VERSION = "2.0_PWA_THEME"; // TEMA DUAL & PWA READY
+
+        const userVersion = localStorage.getItem('maka_app_version');
+        if (userVersion !== CURRENT_VERSION) {
+            if ('caches' in window) {
+                caches.keys().then((names) => {
+                    names.forEach(name => { caches.delete(name); });
+                });
+            }
+            localStorage.setItem('maka_app_version', CURRENT_VERSION);
+            alert("Sistem mendeteksi Update Baru! Aplikasi akan di-refresh untuk menerapkan pembaruan.");
+            window.location.reload(true); 
+        }
+
+        // Kalau sudah login, tendang langsung ke dashboard
+        if (localStorage.getItem('maka_user')) {
+            window.location.replace('dashboard_kc.html');
+        }
+    </script>
+    
+    <link rel="manifest" href="manifest_kc.json">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@700;800;900&family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* === TEMA DEFAULT: CYBER NAVY & CYAN === */
+        :root { 
+            --cyan-logo: #00E5FF;     
+            --cyan-dark: #0077B6;     
+            --yellow-logo: #FFFF00;   
+            --navy-bg: #050B14;       
+            --bg-black: #000000;    
+            
+            --text-main: #F8FAFC; 
+            --text-muted: #94A3B8; 
+            --danger: #EF4444; 
+            --glass-bg: rgba(5, 11, 20, 0.75); 
+            --border-glass: rgba(0, 229, 255, 0.2);
+            --shadow-cyan: 0 10px 30px rgba(0, 229, 255, 0.15);
+        }
+
+        /* === TEMA SOFT BLUE === */
+        html.theme-soft-blue {
+            --cyan-logo: #0284C7;
+            --cyan-dark: #0369A1;
+            --yellow-logo: #D97706;
+            --navy-bg: #E0F2FE;
+            --bg-black: #F8FAFC;
+            
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --border-glass: rgba(2, 132, 199, 0.3);
+            --shadow-cyan: 0 10px 30px rgba(2, 132, 199, 0.15);
+        }
+        
+        body { 
+            margin: 0; 
+            background-color: var(--bg-black);
+            background-image: radial-gradient(circle at top right, var(--navy-bg) 0%, var(--bg-black) 70%);
+            font-family: 'Inter', sans-serif; 
+            color: var(--text-main); 
+            overflow: hidden; 
+            -webkit-tap-highlight-color: transparent;
+            min-height: 100vh;
+        }
+        
+        * { box-sizing: border-box; outline: none; text-decoration: none; }
+
+        /* AMBIENT LIGHTS */
+        .ambient-light { position: fixed; border-radius: 50%; filter: blur(120px); z-index: -1; opacity: 0.25; animation: floatLight 10s infinite alternate; }
+        .light-1 { top: -10%; left: -20%; width: 400px; height: 400px; background: var(--cyan-dark); }
+        .light-2 { bottom: -20%; right: -20%; width: 300px; height: 300px; background: var(--cyan-logo); animation-delay: 2s; opacity: 0.15;}
+        html.theme-soft-blue .ambient-light { opacity: 0.4; }
+        @keyframes floatLight { 0% {transform: translate(0,0);} 100% {transform: translate(30px, 30px);} }
+
+        /* PWA INSTALL BANNER */
+        .pwa-banner { position: fixed; top: 0; left: 0; right: 0; background: var(--cyan-logo); color: black; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 100000; box-shadow: 0 10px 30px rgba(0,229,255,0.4); font-family: 'Space Grotesk'; font-weight: 800; transform: translateY(-100%); transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: none;}
+        html.theme-soft-blue .pwa-banner { color: #FFF; box-shadow: 0 10px 30px rgba(2, 132, 199, 0.3); }
+        .pwa-banner.show { transform: translateY(0); }
+        .pwa-info { display: flex; align-items: center; gap: 12px; font-size: 13px; }
+        .pwa-info i { font-size: 20px; }
+        #btnInstallPwa { background: black; color: var(--cyan-logo); border: none; padding: 8px 16px; border-radius: 10px; font-weight: 900; font-family: 'Space Grotesk'; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.3); transition: 0.2s;}
+        html.theme-soft-blue #btnInstallPwa { background: #FFF; color: var(--cyan-logo); box-shadow: 0 5px 15px rgba(255,255,255,0.3); }
+        #btnInstallPwa:active { transform: scale(0.9); }
+
+        /* === LOADING SCREEN SETELAH LOGIN === */
+        #loader { position: fixed; inset: 0; background: var(--bg-black); z-index: 99999; display: none; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.4s ease; }
+        
+        .loader-img { 
+            width: 80vw; max-width: 350px; height: auto; 
+            animation: floatSore 1.5s ease-in-out infinite alternate; margin-bottom: 25px;
+        }
+        
+        .loader-text { margin-top: 15px; font-family: 'Space Grotesk'; font-weight: 900; color: var(--cyan-logo); letter-spacing: 4px; font-size: 16px; text-transform: uppercase; text-shadow: 0 0 10px rgba(0,229,255,0.5);}
+        html.theme-soft-blue .loader-text { text-shadow: none; }
+        
+        .loading-bar { width: 220px; height: 6px; background: rgba(0,229,255,0.1); border-radius: 6px; overflow: hidden; margin-top: 20px; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); border: 1px solid var(--border-glass);}
+        .loading-progress { width: 0%; height: 100%; background: var(--cyan-logo); box-shadow: 0 0 15px var(--cyan-logo); animation: fillBar 2.5s ease forwards; }
+        html.theme-soft-blue .loading-progress { box-shadow: none; }
+        
+        @keyframes floatSore { 0% { transform: translateY(0) scale(0.95); filter: drop-shadow(0 0 20px rgba(0,229,255,0.4)); } 100% { transform: translateY(-20px) scale(1.1); filter: drop-shadow(0 0 50px rgba(0,229,255,1)); } }
+        @keyframes fillBar { to { width: 100%; } }
+
+        /* MAIN LOGIN WRAPPER */
+        .login-wrapper { height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        
+        .logo-main { width: 180px; height: auto; margin-bottom: 15px; filter: drop-shadow(0 10px 25px rgba(0,0,0,0.9)); animation: zoomIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);}
+        html.theme-soft-blue .logo-main { filter: drop-shadow(0 10px 25px rgba(2, 132, 199, 0.3)); }
+        @keyframes zoomIn { from {transform: scale(0.5); opacity: 0;} to {transform: scale(1); opacity: 1;} }
+        
+        .app-title { font-family: 'Outfit'; font-size: 21px; font-weight: 900; color: var(--text-main); margin: 0; text-transform: uppercase; letter-spacing: 1px; text-align: center; white-space: nowrap;}
+        .app-subtitle { font-family: 'Space Grotesk'; font-size: 11px; font-weight: 800; color: var(--cyan-logo); letter-spacing: 3px; margin-bottom: 40px; text-transform: uppercase; text-align: center; text-shadow: 0 0 10px rgba(0,229,255,0.4);}
+        html.theme-soft-blue .app-subtitle { text-shadow: none; }
+
+        .login-box { width: 100%; max-width: 350px; background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--border-glass); border-radius: 28px; padding: 30px 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
+        html.theme-soft-blue .login-box { box-shadow: 0 20px 50px rgba(2, 132, 199, 0.15); }
+
+        .form-group { margin-bottom: 20px; position: relative;}
+        .form-label { display: block; font-size: 10px; font-weight: 800; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;}
+        
+        .input-icon-wrap { position: relative; }
+        .input-icon-wrap i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #64748B; font-size: 16px; transition: 0.3s;}
+        
+        .form-input { width: 100%; padding: 16px 15px 16px 45px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); background: #000; color: white; font-family: 'Space Grotesk'; font-size: 16px; font-weight: 700; outline: none; transition: 0.3s; text-transform: uppercase;}
+        html.theme-soft-blue .form-input { background: #F1F5F9; color: var(--text-main); border-color: #CBD5E1; }
+        .form-input:focus { border-color: var(--cyan-logo); box-shadow: 0 0 15px rgba(0,229,255,0.15); background: rgba(5,11,20,0.8);}
+        html.theme-soft-blue .form-input:focus { background: #FFFFFF; box-shadow: 0 0 15px rgba(2, 132, 199, 0.15); }
+        .form-input:focus + i { color: var(--cyan-logo); }
+
+        /* WARNING PIN */
+        .pin-warning { background: rgba(239,68,68,0.1); border-left: 3px solid var(--danger); padding: 12px; border-radius: 12px; margin-bottom: 25px; display: flex; align-items: flex-start; gap: 10px;}
+        html.theme-soft-blue .pin-warning { background: #FEF2F2; }
+        .pin-warning i { color: var(--danger); font-size: 14px; margin-top: 2px;}
+        .pin-warning p { margin: 0; font-size: 10px; color: var(--text-main); opacity: 0.9; line-height: 1.5; font-weight: 600;}
+        .pin-warning b { color: var(--yellow-logo); }
+        html.theme-soft-blue .pin-warning b { color: var(--yellow-dark); }
+
+        /* TOMBOL LOGIN */
+        .btn-login { width: 100%; padding: 18px; border-radius: 16px; border: none; background: linear-gradient(135deg, var(--cyan-logo) 0%, var(--cyan-dark) 100%); color: black; font-family: 'Space Grotesk'; font-size: 15px; font-weight: 900; letter-spacing: 1px; cursor: pointer; box-shadow: 0 10px 25px rgba(0,229,255,0.3); transition: 0.2s;}
+        html.theme-soft-blue .btn-login { color: #FFF; box-shadow: 0 10px 25px rgba(2, 132, 199, 0.3); }
+        .btn-login:active { transform: scale(0.96); box-shadow: 0 5px 15px rgba(0,229,255,0.4); }
+
+        .btn-eye { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #64748B; cursor: pointer; font-size: 16px; padding: 0; transition: 0.2s;}
+        .btn-eye:active { transform: scale(0.8); }
+    </style>
+</head>
+<body>
+
+    <div id="pwaInstallBanner" class="pwa-banner">
+        <div class="pwa-info"><i class="fas fa-download"></i><span>Install Aplikasi KC ke Layar Utama</span></div>
+        <button id="btnInstallPwa">INSTALL</button>
+    </div>
+
+    <div id="loader">
+        <img src="logo_kc.png" class="loader-img" alt="KC Logo" onerror="this.src='https://cdn-icons-png.flaticon.com/512/847/847969.png'">
+        <div class="loader-text">MEMUAT SISTEM...</div>
+        <div class="loading-bar"><div class="loading-progress"></div></div>
+    </div>
+
+    <div class="ambient-light light-1"></div>
+    <div class="ambient-light light-2"></div>
+
+    <div class="login-wrapper">
+        <img src="logo_kc.png" class="logo-main" alt="KC Logo" onerror="this.src='https://cdn-icons-png.flaticon.com/512/847/847969.png'">
+        <h1 class="app-title">FC KARTIKA CHANDRA</h1>
+        <div class="app-subtitle">Maka Lintas Kartika Chandra</div>
+
+        <div class="login-box">
+            <div class="form-group">
+                <label class="form-label">Plat Nomor Kendaraan</label>
+                <div class="input-icon-wrap"><input type="text" id="platInput" class="form-input" placeholder="Contoh: B 1234 ABC"><i class="fas fa-motorcycle"></i></div>
+            </div>
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label class="form-label">PIN Login App</label>
+                <div class="input-icon-wrap"><input type="password" id="pinInput" class="form-input" placeholder="Masukkan PIN Login"><i class="fas fa-lock"></i><button class="btn-eye" onclick="togglePin()"><i class="fas fa-eye" id="eyeIcon"></i></button></div>
+            </div>
+            <div class="pin-warning"><i class="fas fa-exclamation-circle"></i><p><b>PERHATIAN:</b> Ini adalah PIN Khusus untuk masuk aplikasi. <b>BUKAN</b> PIN Tabungan Anda.</p></div>
+            <button class="btn-login" id="btnLogin" onclick="prosesLogin()">MASUK SYSTEM</button>
+        </div>
+    </div>
+
+    <script>
+        // TOGGLE MATA PASSWORD
+        function togglePin() {
+            const input = document.getElementById('pinInput'); const icon = document.getElementById('eyeIcon');
+            if(input.type === 'password') { input.type = 'text'; icon.classList.remove('fa-eye'); icon.classList.add('fa-eye-slash'); } 
+            else { input.type = 'password'; icon.classList.remove('fa-eye-slash'); icon.classList.add('fa-eye'); }
+        }
+
+        // PENDAFTARAN SERVICE WORKER & TRIGGER PWA INSTALL
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw_kc.js')
+                .then(registration => { console.log('PWA KC Berhasil jalan, Scope:', registration.scope); })
+                .catch(err => { console.log('PWA KC Gagal:', err); });
+            });
+        }
+
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault(); 
+            deferredPrompt = e;
+            const banner = document.getElementById('pwaInstallBanner');
+            banner.style.display = 'flex'; 
+            setTimeout(() => banner.classList.add('show'), 100);
+
+            document.getElementById('btnInstallPwa').addEventListener('click', async () => {
+                banner.classList.remove('show'); 
+                setTimeout(() => banner.style.display = 'none', 500);
+                deferredPrompt.prompt(); 
+                const { outcome } = await deferredPrompt.userChoice; 
+                deferredPrompt = null;
+            });
+        });
+    </script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // KONEKSI DATABASE KC
+        const firebaseConfig = { 
+            apiKey: "AIzaSyDfsTAGclYUSRe6YhiljS-xb-v-9RBYVEM", 
+            authDomain: "antriankcnew.firebaseapp.com", 
+            projectId: "antriankcnew" 
+        };
+        const app = initializeApp(firebaseConfig); 
+        const db = getFirestore(app);
+
+        // FUNGSI UTAMA LOGIN
+        window.prosesLogin = async () => {
+            const platRaw = document.getElementById('platInput').value;
+            const pinRaw = document.getElementById('pinInput').value;
+            const platBersih = platRaw.replace(/\s+/g, '').toUpperCase();
+            
+            if(!platBersih || !pinRaw) {
+                alert("Peringatan: Plat Nomor dan PIN wajib diisi!");
+                return;
+            }
+
+            const btn = document.getElementById('btnLogin');
+            btn.innerText = "MEMVERIFIKASI..."; 
+            btn.style.opacity = "0.7";
+
+            try {
+                // Tarik data dari koleksi "anggota" KC
+                const snap = await getDocs(collection(db, "anggota"));
+                let userDoc = null; 
+                let userId = null;
+                
+                snap.forEach(d => {
+                    const platDB = (d.data().plat || "").replace(/\s+/g, '').toUpperCase();
+                    if(platDB === platBersih) { userDoc = d.data(); userId = d.id; }
+                });
+
+                if(userDoc) {
+                    const dbPinLogin = userDoc.pin_login || userDoc.pin;
+                    
+                    if(!dbPinLogin) {
+                        // User belum punya PIN Login sama sekali, tawarkan untuk save PIN pertama kali
+                        if(confirm(`Anda belum memiliki PIN Login Aplikasi.\n\nApakah Anda ingin menyimpan [ ${pinRaw} ] sebagai PIN Login Anda sekarang?`)) {
+                            await updateDoc(doc(db, "anggota", userId), { pin_login: pinRaw });
+                            berhasilLogin(userId, userDoc);
+                        } else { 
+                            btn.innerText = "MASUK SYSTEM"; btn.style.opacity = "1"; 
+                        }
+                    } else {
+                        // Cek kecocokan PIN
+                        if(dbPinLogin === pinRaw) { 
+                            berhasilLogin(userId, userDoc); 
+                        } else { 
+                            alert("❌ PIN LOGIN SALAH!\n\nPastikan Anda tidak terbalik memasukkan PIN Tabungan ke sini."); 
+                            btn.innerText = "MASUK SYSTEM"; btn.style.opacity = "1"; 
+                        }
+                    }
+                } else { 
+                    alert("❌ Plat Nomor tidak ditemukan di database KC!\nPastikan Anda sudah terdaftar atau ketikkan plat tanpa spasi dengan benar."); 
+                    btn.innerText = "MASUK SYSTEM"; btn.style.opacity = "1"; 
+                }
+            } catch(e) { 
+                alert("Terjadi kesalahan jaringan: " + e.message); 
+                btn.innerText = "MASUK SYSTEM"; btn.style.opacity = "1"; 
+            }
+        };
+
+        function berhasilLogin(id, data) {
+            data.id = id;
+            localStorage.setItem('maka_user', JSON.stringify(data));
+            localStorage.setItem('myPlat', data.plat);
+            
+            const loader = document.getElementById('loader'); 
+            loader.style.display = 'flex';
+            setTimeout(() => { loader.style.opacity = '1'; }, 10);
+            
+            // Tunggu bar loading penuh baru redirect
+            setTimeout(() => { window.location.href = 'dashboard_kc.html'; }, 2500);
+        }
+    </script>
+</body>
+</html>
