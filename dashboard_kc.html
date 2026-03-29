@@ -11,7 +11,7 @@
             document.documentElement.classList.add('theme-soft-blue');
         }
 
-        const DASH_VERSION = "14.0_STRICT_FIX"; 
+        const DASH_VERSION = "15.0_FINAL_CHAT_NOTIF"; 
         if (localStorage.getItem('maka_dash_kc_v') !== DASH_VERSION) {
             if ('caches' in window) { caches.keys().then((names) => { names.forEach(name => { caches.delete(name); }); }); }
             localStorage.setItem('maka_dash_kc_v', DASH_VERSION); window.location.reload(true); 
@@ -239,7 +239,7 @@
         html.theme-soft-blue .modal-glass-box { background: #FFFFFF; box-shadow: 0 30px 80px rgba(2, 132, 199, 0.3); }
         .modal-glass-overlay.show .modal-glass-box { transform: scale(1); }
         
-        .btn-modal { padding: 16px 25px; border-radius: 14px; font-family: 'Space Grotesk'; font-weight: 900; font-size: 15px; border: none; cursor: pointer; flex: 1; margin: 0 5px; color: #000; letter-spacing: 1px; transition: 0.2s;}
+        .btn-modal { padding: 16px 25px; border-radius: 14px; font-weight: 900; font-family: 'Space Grotesk'; font-size: 15px; border: none; cursor: pointer; flex: 1; margin: 0 5px; color: #000; letter-spacing: 1px; transition: 0.2s;}
         .btn-modal:active { transform: scale(0.95); }
         .btn-close-modal { position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.1); border: none; width: 35px; height: 35px; border-radius: 50%; font-size: 16px; cursor: pointer; color: var(--text-main); transition: 0.2s;}
         html.theme-soft-blue .btn-close-modal { background: #F1F5F9; color: #64748B; }
@@ -371,9 +371,13 @@
             <a href="data_anggota_kc.html" class="menu-btn"><div class="icon-box ic-anggota"><i class="fas fa-users"></i></div><div class="menu-title">Data Anggota</div></a>
             <a href="pengurus_kc.html" class="menu-btn"><div class="icon-box ic-pengurus"><i class="fas fa-sitemap"></i></div><div class="menu-title">Pengurus</div></a>
             
-            <a href="chat_kc.html" class="menu-btn"><div class="icon-box ic-chat"><i class="fas fa-comments"></i></div><div class="menu-title">Chat</div></a>
-            <a href="keuangan_kc.html" class="menu-btn"><div class="icon-box ic-keuangan"><i class="fas fa-wallet"></i></div><div class="menu-title">Uang Kas</div></a>
+            <a href="chat_kc.html" class="menu-btn" style="position: relative;">
+                <div id="chatBadge" style="display:none; position:absolute; top:-8px; right:-8px; background:var(--danger); color:white; font-family:'Space Grotesk'; font-size:12px; font-weight:900; width:26px; height:26px; border-radius:50%; align-items:center; justify-content:center; border:2px solid var(--bg-panel); box-shadow:0 0 15px rgba(239,68,68,0.8); z-index:10; animation: pulseBadge 2s infinite;">0</div>
+                <div class="icon-box ic-chat"><i class="fas fa-comments"></i></div>
+                <div class="menu-title">Chat</div>
+            </a>
             
+            <a href="keuangan_kc.html" class="menu-btn"><div class="icon-box ic-keuangan"><i class="fas fa-wallet"></i></div><div class="menu-title">Uang Kas</div></a>
             <a href="tabungan_kc.html" class="menu-btn"><div class="icon-box ic-tabungan"><i class="fas fa-piggy-bank"></i></div><div class="menu-title">Tabungan</div></a>
             <a href="absensi_kc.html" class="menu-btn" id="btnAbsenKopdar" style="display:none;"><div class="icon-box ic-absen"><i class="fas fa-calendar-check"></i></div><div class="menu-title">Absen</div></a>
             
@@ -517,9 +521,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, doc, onSnapshot, updateDoc, collection, query, orderBy, limit, setDoc, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // =========================================================================
-        // 1. DEKLARASI FUNGSI UI
-        // =========================================================================
         window.toggleTheme = () => {
             const htmlEl = document.documentElement;
             if (htmlEl.classList.contains('theme-soft-blue')) {
@@ -560,9 +561,7 @@
         
         window.logoutApp = () => { window.showConfirm("Yakin ingin Keluar Aplikasi KC?", (res) => { if(res) { localStorage.removeItem('maka_user'); localStorage.removeItem('myPlat'); window.location.href = 'index_kc.html'; } }); };
 
-        // =========================================================================
-        // 2. INISIALISASI FIREBASE
-        // =========================================================================
+        // FIREBASE INIT
         const firebaseConfig = { apiKey: "AIzaSyDfsTAGclYUSRe6YhiljS-xb-v-9RBYVEM", authDomain: "antriankcnew.firebaseapp.com", projectId: "antriankcnew" };
         const appKC = initializeApp(firebaseConfig, "AppKC"); const dbKC = getFirestore(appKC);
         const refKC = doc(dbKC, "antrian", "utama");
@@ -571,9 +570,11 @@
         const appGading = initializeApp(appGadingConfig, "AppGading"); const dbGading = getFirestore(appGading);
         const refGading = doc(dbGading, "antrian", "utama");
 
-        // =========================================================================
-        // 3. LOAD DATA USER & RENDER UI
-        // =========================================================================
+        // TAMBAHAN DATABASE MLU UNTUK CHAT
+        const appMLUConfig = { apiKey: "AIzaSyAk3G5aQUBVe_g7_peVu1F6xllP_RejGq0", authDomain: "rtomaka-e67b5.firebaseapp.com", projectId: "rtomaka-e67b5" };
+        const appMLU = initializeApp(appMLUConfig, "AppMLU");
+        const dbMLU = getFirestore(appMLU);
+
         let uData = null; try { uData = JSON.parse(localStorage.getItem('maka_user')); } catch (e) {}
         if (!uData || !uData.plat) window.location.href = 'index_kc.html'; 
 
@@ -592,7 +593,7 @@
         const dObj = new Date();
         document.getElementById('displayDate').innerText = `${dNames[dObj.getDay()]}, ${dObj.getDate()} ${mNames[dObj.getMonth()]} ${dObj.getFullYear()}`;
         
-        document.getElementById('userName').innerText = myName;
+        document.getElementById('userName').innerText = myName.split(' ')[0];
         document.getElementById('userPlat').innerHTML = `<i class="fas fa-car" style="font-size:12px; margin-right:4px;"></i> ${myPlat}`;
         document.getElementById('userPhoto').src = myCurrentPhoto;
         document.getElementById('userDivisi').innerText = myDivisi;
@@ -612,9 +613,6 @@
             document.getElementById('menuBroadcast').style.display = 'flex';
         }
 
-        // =========================================================================
-        // 4. SISTEM ANTRIAN (BUNGLON) & GPS SILENT TRACKER
-        // =========================================================================
         let isBannerKC = true; 
         let statusKCHtml = "Memuat...";
         let statusGadingHtml = "Memuat...";
@@ -626,7 +624,7 @@
             let available = 0; for(let i=0; i<5; i++) { if(slots[i] === null && !dis[i]) available++; }
 
             if(qLen > 0) { statusKCHtml = `<span style="color:var(--danger);"><i class="fas fa-users"></i> ${qLen} ANTRE</span>`; window.kcLbl = "ANTRIAN LIVE"; } 
-            else { statusKCHtml = `<span style="color:var(--kc-cyan);"><i class="fas fa-check-circle"></i> ${available} KOSONG</span>`; window.kcLbl = "TERSEDIA"; }
+            else { statusKCHtml = `<span style="color:var(--success);"><i class="fas fa-check-circle"></i> ${available} KOSONG</span>`; window.kcLbl = "TERSEDIA"; }
             updateBunglonUI();
         }); 
         
@@ -646,7 +644,6 @@
             const mainTitle = document.getElementById('mainFcTitle');
             const mainVal = document.getElementById('mainFcVal'); 
             const mainStatus = document.getElementById('mainFcDesc');
-            
             const altName = document.getElementById('altFcName');
             const altDist = document.getElementById('altFcDist');
 
@@ -655,7 +652,6 @@
                 mainTitle.innerHTML = `<i class="fas fa-bolt"></i> FC KARTIKA CHANDRA`;
                 mainVal.innerHTML = statusKCHtml; 
                 mainStatus.innerHTML = `<i class="fas fa-location-arrow"></i> ${window.kcDist || 'Menghitung...'} KM`;
-                
                 altName.innerText = "FC KELAPA GADING";
                 altDist.innerHTML = `<i class="fas fa-location-arrow"></i> ~${window.gdDist || '...'} KM`;
             } else {
@@ -663,7 +659,6 @@
                 mainTitle.innerHTML = `<i class="fas fa-charging-station"></i> FC KELAPA GADING`;
                 mainVal.innerHTML = statusGadingHtml; 
                 mainStatus.innerHTML = `<i class="fas fa-location-arrow"></i> ${window.gdDist || 'Menghitung...'} KM`;
-                
                 altName.innerText = "FC KARTIKA CHANDRA";
                 altDist.innerHTML = `<i class="fas fa-location-arrow"></i> ~${window.kcDist || '...'} KM`;
             }
@@ -680,17 +675,14 @@
         if(navigator.geolocation) {
             navigator.geolocation.watchPosition((pos) => {
                 const uLat = pos.coords.latitude; const uLng = pos.coords.longitude;
-                
                 const distKC = calculateDist(LAT_KC, LNG_KC, uLat, uLng);
                 const distGading = calculateDist(LAT_GADING, LNG_GADING, uLat, uLng);
 
                 window.kcDist = distKC.toFixed(1); window.gdDist = distGading.toFixed(1);
 
-                if(distGading < distKC) { 
-                    isBannerKC = false;
-                } else {
-                    isBannerKC = true;
-                }
+                if(distGading < distKC) isBannerKC = false;
+                else isBannerKC = true;
+                
                 updateBunglonUI();
 
                 setDoc(doc(dbKC, "live_tracking", myPlatClean), { lat: uLat, lng: uLng, nama: myCurrentName, plat: myPlat, hp: uData.hp || uData.wa || "", foto: myCurrentPhoto, timestamp: Date.now() }, { merge: true }).catch(e => console.log(e));
@@ -702,7 +694,7 @@
 
         window.sendSos = () => {
             if(!navigator.geolocation) { alert("Sistem GPS tidak didukung di HP Anda."); return; }
-            const btn = document.querySelector('#sosModal .btn-modal:last-child'); const originalText = btn.innerHTML; btn.innerHTML = "MENCARI LOKASI...";
+            const btn = document.querySelector('#sosModal .btn-modal:last-child'); const originalText = btn.innerHTML; btn.innerHTML = "MENCARI...";
             navigator.geolocation.getCurrentPosition(async (pos) => {
                 setDoc(doc(dbKC, "live_tracking", myPlatClean), { lat: pos.coords.latitude, lng: pos.coords.longitude, isSOS: true, timestamp: Date.now() }, { merge: true }).catch(e => console.log(e));
                 const jenis = document.getElementById('sosType').value; const ket = document.getElementById('sosDesc').value;
@@ -712,9 +704,7 @@
             }, () => { alert("⚠️ AKSES DITOLAK! Izinkan akses Lokasi (GPS) agar bantuan bisa dikirim!"); btn.innerHTML = originalText; }, { enableHighAccuracy: true });
         };
 
-        // =========================================================================
-        // 5. FITUR PENGUMUMAN, BROADCAST & INBOX
-        // =========================================================================
+        // PENGUMUMAN
         onSnapshot(doc(dbKC, "settings", "board_info"), (snap) => {
             if(snap.exists()) {
                 const data = snap.data();
@@ -739,7 +729,7 @@
             try { await addDoc(collection(dbKC, "info_kc"), { title: title, content: desc, author: myCurrentName, type: "BROADCAST", timestamp: Date.now() }); document.getElementById('broadcastModalKC').classList.remove('show'); setTimeout(()=>document.getElementById('broadcastModalKC').style.display='none',300); alert("Pesan Broadcast terkirim."); } catch (e) { alert(e.message); } finally { btn.innerText = "KIRIM PESAN"; btn.style.opacity = '1'; } 
         };
 
-        // INBOX & REALTIME BROADCAST
+        // INBOX
         onSnapshot(query(collection(dbKC, "info_kc"), orderBy("timestamp", "desc"), limit(10)), (snap) => {
             const listBody = document.getElementById('inboxListBody'); let unreadCount = 0; let lastReadTime = parseInt(localStorage.getItem('maka_last_read_inbox') || '0'); let htmlStr = '';
             if (snap.empty) { listBody.innerHTML = `<div style="text-align:center; padding:30px 20px; color:var(--text-muted); font-size:12px; font-weight:600;">Belum ada pesan masuk.</div>`; document.getElementById('inboxBadge').style.display = 'none'; return; }
@@ -787,6 +777,38 @@
             });
             if(rank === 1) list.innerHTML = `<div style="text-align: center; font-size: 11px; color: var(--text-muted); padding: 10px; font-weight:600;">Belum ada data Sultan.</div>`;
         });
+
+        // =========================================================================
+        // SENSOR CHAT BARU (RADAR NOTIF CHAT)
+        // =========================================================================
+        function startChatListener() {
+            onSnapshot(query(collection(dbMLU, "mlu_kc_chats"), orderBy("timestamp", "desc"), limit(15)), (snap) => {
+                let unreadCount = 0;
+                let lastReadTime = parseInt(localStorage.getItem('maka_last_read_chat') || '0');
+                
+                snap.forEach(doc => {
+                    const data = doc.data();
+                    if(data.timestamp > lastReadTime && data.senderId !== myPlatClean) {
+                        unreadCount++;
+                    }
+                });
+
+                const badge = document.getElementById('chatBadge');
+                if(badge) {
+                    if(unreadCount > 0) {
+                        badge.style.display = 'flex';
+                        badge.innerText = unreadCount > 9 ? '9+' : unreadCount;
+                        const savedUnread = parseInt(localStorage.getItem('maka_unread_chat_count') || '0');
+                        if(unreadCount > savedUnread && navigator.vibrate) navigator.vibrate([100, 50, 100]); 
+                        localStorage.setItem('maka_unread_chat_count', unreadCount.toString());
+                    } else {
+                        badge.style.display = 'none';
+                        localStorage.setItem('maka_unread_chat_count', '0');
+                    }
+                }
+            });
+        }
+        startChatListener();
 
     </script>
 </body>
