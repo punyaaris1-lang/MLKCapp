@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KC - Secure Savings</title>
+    
+    <script>
+        const savedTheme = localStorage.getItem('maka_theme');
+        if (savedTheme === 'soft-blue') {
+            document.documentElement.classList.add('theme-soft-blue');
+        }
+
+        const TABUNGAN_VERSION = "4.0_STRICT_FINAL";
+        if (localStorage.getItem('maka_tabungan_v') !== TABUNGAN_VERSION) {
+            if ('caches' in window) { caches.keys().then((names) => { names.forEach(name => { caches.delete(name); }); }); }
+            localStorage.setItem('maka_tabungan_v', TABUNGAN_VERSION);
+            window.location.reload(true); 
+        }
+    </script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@700;800;900&family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+
+    <style>
+        /* === TEMA DEFAULT: DARK CYBER NAVY === */
+        :root { 
+            --kc-cyan: #00E5FF;
+            --kc-cyan-dim: #008EAA;
+            --kc-yellow: #FFFF00;
+            --kc-dark-bg: #001219;
+            --kc-panel-bg: #001B26;
+            --kc-card-bg: #004D66;
+            
+            --text-white: #FFFFFF;
+            --text-gray: #94A3B8;
+            --danger: #EF4444;
+            --success: #10B981;
+            --warning: #F59E0B;
+        }
+
+        /* === TEMA KEDUA: SOFT BLUE === */
+        html.theme-soft-blue {
+            --kc-cyan: #0284C7;
+            --kc-cyan-dim: #0369A1;
+            --kc-yellow: #D97706;
+            --kc-dark-bg: #F0F4F8;
+            --kc-panel-bg: #FFFFFF;
+            --kc-card-bg: #FFFFFF;
+            
+            --text-white: #0F172A;
+            --text-gray: #64748B;
+        }
+        
+        body { margin:0; background-color:var(--kc-dark-bg); font-family:'Inter',sans-serif; color:var(--text-white); overflow-x:hidden; user-select:none; -webkit-tap-highlight-color: transparent; min-height: 100vh;}
+        * { box-sizing: border-box; outline: none; }
+        
+        .ambient-light { position: fixed; border-radius: 50%; filter: blur(100px); z-index: -1; opacity: 0.3; animation: floatLight 10s infinite alternate; }
+        .light-1 { top: -10%; left: -20%; width: 400px; height: 400px; background: var(--kc-cyan); }
+        @keyframes floatLight { 0% {transform: translate(0,0);} 100% {transform: translate(20px, 40px);} }
+
+        /* SECURITY UI (FACE & PIN) */
+        #securityScreen { position: fixed; inset: 0; background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; transition: opacity 0.5s; }
+        .sec-icon-box { width: 90px; height: 90px; border-radius: 50%; background: #000; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 30px rgba(0,229,255,0.2); margin-bottom: 20px; position: relative; overflow: hidden; border: 1px solid var(--kc-cyan);}
+        .sec-icon-box i { font-size: 35px; color: var(--kc-cyan); z-index: 2; }
+        
+        .camera-container { width: 220px; height: 220px; border-radius: 40px; overflow: hidden; position: relative; border: 4px solid #111; box-shadow: 0 20px 60px rgba(0,0,0,0.9); background: #000; display: none; margin-bottom: 20px; }
+        #videoInput { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+        .face-frame { position: absolute; inset: 15px; border: 3px dashed rgba(255,255,255,0.4); border-radius: 30px; transition: all 0.3s; pointer-events: none; }
+        .face-frame.scanning { border: 4px solid var(--kc-cyan); animation: facePulse 0.8s infinite alternate; }
+        @keyframes facePulse { 0% { transform: scale(0.98); opacity: 0.7;} 100% { transform: scale(1.02); opacity: 1;} }
+
+        .btn-action { width: 100%; max-width: 250px; padding: 16px; border: none; border-radius: 16px; font-family: 'Space Grotesk'; font-weight: 900; font-size: 14px; cursor: pointer; background: var(--kc-cyan); color: black; transition: 0.2s;}
+        .btn-action:active { transform: scale(0.95); }
+        .btn-outline { background: rgba(0,229,255,0.05); color: var(--kc-cyan); border: 1px solid var(--kc-cyan); }
+        .btn-ghost { background: transparent; color: var(--text-gray); box-shadow: none; font-size: 12px; margin-top: 5px; }
+
+        /* PIN PAD */
+        .pin-area { display: none; width: 100%; max-width: 280px; flex-direction: column; align-items: center; }
+        .pin-display { display: flex; gap: 10px; margin-bottom: 30px; }
+        .pin-dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--kc-cyan); transition: 0.2s; }
+        .pin-dot.filled { background: var(--kc-cyan); box-shadow: 0 0 10px var(--kc-cyan); }
+        .pin-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; width: 100%; }
+        .pin-key { width: 65px; height: 65px; border-radius: 50%; background: #000; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-family: 'Space Grotesk'; font-size: 22px; font-weight: 900; color: white; cursor: pointer; transition: 0.2s;}
+        .pin-key:active { background: rgba(0,229,255,0.1); transform: scale(0.95); border-color: var(--kc-cyan); color: var(--kc-cyan);}
+
+        /* APP UI */
+        #mainApp { display: none; padding-bottom: 100px; }
+        .dash-header { padding: 35px 20px 10px; display: flex; flex-direction: column; gap: 8px;}
+        .dh-tag { font-family: 'Space Grotesk'; font-size: 11px; font-weight: 800; color: var(--kc-cyan); text-transform: uppercase; letter-spacing: 1px;}
+        .dh-title { font-family: 'Outfit'; font-size: 32px; font-weight: 900; color: var(--text-white); line-height: 1; letter-spacing: -1px;}
+
+        .tab-container { display:flex; gap:10px; padding:20px; overflow-x: auto; scrollbar-width: none; }
+        .tab-btn { background: var(--kc-panel-bg); border:1px solid rgba(255,255,255,0.05); padding:12px 20px; border-radius:50px; font-family: 'Space Grotesk'; font-weight:900; font-size:11px; color:var(--text-gray); cursor:pointer; transition:0.3s; white-space: nowrap; flex: 1;}
+        html.theme-soft-blue .tab-btn { border-color: rgba(2, 132, 199, 0.2); }
+        .tab-btn.active { background:var(--kc-cyan); color:black; transform:scale(1.05); border-color: var(--kc-cyan);}
+        
+        .content-area { padding:0 20px; display:none;}
+        .content-area.active { display:block; }
+        
+        /* SALDO PRIBADI */
+        .saldo-card { background: linear-gradient(135deg, var(--kc-cyan-dim) 0%, #001f2e 100%); padding: 25px; border-radius: 24px; color: white; text-align: center; margin-bottom: 15px; position: relative; box-shadow: 0 15px 30px rgba(0,0,0,0.5); border: 1px solid rgba(0,229,255,0.2);}
+        html.theme-soft-blue .saldo-card { background: linear-gradient(135deg, #FFFFFF 0%, #E0F2FE 100%); border-color: rgba(2, 132, 199, 0.3); box-shadow: 0 10px 30px rgba(2, 132, 199, 0.15); color: var(--text-white);}
+        
+        .saldo-val { font-family:'Space Grotesk'; font-size:36px; font-weight:900; margin:10px 0; color: var(--kc-yellow); letter-spacing: 1px;}
+        html.theme-soft-blue .saldo-val { color: var(--kc-cyan-dark); }
+        
+        .btn-nabung { background: var(--kc-yellow); border: none; color: black; padding: 14px 10px; border-radius: 14px; font-size: 11px; font-weight: 900; font-family: 'Space Grotesk'; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; transition: 0.2s; letter-spacing: 0.5px;}
+        .btn-nabung:active { transform: scale(0.96); }
+        
+        /* KOTAK TOTAL GLOBAL */
+        .global-vault-card { background: var(--kc-panel-bg); border-radius: 16px; padding: 20px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; border: 1px solid rgba(255,255,255,0.05); color: white; display: none; }
+        html.theme-soft-blue .global-vault-card { border-color: rgba(2, 132, 199, 0.2); color: var(--text-white); }
+        .gvc-icon { width: 45px; height: 45px; border-radius: 14px; background: rgba(16,185,129,0.1); display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--success); }
+
+        .trx-item { background: var(--kc-panel-bg); padding: 15px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.05); }
+        html.theme-soft-blue .trx-item { border-color: rgba(2, 132, 199, 0.2); }
+        
+        .member-row { background: var(--kc-panel-bg); padding:15px; border-radius:16px; margin-bottom:10px; display:flex; align-items:center; justify-content:space-between; border:1px solid rgba(255,255,255,0.05); transition: 0.3s;}
+        html.theme-soft-blue .member-row { border-color: rgba(2, 132, 199, 0.2); }
+        
+        .btn-plus { width:40px; height:40px; background:var(--kc-yellow); color:black; border-radius:12px; display:flex; align-items:center; justify-content:center; border:none; cursor:pointer; font-size:16px;}
+        .btn-reset { width:40px; height:40px; background:rgba(245,158,11,0.1); color:var(--warning); border-radius:12px; display:flex; align-items:center; justify-content:center; border:1px solid rgba(245,158,11,0.3); cursor:pointer; font-size:16px; margin-right: 8px;}
+        
+        .app-card { background: var(--kc-panel-bg); padding:15px; border-radius:16px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; border: 1px solid rgba(255,255,255,0.05);}
+        html.theme-soft-blue .app-card { border-color: rgba(2, 132, 199, 0.2); }
+        
+        /* MODALS */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 10000; display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(5px); }
+        .modal-box { background: var(--kc-panel-bg); width: 100%; max-width: 380px; border-radius: 24px; padding: 25px; text-align: center; box-shadow: 0 30px 80px rgba(0,0,0,0.9); max-height: 85vh; overflow-y: auto; border: 1px solid var(--kc-cyan);}
+        html.theme-soft-blue .modal-box { background: #FFFFFF; }
+
+        .form-group { margin-bottom:15px; text-align: left;}
+        .form-label { display:block; font-size:11px; font-weight:900; color:var(--kc-cyan); margin-bottom:6px; text-transform:uppercase; letter-spacing:1px;}
+        .form-input { width:100%; padding:14px; border:1px solid #333; border-radius:12px; font-family:'Inter'; font-weight:600; font-size:14px; background:#000; color: white; outline:none; transition: 0.2s;}
+        html.theme-soft-blue .form-input { background: #F8FAFC; color: var(--text-white); border-color: #CBD5E1; }
+        .form-input:focus { border-color: var(--kc-cyan); }
+        
+        .btn-submit { width:100%; padding:14px; border:none; border-radius:12px; font-weight:900; color:black; cursor:pointer; margin-top:10px; font-family:'Space Grotesk'; font-size:13px; transition: 0.2s; letter-spacing: 1px;}
+        .btn-submit:active { transform: scale(0.95); }
+        .bg-sukses { background:var(--kc-cyan); } 
+        .bg-cancel { background:#111; color:#fff; border: 1px solid #333; }
+        
+        /* ADMIN TRX LIST ITEM */
+        .admin-hist-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px dashed rgba(255,255,255,0.1); text-align: left; }
+        html.theme-soft-blue .admin-hist-item { border-bottom-color: #E2E8F0; }
+        .admin-hist-item:last-child { border-bottom: none; }
+        .btn-edit { background: rgba(0,229,255,0.1); border: 1px solid rgba(0,229,255,0.3); color: var(--kc-cyan); cursor: pointer; width: 35px; height: 35px; border-radius: 10px; font-size: 14px; display:flex; align-items:center; justify-content:center; transition:0.2s;}
+        .btn-edit:active { transform:scale(0.9); }
+        
+        .btn-danger-reset { display: none; width: 100%; padding: 15px; margin-top: 30px; background: rgba(239,68,68,0.1); color: var(--danger); border: 1px solid rgba(239,68,68,0.3); border-radius: 12px; font-weight: 800; cursor: pointer; font-size: 11px; letter-spacing: 1px; }
+
+        .dock-nav { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; background: var(--kc-panel-bg); border: 1px solid rgba(0,229,255,0.2); border-radius: 50px; padding: 12px 30px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.8);}
+        html.theme-soft-blue .dock-nav { border-color: var(--kc-cyan); box-shadow: 0 10px 30px rgba(2, 132, 199, 0.2); }
+        .dn-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-gray); transition: 0.3s;}
+        .dn-item.active { color: var(--kc-cyan); transform: translateY(-2px);}
+        .dn-item i { font-size: 18px; }
+        .dn-text { font-family: 'Space Grotesk'; font-size: 9px; font-weight: 900; text-transform: uppercase;}
+    </style>
+</head>
+<body>
+
+    <div class="ambient-light light-1"></div>
+
+    <div id="loaderOverlay" style="position:fixed; inset:0; background:rgba(0,0,0,0.9); backdrop-filter:blur(10px); z-index:20000; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+        <div style="width:50px; height:50px; border:4px solid #111; border-top:4px solid var(--kc-cyan); border-radius:50%; animation:spin 1s infinite linear;"></div>
+        <div style="margin-top:20px; font-family:'Space Grotesk'; font-weight:900; color:var(--kc-cyan); font-size:12px; letter-spacing: 2px;">MEMUAT DATABASE...</div>
+        <style>@keyframes spin{100%{transform:rotate(360deg)}}</style>
+    </div>
+
+    <div id="securityScreen">
+        <div class="sec-icon-box"><div class="scan-laser"></div><i class="fas fa-wallet" id="secIcon"></i></div>
+        <div class="sec-title" id="secTitle" style="font-family:'Outfit'; font-weight:900; font-size:24px; color:var(--kc-cyan); letter-spacing:1px; margin-bottom: 5px;">DOMPET TABUNGAN</div>
+        <div class="sec-desc" id="secDesc" style="font-size:12px; color:var(--text-gray); margin-bottom:20px; font-weight: 600;">Keamanan Berlapis KC.</div>
+        
+        <div class="camera-container" id="camWrap">
+            <video id="videoInput" autoplay muted playsinline></video>
+            <div class="face-frame" id="faceFrame"></div>
+        </div>
+
+        <button class="btn-action" id="btnMainAction" style="display:none;" onclick="handleAction()">MULAI SCAN</button>
+        <div id="scanStatus" style="font-size:12px; font-weight:800; color:var(--kc-cyan); height:20px; letter-spacing:1px;"></div>
+        
+        <div class="pin-area" id="pinArea">
+            <div class="pin-display"><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div></div>
+            <div class="pin-grid">
+                <div class="pin-key" onclick="pressPin(1)">1</div><div class="pin-key" onclick="pressPin(2)">2</div><div class="pin-key" onclick="pressPin(3)">3</div>
+                <div class="pin-key" onclick="pressPin(4)">4</div><div class="pin-key" onclick="pressPin(5)">5</div><div class="pin-key" onclick="pressPin(6)">6</div>
+                <div class="pin-key" onclick="pressPin(7)">7</div><div class="pin-key" onclick="pressPin(8)">8</div><div class="pin-key" onclick="pressPin(9)">9</div>
+                <div class="pin-key" style="color:var(--danger); border-color:rgba(239,68,68,0.3);" onclick="clearPin()">C</div>
+                <div class="pin-key" onclick="pressPin(0)">0</div>
+                <div class="pin-key" style="color:var(--danger); border-color:rgba(239,68,68,0.3);" onclick="delPin()"><i class="fas fa-backspace"></i></div>
+            </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:8px; width:100%; max-width:250px; margin-top:20px;" id="btnBawahKamera">
+            <button class="btn-action btn-outline" id="btnSwitch" onclick="switchMode()">Gunakan PIN (6 Digit)</button>
+            <button class="btn-action btn-ghost" onclick="window.location.href='dashboard_kc.html'">BATAL / KEMBALI KE DASHBOARD</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="customAlertModal" style="z-index: 30000;">
+        <div class="modal-box">
+            <div id="camTitle" style="font-family:'Outfit'; font-size:20px; color:var(--kc-cyan); margin-bottom:10px; font-weight:900; letter-spacing:1px;">TITLE</div>
+            <div id="camMsg" style="font-size:13px; color:var(--text-white); margin-bottom:25px; line-height:1.6; font-weight: 600;">Message</div>
+            <input type="password" id="camInput" class="form-input" style="display:none; margin-bottom:20px; text-align:center; font-size:20px; letter-spacing:5px;" placeholder="Password">
+            <div style="display:flex; gap:10px;">
+                <button class="btn-submit bg-cancel" id="camBtnCancel">BATAL</button>
+                <button class="btn-submit bg-sukses" id="camBtnOk">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="agreeModal">
+        <div class="modal-box">
+            <div style="font-family:'Outfit'; font-weight:900; font-size:20px; color:var(--kc-cyan); margin-bottom:15px;">AKTIVASI DOMPET KC</div>
+            <div style="height:160px; overflow-y:auto; text-align:left; font-size:12px; color:var(--text-gray); margin-bottom:25px; background:#000; border:1px solid #333; padding:15px; border-radius:12px; line-height: 1.6;">
+                <b>PENTING:</b><br><br>1. PIN ini KHUSUS TABUNGAN (6 Digit).<br>2. BERBEDA DENGAN PIN LOGIN Aplikasi (4 Digit).<br>3. Wajah Anda akan direkam sebagai kunci ganda biometrik.<br>4. Sistem ini dikunci dan Saldo Anda Dijamin Aman 100%.
+            </div>
+            <button class="btn-submit" style="background:var(--kc-cyan); color:black;" onclick="acceptAgreement()">BUAT KUNCI SEKARANG</button>
+        </div>
+    </div>
+
+    <div id="mainApp">
+        <div class="dash-header">
+            <div class="dh-tag">KARTIKA CHANDRA ASSETS</div>
+            <div class="dh-title">DOMPET TABUNGAN</div>
+        </div>
+
+        <div class="tab-container">
+            <button class="tab-btn active" onclick="switchTab('member')">SAYA</button>
+            <button class="tab-btn" onclick="switchTab('admin')" id="btnTabAdmin" style="display:none;">INPUT SETORAN</button>
+            <button class="tab-btn" onclick="switchTab('approval')" id="btnTabApprove" style="display:none; color:var(--kc-yellow);">VALIDASI ACC</button>
+        </div>
+
+        <div id="viewMember" class="content-area active">
+            
+            <div class="saldo-card">
+                <button onclick="changePinSelf()" style="position:absolute; top:20px; right:20px; background:rgba(0,0,0,0.3); color:white; padding:6px 12px; border-radius:8px; font-size:9px; font-weight:900; cursor:pointer; border:1px solid rgba(255,255,255,0.2); transition:0.2s;">GANTI KUNCI</button>
+                <div style="font-size:10px; opacity:0.8; letter-spacing:2px; font-weight: 800;">SALDO PRIBADI SAYA</div>
+                <div class="saldo-val" id="myBalance">Rp 0</div>
+                <div style="font-size:10px; font-weight:900; background:rgba(16,185,129,0.1); color:var(--success); padding:6px 12px; border-radius:8px; display:inline-block; border: 1px solid rgba(16,185,129,0.3); letter-spacing: 1px;">
+                    <i class="fas fa-shield-check"></i> SECURED ASSET
+                </div>
+                
+                <div style="display:flex; gap:10px; margin-top:20px;">
+                    <button class="btn-nabung" style="flex:1; margin:0;" onclick="document.getElementById('modalQris').style.display='flex'">
+                        <i class="fas fa-qrcode" style="font-size:14px;"></i> SETOR DANA
+                    </button>
+                    <button class="btn-nabung" style="flex:1; margin:0; background:var(--danger); border:1px solid var(--danger); color:white;" onclick="bukaModalTarik()">
+                        <i class="fas fa-hand-holding-usd" style="font-size:14px;"></i> TARIK DANA
+                    </button>
+                </div>
+            </div>
+
+            <div class="global-vault-card" id="globalVaultCard">
+                <div>
+                    <div style="font-size: 10px; font-weight: 900; color: var(--text-gray); letter-spacing: 1.5px; margin-bottom: 5px;">
+                        <i class="fas fa-globe" style="color: var(--kc-cyan);"></i> TOTAL ASET KC (GLOBAL)
+                    </div>
+                    <div id="globalBalance" style="font-family: 'Space Grotesk'; font-size: 24px; font-weight: 900; color: var(--success); letter-spacing: 0.5px;">
+                        <i class="fas fa-spinner fa-spin" style="font-size:16px;"></i> Menghitung...
+                    </div>
+                </div>
+                <div class="gvc-icon"><i class="fas fa-vault"></i></div>
+            </div>
+
+            <button onclick="document.getElementById('videoModal').style.display='flex'" style="width: 100%; margin-bottom: 20px; padding: 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); font-family: 'Outfit'; font-weight: 800; font-size: 13px; color: white; display: flex; align-items: center; justify-content: center; gap: 10px; background: var(--kc-panel-bg); cursor: pointer; transition: 0.2s;">
+                <i class="fab fa-tiktok" style="font-size: 18px; filter: drop-shadow(2px 0px 0px var(--kc-cyan)) drop-shadow(-2px 0px 0px #fe0979);"></i> LIHAT TUTORIAL
+            </button>
+            
+            <div style="font-family:'Outfit'; font-size:16px; font-weight:900; color:var(--kc-cyan); margin-bottom:15px; padding-left:8px; border-left: 3px solid var(--kc-cyan);">Mutasi Terakhir</div>
+            <div class="trx-list" id="historyList">
+                <div style="text-align:center; padding:30px; color:var(--text-gray); font-size:12px;">Memuat riwayat...</div>
+            </div>
+        </div>
+
+        <div id="viewAdmin" class="content-area">
+            <div style="background:rgba(0,229,255,0.05); padding:15px; border-radius:16px; border:1px dashed rgba(0,229,255,0.3); font-size:11px; color:var(--kc-cyan); margin-bottom:20px; line-height: 1.5; font-weight: 600;">
+                <b>AREA PENGURUS:</b> Gunakan tombol IKON KUNCI untuk melakukan Reset Keamanan (PIN/Face ID) member yang lupa sandi.
+            </div>
+            <input type="text" id="searchMem" class="form-input" placeholder="Cari Nama / Plat Anggota..." style="margin-bottom:15px;" onkeyup="filterMembers()">
+            <div id="adminMemberList"></div>
+
+            <button id="btnResetData" class="btn-danger-reset" onclick="resetAllSystem()">
+                ⚠️ RESET SEMUA DATA (HAPUS SALDO & RIWAYAT PERMANEN)
+            </button>
+        </div>
+
+        <div id="viewApproval" class="content-area">
+            <div id="approvalList">
+                <div style="text-align:center; padding:30px; color:var(--text-gray); font-size:11px;">Memuat antrean validasi...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalTarik">
+        <div class="modal-box" style="text-align:left;">
+            <h3 style="margin-top:0; font-family:'Outfit'; color:var(--danger); text-align:center; margin-bottom: 20px; font-size: 20px;">PENARIKAN DANA</h3>
+            
+            <div class="form-group">
+                <label class="form-label" style="color: var(--danger);">Nominal Penarikan (Rp)</label>
+                <input type="number" id="inputTarikAmount" class="form-input" placeholder="Contoh: 100000" onkeyup="calcTarik()" onchange="calcTarik()">
+            </div>
+
+            <div style="background: rgba(239,68,68,0.1); border: 1px dashed rgba(239,68,68,0.3); padding: 12px; border-radius: 12px; margin-bottom: 15px;">
+                <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-gray); margin-bottom:5px; font-weight: 600;">
+                    <span>Potongan Kas KC (5%):</span>
+                    <span id="tarikPotongan" style="color:var(--danger); font-weight:800;">Rp 0</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:12px; color:white; font-weight: 800; border-top: 1px solid #333; padding-top: 5px;">
+                    <span>Sisa Diterima:</span>
+                    <span id="tarikTerima" style="color:var(--success); font-weight:900; font-family:'Space Grotesk'; font-size: 16px;">Rp 0</span>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" style="color: var(--danger);">Metode Pencairan</label>
+                <select id="inputTarikMetode" class="form-input">
+                    <option value="TUNAI">TUNAI / CASH</option>
+                    <option value="BCA">BANK BCA</option>
+                    <option value="MANDIRI">BANK MANDIRI</option>
+                    <option value="BRI">BANK BRI</option>
+                    <option value="BNI">BANK BNI</option>
+                    <option value="DANA">E-WALLET DANA</option>
+                    <option value="GOPAY">E-WALLET GOPAY</option>
+                    <option value="OVO">E-WALLET OVO</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" style="color: var(--danger);">No Rekening / No HP</label>
+                <input type="text" id="inputTarikRek" class="form-input" placeholder="Kosongkan jika Tunai">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" style="color: var(--danger);">Tujuan / Keperluan</label>
+                <input type="text" id="inputTarikDesc" class="form-input" placeholder="Isi keperluan penarikan...">
+            </div>
+
+            <div style="display:flex; gap:10px;">
+                <button class="btn-submit bg-cancel" onclick="document.getElementById('modalTarik').style.display='none'">BATAL</button>
+                <button class="btn-submit" style="background:var(--danger); color:white;" onclick="submitTarikDana()">AJUKAN PENARIKAN</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalUploadBukti">
+        <div class="modal-box">
+            <h3 style="margin-top:0; color:var(--kc-cyan); font-family:'Outfit'; font-size:18px; margin-bottom:15px;">UPLOAD BUKTI TRANSFER</h3>
+            <p style="font-size:11px; color:var(--text-gray); margin-bottom:20px; font-weight: 600;">Pastikan dana <b>Sisa Diterima</b> sudah di-transfer ke rekening member.</p>
+            
+            <input type="hidden" id="uploadBuktiTrxId">
+            <input type="hidden" id="uploadBuktiMemberId">
+            
+            <div style="border:2px dashed var(--kc-cyan); border-radius:18px; padding:20px; text-align:center; background:rgba(0,229,255,0.05); cursor:pointer; position:relative; margin-bottom:20px;">
+                <i class="fas fa-camera" style="font-size:24px; color:var(--kc-cyan); margin-bottom:5px; display:block;"></i>
+                <div style="font-size:11px; font-weight:700; color:var(--text-gray);">Tap untuk Upload Bukti / Resi</div>
+                <input type="file" id="inputBuktiFile" accept="image/*" style="position:absolute; inset:0; opacity:0; cursor:pointer;" onchange="processBuktiFoto(this)">
+                <img id="previewBuktiFoto" style="width:100%; max-height:200px; border-radius:12px; object-fit:contain; display:none; margin-top:10px; border:2px solid var(--kc-cyan);">
+            </div>
+
+            <div style="display:flex; gap:10px;">
+                <button class="btn-submit bg-cancel" onclick="document.getElementById('modalUploadBukti').style.display='none'">BATAL</button>
+                <button class="btn-submit bg-sukses" id="btnSimpanBukti" onclick="simpanBuktiTransfer()">KIRIM BUKTI</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalViewBukti" style="z-index: 105000;">
+        <div class="modal-box" style="padding: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <div style="font-family:'Outfit'; font-weight:900; color:var(--kc-cyan); font-size: 16px;"><i class="fas fa-receipt"></i> BUKTI TRANSFER</div>
+                <button onclick="document.getElementById('modalViewBukti').style.display='none'" style="background:transparent; border:none; width:30px; height:30px; border-radius:50%; font-size:16px; cursor:pointer; color:var(--text-gray);"><i class="fas fa-times"></i></button>
+            </div>
+            <img id="imgBukti" src="" style="width:100%; border-radius:12px; border:1px solid #333; margin-bottom:15px; max-height: 50vh; object-fit: contain;">
+            <button class="btn-submit bg-cancel" style="margin-top:0;" onclick="document.getElementById('modalViewBukti').style.display='none'">TUTUP</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalDeposit">
+        <div class="modal-box" style="text-align: left;">
+            <h3 style="margin-top:0; color:var(--kc-cyan); font-family:'Outfit'; font-size:20px; margin-bottom:5px; text-align: center;">INPUT SETORAN MANUAL</h3>
+            <p id="depMemberName" style="font-size:12px; color:white; margin-bottom:25px; font-weight:800; border-bottom:1px dashed #333; padding-bottom:10px; text-align: center;"></p>
+            <input type="hidden" id="depMemberId">
+            <div class="form-group"><label class="form-label">Nominal (Rp)</label><input type="number" id="depAmount" class="form-input" placeholder="Contoh: 20000"></div>
+            <div style="display:flex; gap:10px;"><button class="btn-submit bg-cancel" onclick="document.getElementById('modalDeposit').style.display='none'">BATAL</button><button class="btn-submit bg-sukses" onclick="processDeposit()">SIMPAN DATA</button></div>
+            
+            <div style="margin-top:25px; border-top:1px dashed #333; padding-top:15px;">
+                <div style="font-size:10px; font-weight:900; color:var(--text-gray); margin-bottom:10px; text-transform:uppercase;">Transaksi Terakhir (Edit/Hapus)</div>
+                <div id="adminRecentTrx" style="max-height:180px; overflow-y:auto; background:#000; border-radius:12px; padding:5px; border: 1px solid #222;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalEditTrx" style="z-index: 20000;">
+        <div class="modal-box" style="border-color: var(--warning);">
+            <h3 style="margin-top:0; color:var(--warning); font-family:'Outfit'; font-size:18px;">KOREKSI NOMINAL</h3>
+            <input type="hidden" id="editTrxId"><input type="hidden" id="editOldAmount">
+            <div class="form-group"><label class="form-label" style="color: var(--warning);">Nominal Baru (Rp)</label><input type="number" id="editNewAmount" class="form-input" style="border-color: rgba(245,158,11,0.5);"></div>
+            <div style="display:flex; gap:10px;"><button class="btn-submit bg-cancel" onclick="document.getElementById('modalEditTrx').style.display='none'">BATAL</button><button class="btn-submit" style="background:var(--warning); color:black;" onclick="saveEditTrx()">UPDATE</button></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalQris">
+        <div class="modal-box" style="text-align:left;">
+            <h3 style="margin-top:0; font-family:'Outfit'; color:var(--kc-cyan); text-align:center; font-size: 20px;">PENGAJUAN SETORAN</h3>
+            <div class="form-group">
+                <label class="form-label">1. Masukkan Nominal Pokok</label>
+                <input type="number" id="inputNabungBase" class="form-input" placeholder="Contoh: 50000" onkeyup="calcTotalTransfer()" onchange="calcTotalTransfer()">
+            </div>
+            
+            <div style="background:rgba(0,229,255,0.05); border:1px dashed rgba(0,229,255,0.3); padding:15px; border-radius:16px; text-align:center; margin-bottom:20px;">
+                <div style="font-size:11px; color:var(--text-gray); font-weight:800;">JUMLAH YANG HARUS DI TRANSFER:</div>
+                <div id="totalNabungTxt" style="font-family:'Space Grotesk'; font-size:32px; font-weight:900; color:white; margin:8px 0;">Rp 0</div>
+                <div style="font-size:10px; color:var(--kc-cyan); font-weight: 600;">(Sudah termasuk Kode Unik: <b id="kodeUnikTxt">***</b>)</div>
+            </div>
+            
+            <div style="border:1px solid #333; padding:15px; border-radius:16px; margin-bottom:20px; background: #000;">
+                <img src="qris_kc.jpg" style="width:100%; border-radius:8px;" alt="QRIS KC" onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=\'padding:20px; color:#EF4444; font-weight:bold; text-align:center;\'>Gambar qris_kc.jpg tidak ditemukan.</div>'">
+            </div>
+            
+            <div style="display:flex; gap:10px;">
+                <button class="btn-submit bg-cancel" onclick="document.getElementById('modalQris').style.display='none'">BATAL</button>
+                <button class="btn-submit bg-sukses" onclick="submitKlaimNabung()">KONFIRMASI TRANSFER</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="videoModal" style="z-index: 25000;">
+        <div class="modal-box" style="padding: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <div style="font-family:'Outfit'; font-weight:900; color:white; font-size: 16px;"><i class="fab fa-tiktok" style="color:var(--kc-cyan);"></i> TUTORIAL SETORAN</div>
+                <button onclick="document.getElementById('videoModal').style.display='none'" style="background:rgba(239,68,68,0.1); color:var(--danger); border:none; width:35px; height:35px; border-radius:10px; font-size:16px; cursor:pointer;"><i class="fas fa-times"></i></button>
+            </div>
+            <div style="position: relative; width: 100%; max-width: 320px; margin: 0 auto; border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); background: #000;">
+                <iframe style="width: 100%; height: 500px; display: block;" src="https://www.tiktok.com/embed/v2/7616071100727971092" title="Tutorial Menabung KC" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
+            <button class="btn-submit bg-cancel" style="margin-top:15px;" onclick="document.getElementById('videoModal').style.display='none'">TUTUP VIDEO</button>
+        </div>
+    </div>
+
+    <div class="dock-nav">
+        <a href="lokasi_fc.html" class="dn-item"><i class="fas fa-map-marker-alt"></i><span class="dn-text">LOKASI</span></a>
+        <a href="dashboard_kc.html" class="dn-item"><i class="fas fa-home"></i><span class="dn-text">HOME</span></a>
+        <a href="tabungan_kc.html" class="dn-item active"><i class="fas fa-piggy-bank"></i><span class="dn-text">TABUNGAN</span></a>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, onSnapshot, updateDoc, collection, query, where, getDocs, runTransaction, deleteDoc, addDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // =====================================
+        // KONEKSI DATABASE KC
+        // =====================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyDfsTAGclYUSRe6YhiljS-xb-v-9RBYVEM",
+            authDomain: "antriankcnew.firebaseapp.com",
+            projectId: "antriankcnew"
+        };
+        const app = initializeApp(firebaseConfig); const db = getFirestore(app);
+
+        let uData = null;
+        try { uData = JSON.parse(localStorage.getItem('maka_user')); } catch (e) {}
+        if (!uData || !uData.plat) window.location.href = 'index_kc.html'; 
+
+        const myName = uData.namaKtp || uData.namaWa || uData.nama || "User";
+        const myPlat = uData.plat || "B XXXX XX";
+        const userId = uData.id || myPlat.replace(/\s+/g, '').toUpperCase();
+        const cleanPlat = myPlat.replace(/\s+/g, '').toUpperCase();
+
+        // CUSTOM MODALS
+        window.showCustomConfirm = (title, msg, isPrompt = false) => {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('customAlertModal');
+                document.getElementById('camTitle').innerHTML = title;
+                document.getElementById('camMsg').innerHTML = msg;
+                const input = document.getElementById('camInput');
+                const btnCancel = document.getElementById('camBtnCancel');
+                const btnOk = document.getElementById('camBtnOk');
+                
+                if(isPrompt) { input.style.display = 'block'; input.value = ''; input.focus(); }
+                else { input.style.display = 'none'; }
+                
+                btnCancel.style.display = 'block';
+                btnOk.style.background = 'var(--kc-cyan)';
+                btnOk.style.color = 'black';
+                modal.style.display = 'flex';
+
+                btnCancel.onclick = () => { modal.style.display = 'none'; resolve(false); };
+                btnOk.onclick = () => { modal.style.display = 'none'; resolve(isPrompt ? input.value : true); };
+            });
+        };
+
+        window.showCustomAlert = (title, msg, type = 'info') => {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('customAlertModal');
+                document.getElementById('camTitle').innerHTML = title;
+                document.getElementById('camMsg').innerHTML = msg;
+                document.getElementById('camInput').style.display = 'none';
+                document.getElementById('camBtnCancel').style.display = 'none';
+                const btnOk = document.getElementById('camBtnOk');
+                
+                if(type === 'success') { btnOk.style.background = 'var(--success)'; btnOk.style.color = 'white'; }
+                else if (type === 'error') { btnOk.style.background = 'var(--danger)'; btnOk.style.color = 'white'; }
+                else { btnOk.style.background = 'var(--kc-cyan)'; btnOk.style.color = 'black'; }
+
+                modal.style.display = 'flex';
+                btnOk.onclick = () => { modal.style.display = 'none'; resolve(true); };
+            });
+        };
+
+        // =====================================
+        // HIERARKI & GEMBOK AKSES ADMIN
+        // =====================================
+        const hierarchy = { "KETUA UMUM": 1, "KETUA": 1, "WAKIL KETUA": 2, "PEMBINA": 3, "PENASEHAT": 4, "SEKRETARIS": 5, "BENDAHARA": 6, "HUMAS INTERNAL": 7, "HUMAS EKSTERNAL": 8, "HUMAS": 8, "KREATOR": 9, "URC KC": 10, "URC": 10, "MEMBER": 11 };
+        const getRank = (role) => { if(!role) return 11; const r = role.toUpperCase(); return hierarchy[r] || 12; };
+
+        // HANYA AGUS, RIFKY, ALFIAN, DAN SUPER ADMIN GHOST
+        const theGods = [
+            "B4124SWI", // Agus
+            "B4426SWF", // Rifky
+            "B4959SWF", // Alfian
+            "B4248SWF"  // Super Admin
+        ];
+
+        const roleUpper = uData.role ? uData.role.toUpperCase() : "";
+        const isKetum = roleUpper.includes("KETUM") || roleUpper === "KETUA UMUM" || roleUpper === "KETUA";
+        const isWaketum = roleUpper.includes("WAKETUM") || roleUpper.includes("WAKIL");
+        const isSuperAdmin = (cleanPlat === "B4248SWF" || uData.id === "ghost_admin");
+        
+        const isTrueAdmin = theGods.includes(cleanPlat) || isSuperAdmin;
+        
+        let userFaceDesc = null; let userPinTabungan = null; let isSetupMode = false; let isFaceMode = true; let stream = null; let videoEl = document.getElementById('videoInput'); let detectInterval = null; let currentPinInput = "";
+        window.myKodeUnik = 999; 
+        
+        let faceApiLoaded = false;
+        const MODEL_URL = 'https://justadudewhohacks.github.io/face-api.js/models';
+        
+        Promise.all([
+            faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+            faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+            faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
+        ]).then(() => { 
+            faceApiLoaded = true;
+            checkUserStatus(); 
+            if(isTrueAdmin) listenGlobalSaldo(); 
+        }).catch((err) => { 
+            console.error("Face API Error:", err);
+            faceApiLoaded = false; 
+            checkUserStatus(); 
+            if(isTrueAdmin) listenGlobalSaldo(); 
+            setTimeout(() => { document.getElementById('loaderOverlay').style.display = 'none'; }, 500);
+        });
+
+        function listenGlobalSaldo() {
+            document.getElementById('globalVaultCard').style.display = 'flex';
+            document.getElementById('btnTabAdmin').style.display = 'block';
+            document.getElementById('btnTabApprove').style.display = 'block';
+            
+            onSnapshot(collection(db, "anggota"), (snap) => {
+                let totalTabunganGlobal = 0;
+                snap.forEach(doc => { const data = doc.data(); if(data.tabungan) { totalTabunganGlobal += data.tabungan; } });
+                document.getElementById('globalBalance').innerText = `Rp ${totalTabunganGlobal.toLocaleString('id-ID')}`;
+            });
+        }
+
+        async function calculateKodeUnik() {
+            try {
+                const snap = await getDocs(collection(db, "anggota"));
+                let allM = [];
+                snap.forEach(d => {
+                    const data = d.data();
+                    if(data.plat && data.plat.replace(/\s+/g, '').toUpperCase() !== "B4248SWF") {
+                        allM.push({id: d.id, ...data});
+                    }
+                });
+
+                allM.sort((a,b) => {
+                    const rankA = getRank(a.role); const rankB = getRank(b.role);
+                    if (rankA !== rankB) return rankA - rankB;
+                    return (a.namaKtp || a.nama || "").localeCompare(b.namaKtp || b.nama || "");
+                });
+                
+                let idx = allM.findIndex(m => m.id === userId);
+                if(idx === -1) idx = allM.length; 
+                
+                window.myKodeUnik = idx + 1; 
+                document.getElementById('kodeUnikTxt').innerText = window.myKodeUnik.toString().padStart(3, '0');
+            } catch(e) {
+                console.log("Gagal hitung kode unik: ", e);
+                window.myKodeUnik = 999;
+                document.getElementById('kodeUnikTxt').innerText = "999";
+            }
+        }
+
+        function checkUserStatus() {
+            onSnapshot(doc(db, "anggota", userId), async (docSnap) => {
+                if(docSnap.exists()) {
+                    const d = docSnap.data();
+                    await calculateKodeUnik();
+
+                    setTimeout(() => { document.getElementById('loaderOverlay').style.display = 'none'; }, 300);
+                    
+                    document.getElementById('myBalance').innerText = `Rp ${(d.tabungan||0).toLocaleString('id-ID')}`;
+                    loadHistory();
+                    
+                    if(isTrueAdmin) initAdminData();
+                    if(isSuperAdmin) document.getElementById('btnResetData').style.display = 'block';
+
+                    if (d.pin_tabungan) {
+                        userPinTabungan = d.pin_tabungan; isSetupMode = false; 
+                        if(d.faceDescriptor && faceApiLoaded) { 
+                            userFaceDesc = new Float32Array(Object.values(d.faceDescriptor)); 
+                            showLoginScreen(); 
+                        } else { 
+                            document.getElementById('btnBawahKamera').style.display = 'none'; 
+                            isFaceMode = true; 
+                            window.switchMode(true); 
+                        }
+                    } else { 
+                        isSetupMode = true; 
+                        showActivationScreen(); 
+                    }
+                } else {
+                    document.getElementById('loaderOverlay').style.display = 'none';
+                    showCustomAlert("AKUN TIDAK DITEMUKAN", "Sistem tidak dapat menemukan data tabungan Anda.", "error");
+                }
+            }, (error) => {
+                document.getElementById('loaderOverlay').style.display = 'none';
+                showCustomAlert("KONEKSI GAGAL", "Gagal menyambung ke server database KC.", "error");
+            });
+        }
+
+        // =====================================
+        // SECURITY & FACE / PIN (BUG FIXED)
+        // =====================================
+        function showActivationScreen() { document.getElementById('agreeModal').style.display = 'flex'; }
+        
+        window.acceptAgreement = () => { 
+            document.getElementById('agreeModal').style.display = 'none'; 
+            if(faceApiLoaded) {
+                document.getElementById('secTitle').innerText = "REGISTRASI WAJAH"; 
+                document.getElementById('btnMainAction').innerText = "SCAN & SIMPAN WAJAH"; 
+                document.getElementById('btnMainAction').style.display = 'block'; 
+                document.getElementById('btnBawahKamera').style.display = 'none'; 
+                startCamera(); 
+            } else {
+                document.getElementById('secTitle').innerText = "BUAT PIN 6 DIGIT"; 
+                document.getElementById('camWrap').style.display = 'none'; 
+                document.getElementById('pinArea').style.display = 'flex'; 
+                document.getElementById('btnMainAction').style.display = 'none'; 
+                isFaceMode = false;
+                if(document.getElementById('btnSwitch')) document.getElementById('btnSwitch').style.display = 'none';
+            }
+        };
+
+        function showLoginScreen() { document.getElementById('secTitle').innerText = "VERIFIKASI WAJAH"; document.getElementById('btnMainAction').style.display = 'none'; startCamera(); }
+
+        async function startCamera() {
+            document.getElementById('camWrap').style.display = 'block'; document.getElementById('pinArea').style.display = 'none'; isFaceMode = true;
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+                videoEl.srcObject = stream;
+                videoEl.addEventListener('play', () => {
+                    document.getElementById('faceFrame').classList.add('scanning');
+                    if (!isSetupMode) {
+                        document.getElementById('scanStatus').innerText = "Mencocokkan Wajah...";
+                        detectInterval = setInterval(async () => {
+                            if (!isFaceMode) return;
+                            const detection = await faceapi.detectSingleFace(videoEl, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor();
+                            if (detection) {
+                                const dist = faceapi.euclideanDistance(detection.descriptor, userFaceDesc);
+                                if (dist < 0.5) { clearInterval(detectInterval); stopCamera(); unlockApp(); }
+                            }
+                        }, 500);
+                    }
+                });
+            } catch (e) { window.switchMode(true); }
+        }
+
+        window.handleAction = async () => {
+            if (isSetupMode) {
+                document.getElementById('btnMainAction').innerText = "MEMINDAI WAJAH...";
+                const detection = await faceapi.detectSingleFace(videoEl, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor();
+                if (detection) {
+                    userFaceDesc = detection.descriptor; stopCamera();
+                    document.getElementById('secTitle').innerText = "BUAT PIN 6 DIGIT"; document.getElementById('camWrap').style.display = 'none'; document.getElementById('pinArea').style.display = 'flex'; document.getElementById('btnMainAction').style.display = 'none'; isFaceMode = false;
+                } else { document.getElementById('btnMainAction').innerText = "GAGAL! SCAN ULANG"; }
+            }
+        };
+
+        function stopCamera() { if (stream) stream.getTracks().forEach(t => t.stop()); if (detectInterval) clearInterval(detectInterval); document.getElementById('faceFrame').classList.remove('scanning'); }
+        
+        window.switchMode = (forcePin = false) => { 
+            if (forcePin) isFaceMode = true; 
+            isFaceMode = !isFaceMode; 
+            
+            if (isFaceMode) { 
+                startCamera(); 
+                document.getElementById('btnSwitch').innerText = "Gunakan PIN (6 Digit)"; 
+                document.getElementById('btnSwitch').classList.add('btn-outline'); 
+                document.getElementById('btnSwitch').style.background='rgba(0,229,255,0.05)'; 
+                document.getElementById('btnSwitch').style.color='var(--kc-cyan)'; 
+            } else { 
+                stopCamera(); 
+                document.getElementById('camWrap').style.display = 'none'; 
+                document.getElementById('pinArea').style.display = 'flex'; 
+                document.getElementById('secTitle').innerText = "MASUKKAN PIN";
+                document.getElementById('secDesc').innerText = "Gunakan 6 Digit PIN Tabungan KC.";
+                
+                if (document.getElementById('btnSwitch')) {
+                    document.getElementById('btnSwitch').innerText = "Gunakan Face ID"; 
+                    document.getElementById('btnSwitch').classList.remove('btn-outline'); 
+                    document.getElementById('btnSwitch').style.background='var(--kc-cyan)'; 
+                    document.getElementById('btnSwitch').style.color='black'; 
+                    if(!faceApiLoaded) document.getElementById('btnSwitch').style.display = 'none';
+                }
+            } 
+        };
+        
+        window.pressPin = (n) => { if (currentPinInput.length < 6) { currentPinInput += n; updatePinDots(); if (currentPinInput.length === 6) window.processPin(); } };
+        window.delPin = () => { currentPinInput = currentPinInput.slice(0, -1); updatePinDots(); };
+        window.clearPin = () => { currentPinInput = ""; updatePinDots(); };
+        function updatePinDots() { document.querySelectorAll('.pin-dot').forEach((d, i) => { if (i < currentPinInput.length) d.classList.add('filled'); else d.classList.remove('filled'); }); }
+        
+        // BUG FIX: Array.from(userFaceDesc) agar Float32Array bisa di-save ke Firebase
+        window.processPin = async () => {
+            if (isSetupMode) {
+                const conf = await showCustomConfirm("SIMPAN PIN", `Jadikan <b style="color:var(--kc-cyan);">${currentPinInput}</b> sebagai PIN Tabungan KC Anda?`);
+                if(conf) {
+                    const faceObj = userFaceDesc ? Array.from(userFaceDesc) : null; 
+                    updateDoc(doc(db, "anggota", userId), { faceDescriptor: faceObj, pin_tabungan: currentPinInput }).then(() => { unlockApp(); });
+                } else { window.clearPin(); }
+            } else {
+                if (currentPinInput === userPinTabungan) unlockApp(); 
+                else { 
+                    await showCustomAlert("AKSES DITOLAK", "PIN yang Anda masukkan Salah!", "error"); 
+                    window.clearPin(); 
+                }
+            }
+        }
+        function unlockApp() { document.getElementById('securityScreen').style.opacity = 0; setTimeout(() => { document.getElementById('securityScreen').style.display = 'none'; document.getElementById('mainApp').style.display = 'block'; }, 500); }
+
+        window.changePinSelf = async () => {
+            const konf = await showCustomConfirm("UBAH SISTEM KEAMANAN", "Anda akan menghapus Data Wajah & PIN lama. Anda akan diminta untuk mendaftarkan ulang pada saat login berikutnya. Lanjutkan?");
+            if(konf) updateDoc(doc(db, "anggota", userId), { pin_tabungan: null, faceDescriptor: null }).then(() => location.reload());
+        }
+
+        // =====================================
+        // FUNGSI NABUNG / SETOR
+        // =====================================
+        window.calcTotalTransfer = () => {
+            let base = parseInt(document.getElementById('inputNabungBase').value) || 0;
+            if(base === 0) { document.getElementById('totalNabungTxt').innerText = "Rp 0"; return; }
+            document.getElementById('totalNabungTxt').innerText = "Rp " + (base + window.myKodeUnik).toLocaleString('id-ID');
+        }
+
+        window.submitKlaimNabung = async () => {
+            let base = parseInt(document.getElementById('inputNabungBase').value);
+            if(!base || base < 5000) return showCustomAlert("PERHATIAN", "Setoran minimal Rp 5.000", "error");
+            let total = base + window.myKodeUnik;
+
+            const konfirm = await showCustomConfirm("KONFIRMASI TRANSFER", `Apakah Anda sudah berhasil transfer dana sebesar <b style="color:var(--kc-cyan);">Rp ${total.toLocaleString('id-ID')}</b> ke QRIS KC?<br><br><span style='color:var(--danger); font-size:11px;'>*Bukti palsu akan otomatis ditolak dan dapat diberikan sanksi.</span>`);
+            if(konfirm) {
+                await addDoc(collection(db, "tabungan_trx"), {
+                    memberId: userId, memberName: myName,
+                    type: 'IN', amount: total, desc: 'Pengajuan Setoran (App)', timestamp: Date.now(), status: 'PENDING'
+                });
+                await showCustomAlert("SUKSES", "Pengajuan berhasil dikirim! Saldo akan masuk setelah divalidasi oleh Pengurus.", "success");
+                document.getElementById('modalQris').style.display = 'none';
+                document.getElementById('inputNabungBase').value = ''; calcTotalTransfer();
+            }
+        }
+
+        // =====================================
+        // FUNGSI PENARIKAN DANA (5% AUTO CUT)
+        // =====================================
+        window.calcTarik = () => {
+            let val = parseInt(document.getElementById('inputTarikAmount').value) || 0;
+            let pot = val * 0.05; // 5% Potongan
+            let trm = val - pot;
+            document.getElementById('tarikPotongan').innerText = "Rp " + pot.toLocaleString('id-ID');
+            document.getElementById('tarikTerima').innerText = "Rp " + trm.toLocaleString('id-ID');
+        }
+
+        window.bukaModalTarik = () => {
+            const saldoStr = document.getElementById('myBalance').innerText.replace(/[^0-9]/g, '');
+            const saldo = parseInt(saldoStr) || 0;
+            if(saldo <= 0) return showCustomAlert("DITOLAK", "Saldo Anda masih kosong!", "error");
+            
+            document.getElementById('inputTarikAmount').value = '';
+            document.getElementById('tarikPotongan').innerText = 'Rp 0';
+            document.getElementById('tarikTerima').innerText = 'Rp 0';
+            document.getElementById('inputTarikMetode').value = 'TUNAI';
+            document.getElementById('inputTarikRek').value = '';
+            document.getElementById('inputTarikDesc').value = '';
+            document.getElementById('modalTarik').style.display = 'flex';
+        }
+
+        window.submitTarikDana = async () => {
+            let amount = parseInt(document.getElementById('inputTarikAmount').value);
+            let metode = document.getElementById('inputTarikMetode').value;
+            let rek = document.getElementById('inputTarikRek').value;
+            let desc = document.getElementById('inputTarikDesc').value;
+            
+            if(!amount || amount < 10000) return showCustomAlert("PERHATIAN", "Penarikan minimal Rp 10.000", "error");
+            if(metode !== 'TUNAI' && !rek) return showCustomAlert("PERHATIAN", "Harap isi Nomor Rekening atau Nomor HP E-Wallet.", "error");
+            if(!desc) return showCustomAlert("PERHATIAN", "Harap isi Tujuan / Keperluan penarikan.", "error");
+
+            let potongan = amount * 0.05;
+            let terima = amount - potongan;
+
+            const mRef = doc(db, "anggota", userId);
+            const mDoc = await getDoc(mRef);
+            let currentSaldo = mDoc.data().tabungan || 0;
+            
+            if(amount > currentSaldo) return showCustomAlert("DITOLAK", "Saldo tabungan Anda tidak mencukupi!", "error");
+
+            const konfirm = await showCustomConfirm("KONFIRMASI", `Ajukan penarikan dana sebesar <b style="color:var(--danger);">Rp ${amount.toLocaleString('id-ID')}</b>?<br>Potongan Kas KC: Rp ${potongan.toLocaleString('id-ID')}<br><br><span style='color:var(--danger); font-size:11px;'>*Pencairan membutuhkan validasi KETUM dan WAKETUM. Saldo akan otomatis ditahan.</span>`);
+            if(konfirm) {
+                await addDoc(collection(db, "tabungan_trx"), {
+                    memberId: userId, memberName: myName,
+                    type: 'OUT', amount: amount, 
+                    amountTerima: terima, potonganKas: potongan,
+                    metodeTransfer: metode, noRekening: rek,
+                    desc: 'Tarik: ' + desc, timestamp: Date.now(), 
+                    status: 'PENDING_APPROVAL', apprKetum: false, apprWaketum: false
+                });
+                await showCustomAlert("SUKSES", "Pengajuan berhasil dikirim! Menunggu ACC Ketum & Waketum.", "success");
+                document.getElementById('modalTarik').style.display = 'none';
+            }
+        }
+
+        // =====================================
+        // KONFIRMASI TERIMA DANA OLEH USER
+        // =====================================
+        window.lihatBukti = (url) => {
+            document.getElementById('imgBukti').src = url;
+            document.getElementById('modalViewBukti').style.display = 'flex';
+        }
+
+        window.konfirmasiTerimaDana = async (trxId) => {
+            const konfirm = await showCustomConfirm("TERIMA DANA", "Apakah Anda sudah memastikan bahwa dana benar-benar sudah masuk ke rekening/tangan Anda?");
+            if(konfirm) {
+                await updateDoc(doc(db, "tabungan_trx", trxId), { status: 'SUCCESS' });
+                showCustomAlert("SELESAI", "Transaksi selesai. Terima kasih!", "success");
+            }
+        }
+
+        // =====================================
+        // FUNGSI ADMIN (APPROVAL & UPLOAD BUKTI)
+        // =====================================
+        function initAdminData() {
+            onSnapshot(query(collection(db, "anggota")), (snap) => {
+                let allMembers = []; snap.forEach(d => allMembers.push({id:d.id, ...d.data()}));
+                allMembers.sort((a,b) => {
+                    const rankA = getRank(a.role); const rankB = getRank(b.role);
+                    if (rankA !== rankB) return rankA - rankB;
+                    return (a.namaKtp||a.nama||'').localeCompare(b.namaKtp||b.nama||'');
+                });
+                window.allMembersCache = allMembers;
+                const searchKey = document.getElementById('searchMem').value;
+                if(searchKey) window.filterMembers(); else window.renderMembers(allMembers);
+            });
+
+            const qApp = query(collection(db, "tabungan_trx"), where("status", "in", ["PENDING", "PENDING_APPROVAL", "WAITING_TRANSFER", "WAITING_CONFIRMATION"]));
+            onSnapshot(qApp, (snap) => {
+                const cont = document.getElementById('approvalList'); cont.innerHTML = "";
+                if(snap.empty) { cont.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-muted); font-size:12px;">Tidak ada antrean validasi pengajuan.</div>`; return;}
+                let arrApp = []; snap.forEach(d => arrApp.push({id: d.id, ...d.data()}));
+                arrApp.sort((a,b) => a.timestamp - b.timestamp);
+                
+                arrApp.forEach(data => {
+                    const isNabung = data.type === 'IN';
+                    const titleText = isNabung ? "Setoran Tabungan" : "Penarikan Dana";
+                    const color = isNabung ? "var(--success)" : "var(--danger)";
+                    
+                    let infoTransferHtml = '';
+                    if(!isNabung) {
+                        infoTransferHtml = `<div style="font-size:11px; color:var(--text-gray); margin-top:6px; background:rgba(0,0,0,0.5); padding:6px; border-radius:8px; border:1px dashed #333;"><b>Metode:</b> ${data.metodeTransfer || '-'} | <b>Rek:</b> ${data.noRekening || '-'}<br><b style="color:var(--success);">Tf Sisa Diterima: Rp ${(data.amountTerima || data.amount).toLocaleString('id-ID')}</b></div>`;
+                    }
+
+                    let actionHtml = '';
+
+                    if(isNabung) {
+                        actionHtml = `
+                        <div style="display:flex; flex-direction:column; gap:5px; margin-top:10px;">
+                            <button class="btn-submit bg-sukses" style="padding:10px; margin:0; color:black; font-size:12px;" onclick="window.approveKlaim('${data.id}', '${data.type}', ${data.amount}, '${data.memberId}')">VALIDASI SETORAN</button>
+                            <button class="btn-submit bg-cancel" style="padding:10px; margin:0; font-size:12px;" onclick="window.rejectKlaim('${data.id}')">TOLAK PENGJUAN</button>
+                        </div>`;
+                    } else {
+                        if (data.status === 'PENDING_APPROVAL') {
+                            let statusKetum = data.apprKetum ? `<span style="color:var(--success)"><i class="fas fa-check-circle"></i> Ketum</span>` : `<span style="color:var(--danger)"><i class="fas fa-clock"></i> Ketum</span>`;
+                            let statusWaketum = data.apprWaketum ? `<span style="color:var(--success)"><i class="fas fa-check-circle"></i> Waketum</span>` : `<span style="color:var(--danger)"><i class="fas fa-clock"></i> Waketum</span>`;
+                            
+                            let btnKetum = (!data.apprKetum && (isKetum || isSuperAdmin)) ? `<button class="btn-submit" style="background:var(--kc-cyan); color:black; padding:8px; margin:0; font-size:11px;" onclick="window.approveTarik('${data.id}', 'KETUM', ${data.amount}, '${data.memberId}')">ACC KETUM</button>` : '';
+                            let btnWaketum = (!data.apprWaketum && (isWaketum || isSuperAdmin)) ? `<button class="btn-submit" style="background:var(--warning); color:black; padding:8px; margin:0; font-size:11px;" onclick="window.approveTarik('${data.id}', 'WAKETUM', ${data.amount}, '${data.memberId}')">ACC WAKETUM</button>` : '';
+                            let btnTolak = `<button class="btn-submit bg-cancel" style="padding:8px; margin:0; font-size:11px; flex:0.5;" onclick="window.rejectKlaim('${data.id}')">TOLAK</button>`;
+
+                            actionHtml = `
+                            <div style="font-size:11px; background:rgba(0,0,0,0.5); padding:8px; border-radius:8px; margin-top:10px; margin-bottom:8px; border:1px solid #333; text-align:center; color:white;">
+                                <b>Status Persetujuan:</b><br> ${statusKetum} &nbsp;|&nbsp; ${statusWaketum}
+                            </div>
+                            <div style="display:flex; gap:5px; width:100%;">
+                                ${btnKetum} ${btnWaketum} ${btnTolak}
+                            </div>`;
+                        } 
+                        else if (data.status === 'WAITING_TRANSFER') {
+                            actionHtml = `
+                            <div style="margin-top:10px;">
+                                <button class="btn-submit" style="background:var(--kc-cyan); color:black; padding:12px; font-size:12px;" onclick="window.bukaUploadBukti('${data.id}', '${data.memberId}')">
+                                    <i class="fas fa-upload"></i> UPLOAD BUKTI TRANSFER
+                                </button>
+                            </div>`;
+                        }
+                        else if (data.status === 'WAITING_CONFIRMATION') {
+                            actionHtml = `
+                            <div style="margin-top:10px; font-size:11px; text-align:center; padding:10px; background:rgba(245,158,11,0.1); color:var(--warning); border-radius:8px; border:1px dashed var(--warning); font-weight:800;">
+                                <i class="fas fa-spinner fa-spin"></i> MENUNGGU USER KONFIRMASI TERIMA DANA
+                            </div>`;
+                        }
+                    }
+
+                    cont.innerHTML += `
+                    <div class="trx-item" style="border-left:4px solid ${color}; display:flex; flex-direction:column; align-items:stretch;">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; width:100%;">
+                            <div>
+                                <div style="font-size:10px; color:var(--text-muted);">${new Date(data.timestamp).toLocaleString('id-ID')}</div>
+                                <h4 style="margin:5px 0; color:white; font-family:'Outfit'; font-size:16px;">${data.memberName}</h4>
+                                <div style="font-size:11px; color:var(--text-muted);">${titleText}</div>
+                                ${infoTransferHtml}
+                            </div>
+                            <div style="text-align:right;">
+                                <div style="font-family:'Space Grotesk'; font-weight:900; font-size:18px; color:${color};">Rp ${data.amount.toLocaleString('id-ID')}</div>
+                            </div>
+                        </div>
+                        ${actionHtml}
+                    </div>`;
+                });
+            });
+        }
+
+        let currentBuktiBase64 = "";
+        window.bukaUploadBukti = (trxId, memberId) => {
+            document.getElementById('uploadBuktiTrxId').value = trxId;
+            document.getElementById('uploadBuktiMemberId').value = memberId;
+            document.getElementById('previewBuktiFoto').style.display = 'none';
+            currentBuktiBase64 = "";
+            document.getElementById('modalUploadBukti').style.display = 'flex';
+        }
+
+        window.processBuktiFoto = (input) => {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const cvs = document.createElement('canvas'); const ctx = cvs.getContext('2d');
+                        let w = img.width; let h = img.height;
+                        if (w > h) { if (w > 600) { h *= 600/w; w = 600; } } else { if (h > 600) { w *= 600/h; h = 600; } }
+                        cvs.width = w; cvs.height = h; ctx.drawImage(img, 0, 0, w, h);
+                        currentBuktiBase64 = cvs.toDataURL('image/jpeg', 0.8);
+                        document.getElementById('previewBuktiFoto').src = currentBuktiBase64;
+                        document.getElementById('previewBuktiFoto').style.display = 'block';
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        };
+
+        window.simpanBuktiTransfer = async () => {
+            if(!currentBuktiBase64) return showCustomAlert("PERHATIAN", "Harap upload foto bukti transfer terlebih dahulu!", "error");
+            const trxId = document.getElementById('uploadBuktiTrxId').value;
+            
+            const btn = document.getElementById('btnSimpanBukti');
+            btn.innerText = "MENGIRIM..."; btn.style.opacity = '0.7';
+
+            try {
+                await updateDoc(doc(dbKC, "tabungan_trx", trxId), {
+                    buktiTransfer: currentBuktiBase64,
+                    status: 'WAITING_CONFIRMATION'
+                });
+                document.getElementById('modalUploadBukti').style.display = 'none';
+                showCustomAlert("BERHASIL", "Bukti transfer telah dikirim ke User.", "success");
+            } catch(e) {
+                showCustomAlert("GAGAL", e.message, "error");
+            } finally {
+                btn.innerText = "KIRIM BUKTI"; btn.style.opacity = '1';
+            }
+        }
+
+        window.approveKlaim = async (trxId, type, amount, memberId) => {
+            const konf = await showCustomConfirm("VALIDASI TRANSAKSI", "Anda yakin dana setor sudah berhasil diverifikasi masuk ke Rekening KC?");
+            if(!konf) return;
+            await runTransaction(dbKC, async(t) => {
+                const r = doc(dbKC, "tabungan_trx", trxId);
+                const mRef = doc(dbKC, "anggota", memberId);
+                const mDoc = await t.get(mRef);
+                let currentSaldo = mDoc.data().tabungan || 0;
+                if (type === 'IN') currentSaldo += amount;
+                t.update(mRef, { tabungan: currentSaldo }); t.update(r, { status: 'SUCCESS' });
+            });
+            showCustomAlert("BERHASIL", "Setoran divalidasi. Saldo tabungan member telah bertambah otomatis.", "success");
+        }
+
+        // POTONG 5% KE KAS KC KETIKA FULL APPROVED
+        window.approveTarik = async (trxId, roleAcc, amount, memberId) => {
+            const konf = await showCustomConfirm("VALIDASI PENARIKAN", `Anda menyetujui penarikan ini sebagai <b style="color:var(--kc-cyan);">${roleAcc}</b>?`);
+            if(!konf) return;
+
+            await runTransaction(dbKC, async(t) => {
+                const rRef = doc(dbKC, "tabungan_trx", trxId);
+                const mRef = doc(dbKC, "anggota", memberId);
+                
+                const rDoc = await t.get(rRef);
+                const mDoc = await t.get(mRef);
+                
+                let currentSaldo = mDoc.data().tabungan || 0;
+                let dataTrx = rDoc.data();
+
+                let isKetumNow = dataTrx.apprKetum;
+                let isWaketumNow = dataTrx.apprWaketum;
+
+                if(roleAcc === 'KETUM') isKetumNow = true;
+                if(roleAcc === 'WAKETUM') isWaketumNow = true;
+
+                if(isKetumNow && isWaketumNow) {
+                    if (currentSaldo < amount) throw "Saldo tabungan member tidak mencukupi untuk dicairkan!";
+                    let potongan = dataTrx.potonganKas || (amount * 0.05);
+
+                    t.update(mRef, { tabungan: currentSaldo - amount });
+                    t.update(rRef, { apprKetum: true, apprWaketum: true, status: 'WAITING_TRANSFER' });
+
+                    // INJECT 5% KE UANG KAS KC OTOMATIS
+                    const kasRef = doc(collection(dbKC, "kas_kc"));
+                    t.set(kasRef, {
+                        type: 'IN', amount: potongan,
+                        desc: `Potongan 5% Tarik Dana ${dataTrx.memberName}`,
+                        timestamp: Date.now(),
+                        kategori: 'Potongan Tabungan',
+                        inputBy: 'Sistem KC'
+                    });
+
+                } else {
+                    t.update(rRef, { apprKetum: isKetumNow, apprWaketum: isWaketumNow });
+                }
+            }).then(() => {
+                showCustomAlert("BERHASIL", `Persetujuan ${roleAcc} berhasil dicatat.`, "success");
+            }).catch((err) => {
+                showCustomAlert("GAGAL", err, "error");
+            });
+        };
+
+        window.rejectKlaim = async (trxId) => {
+            const konf = await showCustomConfirm("TOLAK PENGAJUAN", "Tolak pengajuan ini? Data pengajuan akan dihapus permanen.");
+            if(!konf) return;
+            await deleteDoc(doc(dbKC, "tabungan_trx", trxId));
+            showCustomAlert("INFO", "Pengajuan telah ditolak dan dihapus.", "success");
+        }
+
+        // =====================================
+        // LIST MEMBER UNTUK RESET FACE/PIN (ADMIN)
+        // =====================================
+        window.renderMembers = (arr) => {
+            const cont = document.getElementById('adminMemberList'); cont.innerHTML = "";
+            arr.forEach((m, i) => {
+                const namaTampil = m.namaKtp || m.nama || 'TANPA NAMA';
+                const saldoMember = m.tabungan ? m.tabungan.toLocaleString('id-ID') : '0';
+                const noUrut = String(i + 1).padStart(3, '0');
+                
+                cont.innerHTML += `
+                <div class="member-row">
+                    <div>
+                        <div style="font-family:'Outfit'; font-size:14px; font-weight:900; color:var(--text-white);">${namaTampil}</div>
+                        <div style="font-size:10px; color:var(--kc-cyan); margin-top:2px;">[ Kode Unik: ${noUrut} ]</div>
+                        <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">${m.plat||'-'}</div>
+                        <div style="font-size:12px; color:var(--success); font-weight:900; font-family:'Space Grotesk'; margin-top:4px;">Rp ${saldoMember}</div>
+                    </div>
+                    <div style="display:flex;">
+                        <button class="btn-reset" onclick="window.resetMember('${m.id}', '${namaTampil}')"><i class="fas fa-key"></i></button>
+                        <button class="btn-plus" onclick="document.getElementById('modalDeposit').style.display='flex'; document.getElementById('depMemberId').value='${m.id}'; document.getElementById('depMemberName').innerText='${namaTampil}'; window.loadAdminRecentTrx('${m.id}');"><i class="fas fa-plus"></i></button>
+                    </div>
+                </div>`;
+            });
+        }
+
+        window.resetMember = async (id, name) => {
+            const konf = await showCustomConfirm("RESET KEAMANAN", `Anda yakin ingin me-reset Wajah (Face ID) & PIN milik <b style="color:var(--kc-cyan);">${name}</b>?`);
+            if(konf) updateDoc(doc(dbKC, "anggota", id), { pin_tabungan: null, faceDescriptor: null }).then(() => showCustomAlert("SUKSES", "Keamanan akun tersebut berhasil di-reset.", "success"));
+        };
+
+        window.filterMembers = () => { const k=document.getElementById('searchMem').value.toUpperCase(); window.renderMembers(window.allMembersCache.filter(m=>(m.namaKtp&&m.namaKtp.includes(k))||(m.nama&&m.nama.includes(k))||(m.plat&&m.plat.includes(k)))); }
+        
+        window.loadAdminRecentTrx = async (memberId) => {
+            const cont = document.getElementById('adminRecentTrx');
+            cont.innerHTML = '<div style="text-align:center; padding:20px;"><i class="fas fa-spinner fa-spin" style="font-size:24px; color:var(--kc-cyan);"></i></div>';
+            
+            const q = query(collection(dbKC, "tabungan_trx"), where("memberId", "==", memberId));
+            const snap = await getDocs(q);
+            let dataArr = []; snap.forEach(d => dataArr.push({id: d.id, ...d.data()}));
+            
+            dataArr.sort((a, b) => b.timestamp - a.timestamp); 
+            dataArr = dataArr.slice(0, 5); 
+            
+            cont.innerHTML = "";
+            if(dataArr.length === 0) { cont.innerHTML = '<div style="text-align:center; font-size:10px; color:#aaa; margin-top:10px;">Belum ada Riwayat Transaksi.</div>'; return; }
+            
+            dataArr.forEach(data => {
+                const dateStr = new Date(data.timestamp).toLocaleDateString('id-ID', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
+                const isPlus = data.type === 'IN';
+                
+                const btnDelete = isSuperAdmin ? `<button class="btn-edit" style="color:var(--danger); background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.2);" onclick="window.deleteTrx('${data.id}', ${data.amount}, '${data.type}', '${memberId}')"><i class="fas fa-trash"></i></button>` : ``;
+
+                cont.innerHTML += `
+                <div class="admin-hist-item">
+                    <div style="font-size:11px;"><div style="font-weight:800; color:${isPlus?'var(--success)':'var(--danger)'};">${isPlus?'+':'-'} Rp ${data.amount.toLocaleString('id-ID')}</div><div style="color:var(--text-muted); font-size:9px; margin-top:2px;">${dateStr}</div></div>
+                    <div style="display:flex; gap:5px;">
+                        <button class="btn-edit" onclick="window.openEditTrx('${data.id}', ${data.amount})"><i class="fas fa-pencil-alt"></i></button>
+                        ${btnDelete}
+                    </div>
+                </div>`;
+            });
+        }
+
+        window.openEditTrx = (trxId, amount) => {
+            document.getElementById('editTrxId').value = trxId; document.getElementById('editOldAmount').value = amount; document.getElementById('editNewAmount').value = amount; document.getElementById('modalEditTrx').style.display = 'flex';
+        }
+
+        window.saveEditTrx = async () => {
+            const trxId = document.getElementById('editTrxId').value; const oldAmt = parseInt(document.getElementById('editOldAmount').value); const newAmt = parseInt(document.getElementById('editNewAmount').value); const memberId = document.getElementById('depMemberId').value;
+            if(!newAmt) return;
+            await runTransaction(dbKC, async(t) => {
+                const memRef = doc(dbKC, "anggota", memberId); const trxRef = doc(dbKC, "tabungan_trx", trxId); const memDoc = await t.get(memRef);
+                const currentBal = memDoc.data().tabungan || 0; const diff = newAmt - oldAmt; const finalBal = currentBal + diff;
+                t.update(memRef, { tabungan: finalBal }); t.update(trxRef, { amount: newAmt });
+            });
+            document.getElementById('modalEditTrx').style.display = 'none'; 
+            window.loadAdminRecentTrx(memberId); 
+        }
+
+        window.deleteTrx = async (trxId, amount, type, memberId) => {
+            const konf1 = await showCustomConfirm("HAPUS MUTASI", "Yakin menghapus transaksi ini permanen?<br><br><span style='color:var(--danger);'>Peringatan: Saldo tabungan member otomatis disesuaikan.</span>");
+            if(!konf1) return;
+
+            const pass = await showCustomConfirm("OTORISASI ADMIN", "Password Master Admin (Wajib):", true);
+            if(pass !== "KC2026") return showCustomAlert("AKSES DITOLAK", "Password Administrator Salah!", "error");
+
+            document.getElementById('loaderOverlay').style.display = 'flex';
+            try {
+                await runTransaction(dbKC, async(t) => {
+                    const memRef = doc(dbKC, "anggota", memberId);
+                    const trxRef = doc(dbKC, "tabungan_trx", trxId);
+                    const memDoc = await t.get(memRef);
+                    let currentBal = memDoc.data().tabungan || 0;
+                    
+                    if(type === 'IN') currentBal -= amount; 
+                    else if (type === 'OUT') currentBal += amount; 
+                    
+                    t.update(memRef, { tabungan: currentBal });
+                    t.delete(trxRef);
+                });
+                document.getElementById('loaderOverlay').style.display = 'none';
+                await showCustomAlert("BERHASIL", "Transaksi dihapus, Saldo dikoreksi.", "success");
+                window.loadAdminRecentTrx(memberId); 
+            } catch (e) { document.getElementById('loaderOverlay').style.display = 'none'; showCustomAlert("ERROR", e.message, "error"); }
+        }
+
+        window.processDeposit = async () => {
+            const id = document.getElementById('depMemberId').value; const amt = parseInt(document.getElementById('depAmount').value);
+            if(!amt) return;
+            await runTransaction(dbKC, async(t)=>{
+                const mRef=doc(dbKC,"anggota",id); const mDoc=await t.get(mRef);
+                t.update(mRef, {tabungan: (mDoc.data().tabungan||0)+amt});
+                t.set(doc(collection(dbKC,"tabungan_trx")), {memberId:id, memberName:(mDoc.data().namaKtp||mDoc.data().nama||"User"), type:'IN', amount:amt, desc:'Setoran Manual (Via Admin)', timestamp:Date.now(), status:'SUCCESS'});
+            });
+            document.getElementById('depAmount').value = ''; 
+            window.loadAdminRecentTrx(id); 
+        }
+
+        window.switchTab = (tab) => {
+            document.querySelectorAll('.content-area').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById('view'+tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function loadHistory() {
+            const list = document.getElementById('historyList');
+            const qHist = query(collection(dbKC, "tabungan_trx"), where("memberId", "==", userId));
+            onSnapshot(qHist, (snap) => {
+                list.innerHTML = ""; let arr = []; snap.forEach(d => arr.push({id: d.id, ...d.data()})); arr.sort((a,b) => b.timestamp - a.timestamp);
+                if(arr.length===0) { list.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-muted); font-size:12px;">Belum ada Riwayat Mutasi Rekening.</div>`; return; }
+                
+                arr.forEach(d => {
+                    const color = d.type === 'IN' ? 'var(--success)' : 'var(--danger)'; 
+                    const sign = d.type === 'IN' ? '+' : '-';
+                    const dateStr = new Date(d.timestamp).toLocaleDateString('id-ID', {weekday:'short', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
+                    
+                    let pendingTag = '';
+                    let actionBtn = '';
+
+                    if (d.status === 'PENDING' || d.status === 'PENDING_APPROVAL') pendingTag = 'MENUNGGU ACC';
+                    else if (d.status === 'WAITING_TRANSFER') pendingTag = 'PROSES TRANSFER';
+                    else if (d.status === 'WAITING_CONFIRMATION') {
+                        pendingTag = 'DANA DIKIRIM';
+                        actionBtn = `
+                        <div style="display:flex; gap:5px; margin-top:10px; border-top:1px dashed #333; padding-top:10px;">
+                            <button class="btn-submit bg-cancel" style="padding:8px; font-size:10px; border-radius:8px; flex:1;" onclick="window.lihatBukti('${d.buktiTransfer}')"><i class="fas fa-image"></i> LIHAT BUKTI</button>
+                            <button class="btn-submit bg-sukses" style="padding:8px; margin:0; font-size:10px; border-radius:8px; flex:1; color:black;" onclick="window.konfirmasiTerimaDana('${d.id}')"><i class="fas fa-check-circle"></i> TERIMA DANA</button>
+                        </div>`;
+                    }
+
+                    const tagHtml = pendingTag ? `<span style="background:var(--warning); color:black; padding:2px 6px; border-radius:6px; font-size:8px; margin-left:5px; font-weight:900;">${pendingTag}</span>` : '';
+
+                    list.innerHTML += `
+                    <div class="trx-item" style="flex-direction:column; align-items:stretch; border-left: 4px solid ${color};">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                            <div>
+                                <div style="font-weight:900; font-size:13px; color:var(--text-white); margin-bottom: 4px;">${d.desc}</div>
+                                <div style="font-size:10px; color:var(--text-muted);">${dateStr}</div>
+                                <div>${tagHtml}</div>
+                            </div>
+                            <div style="font-family:'Space Grotesk'; font-weight:900; font-size:15px; color:${d.status.includes('PENDING')?'var(--text-gray)':color};">${sign} Rp ${d.amount.toLocaleString('id-ID')}</div>
+                        </div>
+                        ${actionBtn}
+                    </div>`;
+                });
+            });
+        }
+    </script>
+</body>
+</html>
