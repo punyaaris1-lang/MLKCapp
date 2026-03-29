@@ -14,7 +14,7 @@
             document.documentElement.classList.add('theme-soft-blue');
         }
 
-        const CURRENT_VERSION = "3.0_ICON_FIX"; // PERBAIKAN IKON & TEMA LIGHT
+        const CURRENT_VERSION = "3.1_BIG_LOGO"; // LOGO DIPERBESAR
 
         const userVersion = localStorage.getItem('maka_app_version');
         if (userVersion !== CURRENT_VERSION) {
@@ -121,12 +121,13 @@
         /* MAIN LOGIN WRAPPER */
         .login-wrapper { height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
         
-        .logo-main { width: 180px; height: auto; margin-bottom: 15px; filter: drop-shadow(0 10px 25px rgba(0,0,0,0.9)); animation: zoomIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);}
+        /* LOGO DIPERBESAR DI SINI (260px) */
+        .logo-main { width: 260px; height: auto; margin-bottom: 10px; filter: drop-shadow(0 10px 25px rgba(0,0,0,0.9)); animation: zoomIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);}
         html.theme-soft-blue .logo-main { filter: drop-shadow(0 10px 25px rgba(2, 132, 199, 0.3)); }
         @keyframes zoomIn { from {transform: scale(0.5); opacity: 0;} to {transform: scale(1); opacity: 1;} }
         
         .app-title { font-family: 'Outfit'; font-size: 21px; font-weight: 900; color: var(--text-main); margin: 0; text-transform: uppercase; letter-spacing: 1px; text-align: center; white-space: nowrap;}
-        .app-subtitle { font-family: 'Space Grotesk'; font-size: 11px; font-weight: 800; color: var(--cyan-logo); letter-spacing: 3px; margin-bottom: 40px; text-transform: uppercase; text-align: center; text-shadow: 0 0 10px rgba(0,229,255,0.4);}
+        .app-subtitle { font-family: 'Space Grotesk'; font-size: 11px; font-weight: 800; color: var(--cyan-logo); letter-spacing: 3px; margin-bottom: 30px; text-transform: uppercase; text-align: center; text-shadow: 0 0 10px rgba(0,229,255,0.4);}
         html.theme-soft-blue .app-subtitle { text-shadow: none; color: var(--cyan-dark); }
 
         .login-box { width: 100%; max-width: 350px; background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--border-glass); border-radius: 28px; padding: 30px 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
@@ -135,7 +136,6 @@
         .form-group { margin-bottom: 20px; position: relative;}
         .form-label { display: block; font-size: 10px; font-weight: 800; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;}
         
-        /* --- PERBAIKAN IKON FORM --- */
         .input-icon-wrap { position: relative; display: flex; align-items: center; }
         .input-icon-wrap i { position: absolute; left: 18px; color: #64748B; font-size: 20px; transition: 0.3s; pointer-events: none; z-index: 2;}
         html.theme-soft-blue .input-icon-wrap i { color: var(--cyan-dark); }
@@ -295,7 +295,6 @@
                     const dbPinLogin = userDoc.pin_login || userDoc.pin;
                     
                     if(!dbPinLogin) {
-                        // User belum punya PIN Login sama sekali, tawarkan untuk save PIN pertama kali
                         if(confirm(`Anda belum memiliki PIN Login Aplikasi.\n\nApakah Anda ingin menyimpan [ ${pinRaw} ] sebagai PIN Login Anda sekarang?`)) {
                             await updateDoc(doc(db, "anggota", userId), { pin_login: pinRaw });
                             berhasilLogin(userId, userDoc);
@@ -303,7 +302,6 @@
                             btn.innerText = "MASUK SYSTEM"; btn.style.opacity = "1"; 
                         }
                     } else {
-                        // Cek kecocokan PIN
                         if(dbPinLogin === pinRaw) { 
                             berhasilLogin(userId, userDoc); 
                         } else { 
@@ -330,7 +328,6 @@
             loader.style.display = 'flex';
             setTimeout(() => { loader.style.opacity = '1'; }, 10);
             
-            // Tunggu bar loading penuh baru redirect
             setTimeout(() => { window.location.href = 'dashboard_kc.html'; }, 2500);
         }
     </script>

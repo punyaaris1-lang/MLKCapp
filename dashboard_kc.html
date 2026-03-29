@@ -11,7 +11,7 @@
             document.documentElement.classList.add('theme-soft-blue');
         }
 
-        const DASH_VERSION = "16.0_UI_REFINEMENT"; 
+        const DASH_VERSION = "16.2_LOGO_PERFECT"; 
         if (localStorage.getItem('maka_dash_kc_v') !== DASH_VERSION) {
             if ('caches' in window) { caches.keys().then((names) => { names.forEach(name => { caches.delete(name); }); }); }
             localStorage.setItem('maka_dash_kc_v', DASH_VERSION); window.location.reload(true); 
@@ -106,8 +106,8 @@
         .vip-card::before { content: ''; position: absolute; right: -20px; top: -20px; width: 120px; height: 120px; background: radial-gradient(circle, rgba(0,229,255,0.2) 0%, transparent 70%); border-radius: 50%; z-index: 1;}
         html.theme-soft-blue .vip-card::before { background: radial-gradient(circle, rgba(2, 132, 199, 0.1) 0%, transparent 70%); }
         
-        /* LOGO DIPERBESAR & OPACITY DINAIKKAN */
-        .vc-big-logo { position: absolute; right: -10px; top: 10px; height: 180px; width: auto; object-fit: contain; z-index: 2; opacity: 0.45; pointer-events: none;}
+        /* LOGO DIPERBESAR & DINAIKKAN LAGI BIAR PROPORSIONAL */
+        .vc-big-logo { position: absolute; right: -20px; top: -40px; height: 260px; width: auto; object-fit: contain; z-index: 2; opacity: 0.45; pointer-events: none;}
 
         .vc-top { padding: 20px 25px 10px; display: flex; justify-content: space-between; align-items: flex-start; position: relative; z-index: 3;}
         .vc-chip { width: 35px; height: 25px; background: linear-gradient(135deg, #FDE047, #CA8A04); border-radius: 6px; position: relative; overflow: hidden; opacity: 0.9;}
@@ -203,7 +203,7 @@
         
         .icon-box { width: 55px; height: 55px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 12px; color: #000; box-shadow: 0 5px 20px rgba(0, 229, 255, 0.4); font-weight: 900;}
         
-        /* THEME SOFT BLUE IKON BOX CLEAN (POIN 6) */
+        /* THEME SOFT BLUE IKON BOX CLEAN */
         html.theme-soft-blue .icon-box { background: #E0F2FE !important; color: var(--kc-cyan-dark) !important; box-shadow: none !important; border: 1px solid rgba(2, 132, 199, 0.2) !important; }
         html.theme-soft-blue .ic-urc { background: #FEF2F2 !important; color: var(--danger) !important; border-color: rgba(220, 38, 38, 0.2) !important; }
         html.theme-soft-blue .ic-broadcast { background: #FEF3C7 !important; color: var(--kc-yellow-dark) !important; border-color: rgba(217, 119, 6, 0.2) !important; }
