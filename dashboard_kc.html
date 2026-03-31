@@ -11,7 +11,7 @@
             document.documentElement.classList.add('theme-soft-blue');
         }
 
-        const DASH_VERSION = "16.3_LOGO_FIX"; 
+        const DASH_VERSION = "16.4_PERFECT_LAYOUT"; 
         if (localStorage.getItem('maka_dash_kc_v') !== DASH_VERSION) {
             if ('caches' in window) { caches.keys().then((names) => { names.forEach(name => { caches.delete(name); }); }); }
             localStorage.setItem('maka_dash_kc_v', DASH_VERSION); window.location.reload(true); 
@@ -48,7 +48,7 @@
             --shadow-soft: 0 15px 40px rgba(0, 229, 255, 0.1);
         }
 
-        /* === TEMA KEDUA: SOFT BLUE (SINKRON DENGAN DATA ANGGOTA) === */
+        /* === TEMA KEDUA: SOFT BLUE === */
         html.theme-soft-blue {
             --kc-cyan: #0284C7;
             --kc-cyan-dark: #0369A1;
@@ -79,35 +79,35 @@
         html.theme-soft-blue .ambient-light { opacity: 0.4; }
         @keyframes floatLight { 0% {transform: translate(0,0);} 100% {transform: translate(20px, 40px);} }
 
-        /* --- HEADER --- */
-        .top-header { padding: 40px 20px 20px; display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 10;}
-        .greet-box { display: flex; flex-direction: column; }
-        .date-badge { background: rgba(0, 229, 255, 0.1); padding: 4px 10px; border-radius: 50px; font-family: 'Space Grotesk'; font-size: 10px; font-weight: 900; color: var(--kc-cyan); letter-spacing: 1px; display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--border-glass); margin-bottom: 5px;}
-        html.theme-soft-blue .date-badge { background: rgba(2, 132, 199, 0.1); border-color: rgba(2, 132, 199, 0.3); }
-        .greet-txt { font-family: 'Outfit'; font-size: 26px; font-weight: 900; color: var(--text-main); line-height: 1; letter-spacing: -0.5px;}
+        /* --- HEADER & TOP ACTIONS (DI-REDESIGN BIAR ESTETIK) --- */
+        .top-header { padding: 45px 20px 15px; position: relative; z-index: 10; display: flex; flex-direction: column; align-items: flex-start;}
         
-        .header-actions { display: flex; gap: 10px; }
-        .btn-top { width: 45px; height: 45px; border-radius: 14px; background: var(--bg-panel); border: 1px solid var(--border-glass); color: var(--kc-cyan); font-size: 18px; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-cyan); cursor: pointer; transition: 0.2s; position: relative;}
+        .header-actions { position: absolute; top: 35px; right: 20px; display: flex; gap: 8px; }
+        .btn-top { width: 38px; height: 38px; border-radius: 50%; background: var(--bg-panel); border: 1px solid var(--border-glass); color: var(--kc-cyan); font-size: 15px; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-cyan); cursor: pointer; transition: 0.2s; position: relative;}
         html.theme-soft-blue .btn-top { background: #FFFFFF; color: var(--kc-cyan-dark); }
         .btn-top:active { transform: scale(0.9); background: var(--kc-cyan); color: black; }
         
-        .btn-logout { background: rgba(239, 68, 68, 0.1); border-color: var(--danger); color: var(--danger); }
-        html.theme-soft-blue .btn-logout { background: #FEF2F2; color: var(--danger); }
+        .btn-logout { background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); color: var(--danger); }
+        html.theme-soft-blue .btn-logout { background: #FEF2F2; color: var(--danger); border-color: rgba(220, 38, 38, 0.3); }
 
-        .inbox-badge { position: absolute; top: -5px; right: -5px; background: var(--danger); color: white; font-family: 'Space Grotesk'; font-size: 10px; font-weight: 900; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--bg-surface); box-shadow: 0 3px 10px rgba(239,68,68,0.4); animation: pulseBadge 2s infinite;}
+        .inbox-badge { position: absolute; top: -4px; right: -4px; background: var(--danger); color: white; font-family: 'Space Grotesk'; font-size: 9px; font-weight: 900; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--bg-surface); box-shadow: 0 3px 10px rgba(239,68,68,0.4); animation: pulseBadge 2s infinite;}
         @keyframes pulseBadge { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
 
-        /* --- VIP CARD --- */
-        .vip-card { margin: 5px 20px 25px; border-radius: 24px; background: linear-gradient(135deg, #0A1128 0%, var(--kc-cyan-dark) 100%); position: relative; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); display: flex; flex-direction: column;}
-        html.theme-soft-blue .vip-card { background: linear-gradient(135deg, #FFFFFF 0%, #E0F2FE 100%); box-shadow: var(--shadow-soft); border-color: var(--border-glass); }
+        .greet-box { display: flex; flex-direction: column; margin-top: 10px; }
+        .date-badge { background: rgba(0, 229, 255, 0.1); padding: 4px 10px; border-radius: 50px; font-family: 'Space Grotesk'; font-size: 10px; font-weight: 900; color: var(--kc-cyan); letter-spacing: 1px; display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--border-glass); margin-bottom: 5px;}
+        html.theme-soft-blue .date-badge { background: rgba(2, 132, 199, 0.1); border-color: rgba(2, 132, 199, 0.3); }
+        .greet-txt { font-family: 'Outfit'; font-size: 28px; font-weight: 900; color: var(--text-main); line-height: 1; letter-spacing: -0.5px;}
+        
+        /* --- VIP CARD (DARK THEME KONSISTEN) --- */
+        .vip-card { margin: 10px 20px 25px; border-radius: 24px; background: linear-gradient(135deg, #0A1128 0%, var(--kc-cyan-dark) 100%); position: relative; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); display: flex; flex-direction: column;}
+        /* TEMA LIGHT TETAP PAKAI CARD GELAP AGAR LOGO JELAS */
+        html.theme-soft-blue .vip-card { box-shadow: 0 20px 40px rgba(2, 132, 199, 0.25); border-color: var(--kc-cyan-dark); }
 
         .vip-card::after { content: ''; position: absolute; inset: 0; background-image: radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 15px 15px; opacity: 0.3; pointer-events: none; z-index: 1;}
-        html.theme-soft-blue .vip-card::after { background-image: radial-gradient(rgba(2, 132, 199, 0.1) 1px, transparent 1px); }
         .vip-card::before { content: ''; position: absolute; right: -20px; top: -20px; width: 120px; height: 120px; background: radial-gradient(circle, rgba(0,229,255,0.2) 0%, transparent 70%); border-radius: 50%; z-index: 1;}
-        html.theme-soft-blue .vip-card::before { background: radial-gradient(circle, rgba(2, 132, 199, 0.1) 0%, transparent 70%); }
         
-        /* LOGO DIKEMBALIKAN KE UKURAN PROPORSIONAL */
-        .vc-big-logo { position: absolute; right: -10px; top: 0px; height: 160px; width: auto; object-fit: contain; z-index: 2; opacity: 0.35; pointer-events: none;}
+        /* LOGO DIKECILKAN & DINAIKKAN SEDIKIT */
+        .vc-big-logo { position: absolute; right: -15px; top: -15px; height: 145px; width: auto; object-fit: contain; z-index: 2; opacity: 0.4; pointer-events: none;}
 
         .vc-top { padding: 20px 25px 10px; display: flex; justify-content: space-between; align-items: flex-start; position: relative; z-index: 3;}
         .vc-chip { width: 35px; height: 25px; background: linear-gradient(135deg, #FDE047, #CA8A04); border-radius: 6px; position: relative; overflow: hidden; opacity: 0.9;}
@@ -116,26 +116,18 @@
         
         .vc-middle { padding: 0 25px; position: relative; z-index: 4; display: flex; align-items: center; gap: 15px;}
         .vc-avatar { width: 75px; height: 75px; border-radius: 22px; background: #000; padding: 2px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); flex-shrink: 0; border: 2px solid var(--kc-cyan);}
-        html.theme-soft-blue .vc-avatar { background: #FFF; border-color: var(--kc-cyan); }
         .vc-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 18px;}
         
         .vc-info { flex: 1; }
         .vc-name { font-family: 'Outfit'; font-size: 22px; font-weight: 900; color: white; line-height: 1.1; margin-bottom: 4px; text-shadow: 0 2px 10px rgba(0,0,0,0.8); text-transform: uppercase;}
-        html.theme-soft-blue .vc-name { color: var(--text-main); text-shadow: none; }
         .vc-plat { font-family: 'Space Grotesk'; font-size: 14px; font-weight: 900; color: var(--kc-yellow); letter-spacing: 1.5px; text-shadow: 0 2px 5px rgba(0,0,0,0.8);}
-        html.theme-soft-blue .vc-plat { color: var(--kc-cyan-dark); text-shadow: none; }
         .vc-divisi { font-size: 10px; font-weight: 900; color: #000; background: var(--kc-cyan); padding: 3px 8px; border-radius: 6px; display: inline-block; margin-top: 4px;}
-        html.theme-soft-blue .vc-divisi { color: #FFF; }
         
         .vc-bottom { margin-top: 20px; background: rgba(0,0,0,0.3); padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 4; backdrop-filter: blur(10px);}
-        html.theme-soft-blue .vc-bottom { background: rgba(2, 132, 199, 0.05); border-top: 1px solid var(--border-glass); }
         .vc-role { font-size: 11px; font-weight: 900; color: white; display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 8px; font-family: 'Space Grotesk'; border: 1px solid rgba(255,255,255,0.1);}
-        html.theme-soft-blue .vc-role { color: var(--text-main); background: #FFF; border-color: var(--border-glass); }
         .vc-role i { color: var(--kc-yellow); }
-        html.theme-soft-blue .vc-role i { color: var(--kc-yellow-dark); }
         
         .vc-qr { font-size: 26px; color: white; cursor: pointer; transition: 0.2s; background: rgba(255,255,255,0.1); width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.3);}
-        html.theme-soft-blue .vc-qr { color: var(--kc-cyan-dark); background: rgba(2, 132, 199, 0.1); border-color: var(--kc-cyan); }
         .vc-qr:active { transform: scale(0.9); background: var(--kc-cyan); color: black;}
 
         .dash-container { padding: 0 20px; display: flex; flex-direction: column; gap: 15px; position: relative; z-index: 10;}
@@ -290,10 +282,6 @@
     <div class="ambient-light light-2"></div>
 
     <div class="top-header">
-        <div class="greet-box">
-            <div class="date-badge" id="displayDate">MEMUAT...</div>
-            <div class="greet-txt" id="greetingText">Halo!</div>
-        </div>
         <div class="header-actions">
             <button class="btn-top" onclick="toggleTheme()" title="Ganti Tema">
                 <i class="fas fa-palette"></i>
@@ -305,6 +293,11 @@
             <button class="btn-top btn-logout" onclick="logoutApp()" title="Keluar">
                 <i class="fas fa-power-off"></i>
             </button>
+        </div>
+        
+        <div class="greet-box">
+            <div class="date-badge" id="displayDate">MEMUAT...</div>
+            <div class="greet-txt" id="greetingText">Halo!</div>
         </div>
     </div>
 
