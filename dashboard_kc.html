@@ -11,7 +11,7 @@
             document.documentElement.classList.add('theme-soft-blue');
         }
 
-        const DASH_VERSION = "16.2_LOGO_PERFECT"; 
+        const DASH_VERSION = "16.3_LOGO_FIX"; 
         if (localStorage.getItem('maka_dash_kc_v') !== DASH_VERSION) {
             if ('caches' in window) { caches.keys().then((names) => { names.forEach(name => { caches.delete(name); }); }); }
             localStorage.setItem('maka_dash_kc_v', DASH_VERSION); window.location.reload(true); 
@@ -106,8 +106,8 @@
         .vip-card::before { content: ''; position: absolute; right: -20px; top: -20px; width: 120px; height: 120px; background: radial-gradient(circle, rgba(0,229,255,0.2) 0%, transparent 70%); border-radius: 50%; z-index: 1;}
         html.theme-soft-blue .vip-card::before { background: radial-gradient(circle, rgba(2, 132, 199, 0.1) 0%, transparent 70%); }
         
-        /* LOGO DIPERBESAR & DINAIKKAN LAGI BIAR PROPORSIONAL */
-        .vc-big-logo { position: absolute; right: -20px; top: -40px; height: 260px; width: auto; object-fit: contain; z-index: 2; opacity: 0.45; pointer-events: none;}
+        /* LOGO DIKEMBALIKAN KE UKURAN PROPORSIONAL */
+        .vc-big-logo { position: absolute; right: -10px; top: 0px; height: 160px; width: auto; object-fit: contain; z-index: 2; opacity: 0.35; pointer-events: none;}
 
         .vc-top { padding: 20px 25px 10px; display: flex; justify-content: space-between; align-items: flex-start; position: relative; z-index: 3;}
         .vc-chip { width: 35px; height: 25px; background: linear-gradient(135deg, #FDE047, #CA8A04); border-radius: 6px; position: relative; overflow: hidden; opacity: 0.9;}
