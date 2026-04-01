@@ -11,7 +11,7 @@
             document.documentElement.classList.add('theme-soft-blue');
         }
 
-        const DASH_VERSION = "17.2_TIKTOK_WATERMARK_FIX"; 
+        const DASH_VERSION = "17.3_FULL_WATERMARK"; 
         if (localStorage.getItem('maka_dash_kc_v') !== DASH_VERSION) {
             if ('caches' in window) { caches.keys().then((names) => { names.forEach(name => { caches.delete(name); }); }); }
             localStorage.setItem('maka_dash_kc_v', DASH_VERSION); window.location.reload(true); 
@@ -119,8 +119,11 @@
         /* TEMA LIGHT MENGGUNAKAN BIRU MUDA CERAH AGAR LOGO JELAS & ELEGAN */
         html.theme-soft-blue .vip-card { background: linear-gradient(135deg, #0284C7 0%, #38BDF8 100%); box-shadow: 0 20px 40px rgba(2, 132, 199, 0.3); border-color: rgba(255,255,255,0.6); }
 
-        /* WATERMARK BESAR (BELAKANG) - DIKECILKAN DAN DI-CENTER VERTIKAL */
-        .vc-watermark-logo { position: absolute; right: -15px; top: 50%; transform: translateY(-50%); height: 190px; width: auto; object-fit: contain; z-index: 1; opacity: 0.15; pointer-events: none;}
+        .vip-card::after { content: ''; position: absolute; inset: 0; background-image: radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 15px 15px; opacity: 0.3; pointer-events: none; z-index: 1;}
+        .vip-card::before { content: ''; position: absolute; right: -20px; top: -20px; width: 120px; height: 120px; background: radial-gradient(circle, rgba(0,229,255,0.2) 0%, transparent 70%); border-radius: 50%; z-index: 1;}
+        
+        /* WATERMARK BESAR (BELAKANG) - CENTER 100% & UKURAN HAMPIR FULL CARD */
+        .vc-watermark-logo { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 135%; height: auto; object-fit: contain; z-index: 1; opacity: 0.12; pointer-events: none;}
         
         /* LOGO KECIL TAJAM (KANAN ATAS) */
         .vc-small-logo { position: absolute; right: 20px; top: 25px; height: 60px; width: auto; object-fit: contain; z-index: 5; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.4));}
@@ -189,7 +192,7 @@
         
         .banner-title { font-family: 'Space Grotesk'; font-size: 16px; font-weight: 900; color: var(--text-main); margin-bottom: 8px; display: flex; align-items: center; gap: 8px;}
         .banner-status { font-size: 11px; font-weight: 800; font-family: 'Inter'; color: var(--text-muted); display: inline-flex; align-items: center; gap: 5px; background: rgba(0,0,0,0.2); padding: 4px 10px; border-radius: 8px;}
-        html.theme-soft-blue .banner-status { background: rgba(2, 132, 199, 0.1); }
+        html.theme-soft-blue .banner-status { background: rgba(2, 132, 199, 0.05); }
         
         .banner-val { font-size: 24px; color: var(--kc-cyan); text-align: right; background: rgba(0,229,255,0.1); padding: 8px 12px; display: flex; align-items: center; justify-content: center; border-radius: 12px;}
         html.theme-soft-blue .banner-val { background: rgba(2, 132, 199, 0.1); }
@@ -266,6 +269,7 @@
 
         /* --- BOTTOM DOCK --- */
         .dock-container { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); width: 88%; max-width: 380px; background: var(--bg-panel); backdrop-filter: blur(25px); border: 1px solid var(--border-glass); padding: 15px 35px; border-radius: 50px; display: flex; justify-content: space-around; align-items: center; z-index: 9999; box-shadow: 0 20px 50px rgba(0,0,0,0.9); transition: 0.5s;}
+        html.theme-soft-blue .dock-container { background: rgba(255, 255, 255, 0.95); border: 1px solid var(--kc-cyan); box-shadow: 0 20px 50px rgba(2, 132, 199, 0.2); }
         
         .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-muted); transition: 0.3s; gap: 6px; text-decoration: none;}
         .nav-item.active { color: var(--kc-cyan); transform: translateY(-4px);}
@@ -287,6 +291,7 @@
         html.theme-soft-blue .btn-close-modal { background: rgba(0,0,0,0.1); color: #0F172A; }
 
         .qr-wrapper { background: white; border: 2px dashed var(--kc-cyan); padding: 15px; border-radius: 20px; display: inline-block; margin-bottom: 15px;}
+        html.theme-soft-blue .qr-wrapper { background: #F8FAFC; }
         .qr-wrapper img { width: 200px; height: 200px; border-radius: 10px; mix-blend-mode: multiply;}
         .qr-name { font-family: 'Outfit'; font-size: 20px; font-weight: 900; color: var(--kc-cyan); margin-bottom: 2px; text-transform: uppercase;}
 
@@ -351,7 +356,6 @@
 
     <div class="vip-card">
         <img src="logo_kc.png" class="vc-watermark-logo" onerror="this.style.display='none'">
-        
         <img src="logo_kc.png" class="vc-small-logo" onerror="this.style.display='none'">
 
         <div class="vc-top">
@@ -411,6 +415,16 @@
                 <p>Ikuti keseruan & update info terbaru di TikTok Resmi Kami!</p>
             </div>
             <div class="tt-btn">FOLLOW <i class="fas fa-chevron-right" style="font-size:10px; margin-left:3px;"></i></div>
+        </div>
+
+        <div class="sultan-panel">
+            <div class="sp-header">
+                <div class="sp-title"><i class="fas fa-crown"></i> SULTAN TABUNGAN</div>
+                <div style="font-size: 11px; color: var(--text-muted); font-weight: 900;">TOP 3 SAVERS</div>
+            </div>
+            <div class="sp-list" id="topSaversList">
+                <div style="text-align: center; font-size: 12px; color: var(--text-muted); padding: 10px; font-weight:800;">Memuat data sultan... <i class="fas fa-spinner fa-spin"></i></div>
+            </div>
         </div>
 
     </div>
