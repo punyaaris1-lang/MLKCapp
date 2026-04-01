@@ -11,7 +11,7 @@
             document.documentElement.classList.add('theme-soft-blue');
         }
 
-        const DASH_VERSION = "17.3_FULL_WATERMARK"; 
+        const DASH_VERSION = "17.4_PERFECT_WATERMARK"; 
         if (localStorage.getItem('maka_dash_kc_v') !== DASH_VERSION) {
             if ('caches' in window) { caches.keys().then((names) => { names.forEach(name => { caches.delete(name); }); }); }
             localStorage.setItem('maka_dash_kc_v', DASH_VERSION); window.location.reload(true); 
@@ -80,7 +80,7 @@
         html.theme-soft-blue .ambient-light { opacity: 0.4; }
         @keyframes floatLight { 0% {transform: translate(0,0);} 100% {transform: translate(20px, 40px);} }
 
-        /* --- HEADER & TOP ACTIONS (REDESIGN MOCKUP BARU) --- */
+        /* --- HEADER & TOP ACTIONS --- */
         .top-header { padding: 40px 20px 15px; position: relative; z-index: 10; display: flex; flex-direction: column; gap: 15px;}
         .header-top-row { display: flex; justify-content: space-between; align-items: center; width: 100%;}
         
@@ -113,20 +113,19 @@
 
         .greet-txt { font-family: 'Outfit'; font-size: 34px; font-weight: 900; color: var(--text-main); line-height: 1.1; letter-spacing: -0.5px;}
 
-        /* --- VIP CARD (DUAL LOGO: WATERMARK & CRISP) --- */
+        /* --- VIP CARD --- */
         .vip-card { margin: 10px 20px 25px; border-radius: 24px; background: linear-gradient(135deg, #0A2E5C 0%, #03152E 100%); position: relative; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.5); border: 1px solid rgba(0,229,255,0.3); display: flex; flex-direction: column;}
         
-        /* TEMA LIGHT MENGGUNAKAN BIRU MUDA CERAH AGAR LOGO JELAS & ELEGAN */
         html.theme-soft-blue .vip-card { background: linear-gradient(135deg, #0284C7 0%, #38BDF8 100%); box-shadow: 0 20px 40px rgba(2, 132, 199, 0.3); border-color: rgba(255,255,255,0.6); }
 
         .vip-card::after { content: ''; position: absolute; inset: 0; background-image: radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 15px 15px; opacity: 0.3; pointer-events: none; z-index: 1;}
         .vip-card::before { content: ''; position: absolute; right: -20px; top: -20px; width: 120px; height: 120px; background: radial-gradient(circle, rgba(0,229,255,0.2) 0%, transparent 70%); border-radius: 50%; z-index: 1;}
         
-        /* WATERMARK BESAR (BELAKANG) - CENTER 100% & UKURAN HAMPIR FULL CARD */
-        .vc-watermark-logo { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 135%; height: auto; object-fit: contain; z-index: 1; opacity: 0.12; pointer-events: none;}
+        /* WATERMARK BESAR (DIKECILKAN SEDIKIT 115%) */
+        .vc-watermark-logo { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 115%; height: auto; object-fit: contain; z-index: 1; opacity: 0.12; pointer-events: none;}
         
-        /* LOGO KECIL TAJAM (KANAN ATAS) */
-        .vc-small-logo { position: absolute; right: 20px; top: 25px; height: 60px; width: auto; object-fit: contain; z-index: 5; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.4));}
+        /* LOGO KECIL TAJAM (SEJAJAR DENGAN CHIP) */
+        .vc-small-logo { position: absolute; right: 20px; top: 20px; height: 50px; width: auto; object-fit: contain; z-index: 5; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.4));}
 
         .vc-top { padding: 20px 25px 5px; display: flex; justify-content: flex-start; align-items: flex-start; position: relative; z-index: 3;}
         .vc-chip { width: 45px; height: 32px; background: linear-gradient(135deg, #FDE047, #CA8A04); border-radius: 8px; position: relative; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.3);}
@@ -162,7 +161,7 @@
 
         .dash-container { padding: 0 20px; display: flex; flex-direction: column; gap: 15px; position: relative; z-index: 10;}
 
-        /* BOARD PENGUMUMAN (KACA BURAM DI LIGHT MODE) */
+        /* BOARD PENGUMUMAN */
         .board-pengumuman { background: linear-gradient(90deg, rgba(0, 229, 255, 0.15) 0%, rgba(0,0,0,0) 100%); border-left: 5px solid var(--kc-cyan); border-radius: 14px; padding: 15px; margin-bottom: 5px; display: flex; gap: 15px; align-items: flex-start; text-align: left; width: 100%; position: relative;}
         html.theme-soft-blue .board-pengumuman { background: rgba(255, 255, 255, 0.45); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.8); border-left: 5px solid var(--kc-cyan-dark); box-shadow: 0 10px 25px rgba(2, 132, 199, 0.05);}
         
@@ -178,7 +177,7 @@
         html.theme-soft-blue #btnEditBoard { color: var(--kc-yellow-dark); }
         #btnEditBoard:active { transform: scale(0.9); }
 
-        /* --- FC BANNER (SMART BUNGLON GABUNGAN) --- */
+        /* --- FC BANNER --- */
         .fc-combined-box { background: var(--bg-panel); border-radius: 16px; border: 1px solid var(--border-glass); box-shadow: var(--shadow-soft); overflow: hidden; backdrop-filter: blur(20px);}
         .fc-main-part { padding: 18px 20px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--kc-cyan); cursor: pointer; transition: 0.2s;}
         .fc-main-part:active { background: rgba(0,0,0,0.2); }
@@ -192,7 +191,7 @@
         
         .banner-title { font-family: 'Space Grotesk'; font-size: 16px; font-weight: 900; color: var(--text-main); margin-bottom: 8px; display: flex; align-items: center; gap: 8px;}
         .banner-status { font-size: 11px; font-weight: 800; font-family: 'Inter'; color: var(--text-muted); display: inline-flex; align-items: center; gap: 5px; background: rgba(0,0,0,0.2); padding: 4px 10px; border-radius: 8px;}
-        html.theme-soft-blue .banner-status { background: rgba(2, 132, 199, 0.05); }
+        html.theme-soft-blue .banner-status { background: rgba(2, 132, 199, 0.1); }
         
         .banner-val { font-size: 24px; color: var(--kc-cyan); text-align: right; background: rgba(0,229,255,0.1); padding: 8px 12px; display: flex; align-items: center; justify-content: center; border-radius: 12px;}
         html.theme-soft-blue .banner-val { background: rgba(2, 132, 199, 0.1); }
@@ -228,6 +227,7 @@
         html.theme-soft-blue .tt-icon { background: var(--kc-cyan-dark); color: #FFF; box-shadow: 0 0 15px rgba(2, 132, 199, 0.4); }
         .tt-text { flex: 1; }
         .tt-text h3 { margin: 0 0 4px 0; font-family: 'Outfit'; font-size: 16px; font-weight: 900; color: var(--text-main); }
+        html.theme-soft-blue .tt-text h3 { color: var(--text-main); }
         .tt-text p { margin: 0; font-size: 11px; color: var(--text-muted); line-height: 1.4; font-weight: 600;}
         .tt-btn { background: #FFF; color: #000; padding: 8px 14px; border-radius: 50px; font-family: 'Space Grotesk'; font-size: 11px; font-weight: 900; display: flex; align-items: center; box-shadow: 0 5px 15px rgba(255,255,255,0.2);}
         html.theme-soft-blue .tt-btn { background: var(--kc-cyan-dark); color: #FFF; box-shadow: 0 5px 15px rgba(2,132,199,0.3);}
@@ -291,13 +291,12 @@
         html.theme-soft-blue .btn-close-modal { background: rgba(0,0,0,0.1); color: #0F172A; }
 
         .qr-wrapper { background: white; border: 2px dashed var(--kc-cyan); padding: 15px; border-radius: 20px; display: inline-block; margin-bottom: 15px;}
-        html.theme-soft-blue .qr-wrapper { background: #F8FAFC; }
         .qr-wrapper img { width: 200px; height: 200px; border-radius: 10px; mix-blend-mode: multiply;}
         .qr-name { font-family: 'Outfit'; font-size: 20px; font-weight: 900; color: var(--kc-cyan); margin-bottom: 2px; text-transform: uppercase;}
 
         .form-label { display: block; font-size: 12px; font-weight: 900; color: var(--kc-cyan); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 1px; text-align: left;}
         .form-input { width: 100%; padding: 15px; border-radius: 14px; border: 1px solid #333; background: #000; color: white; font-family: 'Inter'; font-size: 15px; font-weight: 800; outline: none; resize: none; transition: 0.2s; margin-bottom: 15px;}
-        html.theme-soft-blue .form-input { background: #F1F5F9; color: var(--text-main); border: 2px solid #CBD5E1; }
+        html.theme-soft-blue .form-input { background: #FFFFFF; color: var(--text-main); border: 1px solid #CBD5E1; }
         .form-input:focus { border-color: var(--kc-cyan); box-shadow: 0 0 15px rgba(0,229,255,0.3);}
 
         /* INBOX BOTTOM SHEET */
