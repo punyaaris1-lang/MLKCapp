@@ -11,7 +11,7 @@
             document.documentElement.classList.add('theme-soft-blue');
         }
 
-        const DASH_VERSION = "17.0_ULTIMATE_ESTETIK"; 
+        const DASH_VERSION = "17.1_WATERMARK_ICON_FIX"; 
         if (localStorage.getItem('maka_dash_kc_v') !== DASH_VERSION) {
             if ('caches' in window) { caches.keys().then((names) => { names.forEach(name => { caches.delete(name); }); }); }
             localStorage.setItem('maka_dash_kc_v', DASH_VERSION); window.location.reload(true); 
@@ -119,8 +119,8 @@
         /* TEMA LIGHT MENGGUNAKAN BIRU MUDA CERAH AGAR LOGO JELAS & ELEGAN */
         html.theme-soft-blue .vip-card { background: linear-gradient(135deg, #0284C7 0%, #38BDF8 100%); box-shadow: 0 20px 40px rgba(2, 132, 199, 0.3); border-color: rgba(255,255,255,0.6); }
 
-        /* WATERMARK BESAR (BELAKANG) */
-        .vc-watermark-logo { position: absolute; right: -30px; bottom: -30px; height: 220px; width: auto; object-fit: contain; z-index: 1; opacity: 0.15; pointer-events: none;}
+        /* WATERMARK BESAR (BELAKANG) - DI PERBAIKI POSISINYA */
+        .vc-watermark-logo { position: absolute; right: -40px; top: -30px; height: 260px; width: auto; object-fit: contain; z-index: 1; opacity: 0.12; pointer-events: none;}
         
         /* LOGO KECIL TAJAM (KANAN ATAS) */
         .vc-small-logo { position: absolute; right: 20px; top: 25px; height: 60px; width: auto; object-fit: contain; z-index: 5; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.4));}
@@ -239,6 +239,7 @@
         
         .ic-absen { background: linear-gradient(135deg, #10B981, #059669); color: white; box-shadow: 0 5px 20px rgba(16,185,129,0.4); }
         .ic-urc { background: linear-gradient(135deg, #ef4444, #991b1b); color: white; box-shadow: 0 5px 20px rgba(239,68,68,0.4); }
+        .ic-broadcast { background: linear-gradient(135deg, #FDE047, #CA8A04); color: #000; box-shadow: 0 5px 20px rgba(202, 138, 4, 0.4); }
 
         .menu-title { font-family: 'Outfit'; font-size: 14px; font-weight: 900; color: var(--text-main); letter-spacing: 0.5px;}
 
