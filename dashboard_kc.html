@@ -11,7 +11,7 @@
             document.documentElement.classList.add('theme-soft-blue');
         }
 
-        const DASH_VERSION = "17.4_PERFECT_WATERMARK"; 
+        const DASH_VERSION = "17.6_BANNER_LOCKED_WATERMARK"; 
         if (localStorage.getItem('maka_dash_kc_v') !== DASH_VERSION) {
             if ('caches' in window) { caches.keys().then((names) => { names.forEach(name => { caches.delete(name); }); }); }
             localStorage.setItem('maka_dash_kc_v', DASH_VERSION); window.location.reload(true); 
@@ -113,7 +113,7 @@
 
         .greet-txt { font-family: 'Outfit'; font-size: 34px; font-weight: 900; color: var(--text-main); line-height: 1.1; letter-spacing: -0.5px;}
 
-        /* --- VIP CARD --- */
+        /* --- VIP CARD (DUAL LOGO: WATERMARK & CRISP) --- */
         .vip-card { margin: 10px 20px 25px; border-radius: 24px; background: linear-gradient(135deg, #0A2E5C 0%, #03152E 100%); position: relative; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.5); border: 1px solid rgba(0,229,255,0.3); display: flex; flex-direction: column;}
         
         html.theme-soft-blue .vip-card { background: linear-gradient(135deg, #0284C7 0%, #38BDF8 100%); box-shadow: 0 20px 40px rgba(2, 132, 199, 0.3); border-color: rgba(255,255,255,0.6); }
@@ -121,8 +121,8 @@
         .vip-card::after { content: ''; position: absolute; inset: 0; background-image: radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 15px 15px; opacity: 0.3; pointer-events: none; z-index: 1;}
         .vip-card::before { content: ''; position: absolute; right: -20px; top: -20px; width: 120px; height: 120px; background: radial-gradient(circle, rgba(0,229,255,0.2) 0%, transparent 70%); border-radius: 50%; z-index: 1;}
         
-        /* WATERMARK BESAR (DIKECILKAN SEDIKIT 115%) */
-        .vc-watermark-logo { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 115%; height: auto; object-fit: contain; z-index: 1; opacity: 0.12; pointer-events: none;}
+        /* WATERMARK BESAR (DIKECILKAN KE 80% AGAR TIDAK NABRAK KANAN KIRI, DAN TETAP CENTER) */
+        .vc-watermark-logo { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 80%; height: auto; object-fit: contain; z-index: 1; opacity: 0.12; pointer-events: none;}
         
         /* LOGO KECIL TAJAM (SEJAJAR DENGAN CHIP) */
         .vc-small-logo { position: absolute; right: 20px; top: 20px; height: 50px; width: auto; object-fit: contain; z-index: 5; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.4));}
@@ -177,11 +177,10 @@
         html.theme-soft-blue #btnEditBoard { color: var(--kc-yellow-dark); }
         #btnEditBoard:active { transform: scale(0.9); }
 
-        /* --- FC BANNER --- */
+        /* --- FC BANNER (MAIN: KC LENGKET, ALT: GADING) --- */
         .fc-combined-box { background: var(--bg-panel); border-radius: 16px; border: 1px solid var(--border-glass); box-shadow: var(--shadow-soft); overflow: hidden; backdrop-filter: blur(20px);}
         .fc-main-part { padding: 18px 20px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--kc-cyan); cursor: pointer; transition: 0.2s;}
         .fc-main-part:active { background: rgba(0,0,0,0.2); }
-        .fc-main-part.mode-gading { border-left-color: var(--success); }
         html.theme-soft-blue .fc-main-part:active { background: rgba(2, 132, 199, 0.05); }
         
         .fc-alt-part { padding: 10px 20px; border-top: 1px dashed rgba(255,255,255,0.15); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.25); cursor: pointer; transition: 0.2s;}
@@ -195,7 +194,19 @@
         
         .banner-val { font-size: 24px; color: var(--kc-cyan); text-align: right; background: rgba(0,229,255,0.1); padding: 8px 12px; display: flex; align-items: center; justify-content: center; border-radius: 12px;}
         html.theme-soft-blue .banner-val { background: rgba(2, 132, 199, 0.1); }
-        .fc-main-part.mode-gading .banner-val { color: var(--success); background: rgba(16,185,129,0.1); }
+
+        /* --- TIKTOK BANNER --- */
+        .tiktok-banner { background: linear-gradient(135deg, #050B14 0%, #0A1931 100%); border: 1px solid rgba(0, 229, 255, 0.3); border-radius: 20px; padding: 15px 20px; display: flex; align-items: center; gap: 15px; margin-bottom: 20px; box-shadow: 0 10px 25px rgba(0, 229, 255, 0.15); cursor: pointer; transition: 0.3s; position: relative; z-index: 10;}
+        html.theme-soft-blue .tiktok-banner { background: linear-gradient(135deg, #FFFFFF 0%, #F0F8FF 100%); border-color: rgba(2, 132, 199, 0.3); box-shadow: 0 10px 25px rgba(2, 132, 199, 0.15); }
+        .tiktok-banner:active { transform: scale(0.98); }
+        .tt-icon { width: 45px; height: 45px; background: var(--kc-cyan); color: #000; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; box-shadow: 0 0 15px rgba(0, 229, 255, 0.5); }
+        html.theme-soft-blue .tt-icon { background: var(--kc-cyan-dark); color: #FFF; box-shadow: 0 0 15px rgba(2, 132, 199, 0.4); }
+        .tt-text { flex: 1; }
+        .tt-text h3 { margin: 0 0 4px 0; font-family: 'Outfit'; font-size: 16px; font-weight: 900; color: var(--text-main); }
+        html.theme-soft-blue .tt-text h3 { color: var(--text-main); }
+        .tt-text p { margin: 0; font-size: 11px; color: var(--text-muted); line-height: 1.4; font-weight: 600;}
+        .tt-btn { background: #FFF; color: #000; padding: 8px 14px; border-radius: 50px; font-family: 'Space Grotesk'; font-size: 11px; font-weight: 900; display: flex; align-items: center; box-shadow: 0 5px 15px rgba(255,255,255,0.2);}
+        html.theme-soft-blue .tt-btn { background: var(--kc-cyan-dark); color: #FFF; box-shadow: 0 5px 15px rgba(2,132,199,0.3);}
 
         /* --- SULTAN TABUNGAN --- */
         .sultan-panel { background: var(--bg-panel); backdrop-filter: blur(20px); border-radius: 22px; padding: 20px; box-shadow: var(--shadow-soft); border: 1px solid var(--border-glass); position: relative; overflow: hidden; margin-bottom: 20px;}
@@ -219,19 +230,6 @@
         .sp-plat { font-size: 11px; font-weight: 800; color: var(--text-muted); }
         .sp-badge { font-size: 18px; opacity: 0.9;}
 
-        /* --- TIKTOK BANNER --- */
-        .tiktok-banner { background: linear-gradient(135deg, #050B14 0%, #0A1931 100%); border: 1px solid rgba(0, 229, 255, 0.3); border-radius: 20px; padding: 15px 20px; display: flex; align-items: center; gap: 15px; margin-bottom: 20px; box-shadow: 0 10px 25px rgba(0, 229, 255, 0.15); cursor: pointer; transition: 0.3s; position: relative; z-index: 10;}
-        html.theme-soft-blue .tiktok-banner { background: linear-gradient(135deg, #FFFFFF 0%, #F0F8FF 100%); border-color: rgba(2, 132, 199, 0.3); box-shadow: 0 10px 25px rgba(2, 132, 199, 0.15); }
-        .tiktok-banner:active { transform: scale(0.98); }
-        .tt-icon { width: 45px; height: 45px; background: var(--kc-cyan); color: #000; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; box-shadow: 0 0 15px rgba(0, 229, 255, 0.5); }
-        html.theme-soft-blue .tt-icon { background: var(--kc-cyan-dark); color: #FFF; box-shadow: 0 0 15px rgba(2, 132, 199, 0.4); }
-        .tt-text { flex: 1; }
-        .tt-text h3 { margin: 0 0 4px 0; font-family: 'Outfit'; font-size: 16px; font-weight: 900; color: var(--text-main); }
-        html.theme-soft-blue .tt-text h3 { color: var(--text-main); }
-        .tt-text p { margin: 0; font-size: 11px; color: var(--text-muted); line-height: 1.4; font-weight: 600;}
-        .tt-btn { background: #FFF; color: #000; padding: 8px 14px; border-radius: 50px; font-family: 'Space Grotesk'; font-size: 11px; font-weight: 900; display: flex; align-items: center; box-shadow: 0 5px 15px rgba(255,255,255,0.2);}
-        html.theme-soft-blue .tt-btn { background: var(--kc-cyan-dark); color: #FFF; box-shadow: 0 5px 15px rgba(2,132,199,0.3);}
-
         /* --- MENU GRID --- */
         .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px;}
         .menu-btn { background: var(--bg-panel); backdrop-filter: blur(20px); border: 1px solid var(--border-glass); border-radius: 22px; padding: 20px 15px; display: flex; flex-direction: column; align-items: center; text-align: center; box-shadow: var(--shadow-soft); cursor: pointer; transition: 0.3s; text-decoration: none;}
@@ -240,7 +238,6 @@
         
         .icon-box { width: 55px; height: 55px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 12px; color: #000; box-shadow: 0 5px 20px rgba(0, 229, 255, 0.4); font-weight: 900;}
         
-        /* THEME SOFT BLUE IKON BOX CLEAN */
         html.theme-soft-blue .icon-box { background: #E0F2FE !important; color: var(--kc-cyan-dark) !important; box-shadow: none !important; border: 1px solid rgba(2, 132, 199, 0.2) !important; }
         html.theme-soft-blue .ic-urc { background: #FEF2F2 !important; color: var(--danger) !important; border-color: rgba(220, 38, 38, 0.2) !important; }
         html.theme-soft-blue .ic-broadcast { background: #FEF3C7 !important; color: var(--kc-yellow-dark) !important; border-color: rgba(217, 119, 6, 0.2) !important; }
@@ -296,7 +293,7 @@
 
         .form-label { display: block; font-size: 12px; font-weight: 900; color: var(--kc-cyan); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 1px; text-align: left;}
         .form-input { width: 100%; padding: 15px; border-radius: 14px; border: 1px solid #333; background: #000; color: white; font-family: 'Inter'; font-size: 15px; font-weight: 800; outline: none; resize: none; transition: 0.2s; margin-bottom: 15px;}
-        html.theme-soft-blue .form-input { background: #FFFFFF; color: var(--text-main); border: 1px solid #CBD5E1; }
+        html.theme-soft-blue .form-input { background: #F1F5F9; color: var(--text-main); border: 2px solid #CBD5E1; }
         .form-input:focus { border-color: var(--kc-cyan); box-shadow: 0 0 15px rgba(0,229,255,0.3);}
 
         /* INBOX BOTTOM SHEET */
@@ -355,6 +352,7 @@
 
     <div class="vip-card">
         <img src="logo_kc.png" class="vc-watermark-logo" onerror="this.style.display='none'">
+        
         <img src="logo_kc.png" class="vc-small-logo" onerror="this.style.display='none'">
 
         <div class="vc-top">
@@ -391,14 +389,14 @@
         </div>
 
         <div class="fc-combined-box" id="fcCombinedBox">
-            <div class="fc-main-part mode-kc" id="mainFcBanner" onclick="handleFCBannerClick()">
+            <div class="fc-main-part mode-kc" id="mainFcBanner" onclick="window.location.href = 'antriankc.html';">
                 <div class="fc-left">
                     <h4 class="banner-title" id="mainFcTitle"><i class="fas fa-bolt"></i> FC KARTIKA CHANDRA</h4>
                     <div class="banner-status" id="mainFcDesc"><i class="fas fa-location-arrow"></i> Menghitung Jarak...</div>
                 </div>
                 <div class="banner-val" id="mainFcVal"><i class="fas fa-spinner fa-spin"></i></div>
             </div>
-            <div class="fc-alt-part" id="altFcBanner" onclick="handleAltFCBannerClick()">
+            <div class="fc-alt-part" id="altFcBanner" onclick="window.location.href = 'antrian_gading.html';">
                 <div style="display:flex; align-items:center; gap:8px;">
                     <span style="font-size:10px; font-weight:800; color:var(--text-muted); text-transform:uppercase;"><i class="fas fa-map-signs"></i> Alt:</span>
                     <span id="altFcName" style="font-size:12px; font-weight:900; color:var(--text-main);">FC KELAPA GADING</span>
@@ -683,11 +681,13 @@
         }
 
         // =========================================================================
-        // 4. SISTEM ANTRIAN (BUNGLON) & GPS SILENT TRACKER
+        // 4. SISTEM ANTRIAN & GPS TRACKER (MAIN: KC, ALT: GADING)
         // =========================================================================
-        let isBannerKC = true; 
         let statusKCHtml = "Memuat...";
         let statusGadingHtml = "Memuat...";
+        
+        window.kcDist = "Menghitung...";
+        window.gdDist = "Menghitung...";
 
         onSnapshot(refKC, (snap) => { 
             if(!snap.exists()) return; 
@@ -695,9 +695,9 @@
             let slots = d.chargingSlots || [null,null,null,null,null]; let dis = d.disabledSlots || [false,false,false,false,false];
             let available = 0; for(let i=0; i<5; i++) { if(slots[i] === null && !dis[i]) available++; }
 
-            if(qLen > 0) { statusKCHtml = `<span style="color:var(--danger);"><i class="fas fa-users"></i> ${qLen} ANTRE</span>`; window.kcLbl = "ANTRIAN LIVE"; } 
-            else { statusKCHtml = `<span style="color:var(--success);"><i class="fas fa-check-circle"></i> ${available} KOSONG</span>`; window.kcLbl = "TERSEDIA"; }
-            updateBunglonUI();
+            if(qLen > 0) { statusKCHtml = `<span style="color:var(--danger);"><i class="fas fa-users"></i> ${qLen} ANTRE</span>`; } 
+            else { statusKCHtml = `<span style="color:var(--success);"><i class="fas fa-check-circle"></i> ${available} KOSONG</span>`; }
+            updateBannersUI();
         }); 
         
         onSnapshot(refGading, (snap) => {
@@ -706,12 +706,12 @@
             let slots = d.chargingSlots || [null,null,null]; let dis = d.disabledSlots || [false,false,false];
             let available = 0; for(let i=0; i<3; i++) { if(slots[i] === null && !dis[i]) available++; }
 
-            if(qLen > 0) { statusGadingHtml = `<span style="color:var(--danger);"><i class="fas fa-users"></i> ${qLen} ANTRE</span>`; window.gdLbl = "ANTRIAN LIVE"; } 
-            else { statusGadingHtml = `<span style="color:var(--success);"><i class="fas fa-check-circle"></i> ${available} KOSONG</span>`; window.gdLbl = "TERSEDIA"; }
-            updateBunglonUI();
+            if(qLen > 0) { statusGadingHtml = `<span style="color:var(--danger);"><i class="fas fa-users"></i> ${qLen} ANTRE</span>`; } 
+            else { statusGadingHtml = `<span style="color:var(--success);"><i class="fas fa-check-circle"></i> ${available} KOSONG</span>`; }
+            updateBannersUI();
         });
 
-        function updateBunglonUI() {
+        function updateBannersUI() {
             const mainPart = document.getElementById('mainFcBanner'); 
             const mainTitle = document.getElementById('mainFcTitle');
             const mainVal = document.getElementById('mainFcVal'); 
@@ -720,27 +720,16 @@
             const altName = document.getElementById('altFcName');
             const altDist = document.getElementById('altFcDist');
 
-            if(isBannerKC) {
-                mainPart.classList.remove('mode-gading');
-                mainTitle.innerHTML = `<i class="fas fa-bolt"></i> FC KARTIKA CHANDRA`;
-                mainVal.innerHTML = statusKCHtml; 
-                mainStatus.innerHTML = `<i class="fas fa-location-arrow"></i> ${window.kcDist || 'Menghitung...'} KM`;
-                
-                altName.innerText = "FC KELAPA GADING";
-                altDist.innerHTML = `<i class="fas fa-location-arrow"></i> ~${window.gdDist || '...'} KM`;
-            } else {
-                mainPart.classList.add('mode-gading');
-                mainTitle.innerHTML = `<i class="fas fa-charging-station" style="color:var(--success);"></i> FC KELAPA GADING`;
-                mainVal.innerHTML = statusGadingHtml; 
-                mainStatus.innerHTML = `<i class="fas fa-location-arrow"></i> ${window.gdDist || 'Menghitung...'} KM`;
-                
-                altName.innerText = "FC KARTIKA CHANDRA";
-                altDist.innerHTML = `<i class="fas fa-location-arrow"></i> ~${window.kcDist || '...'} KM`;
-            }
+            // MAIN BANNER: SELALU KARTIKA CHANDRA
+            mainPart.classList.remove('mode-gading');
+            mainTitle.innerHTML = `<i class="fas fa-bolt"></i> FC KARTIKA CHANDRA`;
+            mainVal.innerHTML = statusKCHtml; 
+            mainStatus.innerHTML = `<i class="fas fa-location-arrow"></i> ${window.kcDist === 'Menghitung...' ? window.kcDist : window.kcDist + ' KM'}`;
+            
+            // ALT BANNER: KELAPA GADING
+            altName.innerText = "FC KELAPA GADING";
+            altDist.innerHTML = `<i class="fas fa-location-arrow"></i> ~${window.gdDist === 'Menghitung...' ? '...' : window.gdDist} KM`;
         }
-
-        window.handleFCBannerClick = () => { if(isBannerKC) window.location.href = 'antriankc.html'; else window.location.href = 'antrian_gading.html'; };
-        window.handleAltFCBannerClick = () => { if(isBannerKC) window.location.href = 'antrian_gading.html'; else window.location.href = 'antriankc.html'; };
 
         const LAT_KC = -6.2285953; const LNG_KC = 106.819502;
         const LAT_GADING = -6.159389; const LNG_GADING = 106.901416;
@@ -755,11 +744,8 @@
                 const distGading = calculateDist(LAT_GADING, LNG_GADING, uLat, uLng);
 
                 window.kcDist = distKC.toFixed(1); window.gdDist = distGading.toFixed(1);
-
-                if(distGading < distKC) isBannerKC = false;
-                else isBannerKC = true;
                 
-                updateBunglonUI();
+                updateBannersUI();
 
                 setDoc(doc(dbKC, "live_tracking", myPlatClean), { lat: uLat, lng: uLng, nama: myCurrentName, plat: myPlat, hp: uData.hp || uData.wa || "", foto: myCurrentPhoto, timestamp: Date.now() }, { merge: true }).catch(e => console.log(e));
 
