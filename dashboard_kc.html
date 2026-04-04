@@ -11,7 +11,7 @@
             document.documentElement.classList.add('theme-soft-blue');
         }
 
-        const DASH_VERSION = "17.6_BANNER_LOCKED_WATERMARK"; 
+        const DASH_VERSION = "18.0_ULTIMATE_FIX"; 
         if (localStorage.getItem('maka_dash_kc_v') !== DASH_VERSION) {
             if ('caches' in window) { caches.keys().then((names) => { names.forEach(name => { caches.delete(name); }); }); }
             localStorage.setItem('maka_dash_kc_v', DASH_VERSION); window.location.reload(true); 
@@ -80,7 +80,7 @@
         html.theme-soft-blue .ambient-light { opacity: 0.4; }
         @keyframes floatLight { 0% {transform: translate(0,0);} 100% {transform: translate(20px, 40px);} }
 
-        /* --- HEADER & TOP ACTIONS (REDESIGN MOCKUP BARU) --- */
+        /* --- HEADER & TOP ACTIONS --- */
         .top-header { padding: 40px 20px 15px; position: relative; z-index: 10; display: flex; flex-direction: column; gap: 15px;}
         .header-top-row { display: flex; justify-content: space-between; align-items: center; width: 100%;}
         
@@ -94,7 +94,6 @@
         html.theme-soft-blue .btn-theme-mini { background: var(--kc-cyan-dark); color: #FFF; }
         .btn-theme-mini:active { transform: scale(0.9); }
 
-        /* PILL MENU KANAN ATAS */
         .header-actions-pill { display: flex; align-items: center; background: rgba(0, 229, 255, 0.05); backdrop-filter: blur(15px); border: 1px solid rgba(0, 229, 255, 0.3); border-radius: 50px; padding: 4px 8px; gap: 5px;}
         html.theme-soft-blue .header-actions-pill { background: rgba(255, 255, 255, 0.6); border-color: rgba(2, 132, 199, 0.3); }
         
@@ -113,20 +112,18 @@
 
         .greet-txt { font-family: 'Outfit'; font-size: 34px; font-weight: 900; color: var(--text-main); line-height: 1.1; letter-spacing: -0.5px;}
 
-        /* --- VIP CARD (DUAL LOGO: WATERMARK & CRISP) --- */
+        /* --- VIP CARD --- */
         .vip-card { margin: 10px 20px 25px; border-radius: 24px; background: linear-gradient(135deg, #0A2E5C 0%, #03152E 100%); position: relative; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.5); border: 1px solid rgba(0,229,255,0.3); display: flex; flex-direction: column;}
-        
-        /* TEMA LIGHT MENGGUNAKAN BIRU MUDA CERAH AGAR LOGO JELAS & ELEGAN */
         html.theme-soft-blue .vip-card { background: linear-gradient(135deg, #0284C7 0%, #38BDF8 100%); box-shadow: 0 20px 40px rgba(2, 132, 199, 0.3); border-color: rgba(255,255,255,0.6); }
 
         .vip-card::after { content: ''; position: absolute; inset: 0; background-image: radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 15px 15px; opacity: 0.3; pointer-events: none; z-index: 1;}
         .vip-card::before { content: ''; position: absolute; right: -20px; top: -20px; width: 120px; height: 120px; background: radial-gradient(circle, rgba(0,229,255,0.2) 0%, transparent 70%); border-radius: 50%; z-index: 1;}
         
-        /* WATERMARK BESAR (DIKECILKAN KE 85% AGAR TIDAK NABRAK KANAN KIRI, DAN TETAP CENTER) */
-        .vc-watermark-logo { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 85%; height: auto; object-fit: contain; z-index: 1; opacity: 0.12; pointer-events: none;}
+        /* WATERMARK BESAR: DIKECILIN KE 75%, CENTER MUTLAK BIAR ADA JARAK KIRI KANAN */
+        .vc-watermark-logo { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 75%; max-height: 160px; object-fit: contain; z-index: 1; opacity: 0.12; pointer-events: none;}
         
-        /* LOGO KECIL TAJAM (SEJAJAR DENGAN CHIP DI TOP 18PX) */
-        .vc-small-logo { position: absolute; right: 20px; top: 18px; height: 50px; width: auto; object-fit: contain; z-index: 5; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.4));}
+        /* LOGO KECIL TAJAM: SEJAJAR DENGAN CHIP (TOP: 20PX) */
+        .vc-small-logo { position: absolute; right: 25px; top: 20px; height: 35px; width: auto; object-fit: contain; z-index: 5; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.4));}
 
         .vc-top { padding: 20px 25px 5px; display: flex; justify-content: flex-start; align-items: flex-start; position: relative; z-index: 3;}
         .vc-chip { width: 45px; height: 32px; background: linear-gradient(135deg, #FDE047, #CA8A04); border-radius: 8px; position: relative; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.3);}
@@ -162,7 +159,7 @@
 
         .dash-container { padding: 0 20px; display: flex; flex-direction: column; gap: 15px; position: relative; z-index: 10;}
 
-        /* BOARD PENGUMUMAN (KACA BURAM DI LIGHT MODE) */
+        /* BOARD PENGUMUMAN */
         .board-pengumuman { background: linear-gradient(90deg, rgba(0, 229, 255, 0.15) 0%, rgba(0,0,0,0) 100%); border-left: 5px solid var(--kc-cyan); border-radius: 14px; padding: 15px; margin-bottom: 5px; display: flex; gap: 15px; align-items: flex-start; text-align: left; width: 100%; position: relative;}
         html.theme-soft-blue .board-pengumuman { background: rgba(255, 255, 255, 0.45); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.8); border-left: 5px solid var(--kc-cyan-dark); box-shadow: 0 10px 25px rgba(2, 132, 199, 0.05);}
         
@@ -178,11 +175,10 @@
         html.theme-soft-blue #btnEditBoard { color: var(--kc-yellow-dark); }
         #btnEditBoard:active { transform: scale(0.9); }
 
-        /* --- FC BANNER --- */
+        /* --- FC BANNER (MAIN FIXED, ALT DINAMIS) --- */
         .fc-combined-box { background: var(--bg-panel); border-radius: 16px; border: 1px solid var(--border-glass); box-shadow: var(--shadow-soft); overflow: hidden; backdrop-filter: blur(20px);}
         .fc-main-part { padding: 18px 20px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--kc-cyan); cursor: pointer; transition: 0.2s;}
         .fc-main-part:active { background: rgba(0,0,0,0.2); }
-        .fc-main-part.mode-gading { border-left-color: var(--success); }
         html.theme-soft-blue .fc-main-part:active { background: rgba(2, 132, 199, 0.05); }
         
         .fc-alt-part { padding: 10px 20px; border-top: 1px dashed rgba(255,255,255,0.15); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.25); cursor: pointer; transition: 0.2s;}
@@ -196,7 +192,6 @@
         
         .banner-val { font-size: 24px; color: var(--kc-cyan); text-align: right; background: rgba(0,229,255,0.1); padding: 8px 12px; display: flex; align-items: center; justify-content: center; border-radius: 12px;}
         html.theme-soft-blue .banner-val { background: rgba(2, 132, 199, 0.1); }
-        .fc-main-part.mode-gading .banner-val { color: var(--success); background: rgba(16,185,129,0.1); }
 
         /* --- TIKTOK BANNER --- */
         .tiktok-banner { background: linear-gradient(135deg, #050B14 0%, #0A1931 100%); border: 1px solid rgba(0, 229, 255, 0.3); border-radius: 20px; padding: 15px 20px; display: flex; align-items: center; gap: 15px; margin-bottom: 20px; box-shadow: 0 10px 25px rgba(0, 229, 255, 0.15); cursor: pointer; transition: 0.3s; position: relative; z-index: 10;}
@@ -241,7 +236,6 @@
         
         .icon-box { width: 55px; height: 55px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 12px; color: #000; box-shadow: 0 5px 20px rgba(0, 229, 255, 0.4); font-weight: 900;}
         
-        /* THEME SOFT BLUE IKON BOX CLEAN */
         html.theme-soft-blue .icon-box { background: #E0F2FE !important; color: var(--kc-cyan-dark) !important; box-shadow: none !important; border: 1px solid rgba(2, 132, 199, 0.2) !important; }
         html.theme-soft-blue .ic-urc { background: #FEF2F2 !important; color: var(--danger) !important; border-color: rgba(220, 38, 38, 0.2) !important; }
         html.theme-soft-blue .ic-broadcast { background: #FEF3C7 !important; color: var(--kc-yellow-dark) !important; border-color: rgba(217, 119, 6, 0.2) !important; }
@@ -393,7 +387,7 @@
         </div>
 
         <div class="fc-combined-box" id="fcCombinedBox">
-            <div class="fc-main-part mode-kc" id="mainFcBanner" onclick="window.handleFCBannerClick()">
+            <div class="fc-main-part mode-kc" id="mainFcBanner" onclick="window.location.href = 'antriankc.html';">
                 <div class="fc-left">
                     <h4 class="banner-title" id="mainFcTitle"><i class="fas fa-bolt"></i> FC KARTIKA CHANDRA</h4>
                     <div class="banner-status" id="mainFcDesc"><i class="fas fa-location-arrow"></i> Menghitung Jarak...</div>
@@ -636,10 +630,11 @@
         const appKC = initializeApp(firebaseConfig, "AppKC"); const dbKC = getFirestore(appKC);
         const refKC = doc(dbKC, "antrian", "utama");
 
+        // Gading DB tetap diload (tapi tidak untuk render queue di banner)
         const appGadingConfig = { apiKey: "AIzaSyB666i9lYWIpxOdkwpoX9EvFvHLmHczeq8", authDomain: "fcgadingnew22.firebaseapp.com", projectId: "fcgadingnew22" };
         const appGading = initializeApp(appGadingConfig, "AppGading"); const dbGading = getFirestore(appGading);
-        const refGading = doc(dbGading, "antrian", "utama");
 
+        // MLU DB UNTUK MENGAMBIL DATA fc_locations
         const appMLUConfig = { apiKey: "AIzaSyAk3G5aQUBVe_g7_peVu1F6xllP_RejGq0", authDomain: "rtomaka-e67b5.firebaseapp.com", projectId: "rtomaka-e67b5" };
         const appMLU = initializeApp(appMLUConfig, "AppMLU");
         const dbMLU = getFirestore(appMLU);
@@ -686,14 +681,12 @@
         }
 
         // =========================================================================
-        // 4. SISTEM ANTRIAN & GPS TRACKER (MAIN: KC, ALT: LOKASI TERDEKAT)
+        // 4. SISTEM ANTRIAN (MAIN: KC FIXED, ALT: DINAMIS DARI DB MLU)
         // =========================================================================
         let statusKCHtml = "Memuat...";
-        let statusGadingHtml = "Memuat...";
-        
         window.kcDist = "Memuat...";
-        window.gdDist = "Memuat...";
-
+        
+        // 1. Ambil Status Antrean KC (Banner Utama)
         onSnapshot(refKC, (snap) => { 
             if(!snap.exists()) return; 
             const d = snap.data(); let qLen = (d.waitingQueue||[]).length; 
@@ -702,93 +695,78 @@
 
             if(qLen > 0) { statusKCHtml = `<span style="color:var(--danger);"><i class="fas fa-users"></i> ${qLen} ANTRE</span>`; } 
             else { statusKCHtml = `<span style="color:var(--success);"><i class="fas fa-check-circle"></i> ${available} KOSONG</span>`; }
-            updateBannersUI();
+            document.getElementById('mainFcVal').innerHTML = statusKCHtml;
         }); 
-        
-        onSnapshot(refGading, (snap) => {
-            if(!snap.exists()) return;
-            const d = snap.data(); let qLen = (d.waitingQueue||[]).length;
-            let slots = d.chargingSlots || [null,null,null]; let dis = d.disabledSlots || [false,false,false];
-            let available = 0; for(let i=0; i<3; i++) { if(slots[i] === null && !dis[i]) available++; }
 
-            if(qLen > 0) { statusGadingHtml = `<span style="color:var(--danger);"><i class="fas fa-users"></i> ${qLen} ANTRE</span>`; } 
-            else { statusGadingHtml = `<span style="color:var(--success);"><i class="fas fa-check-circle"></i> ${available} KOSONG</span>`; }
-            updateBannersUI();
+        // 2. Load Semua Station Alternatif (Kecuali KC) dari DB MLU
+        let altStations = [
+            { id: 'gading', name: 'FC KELAPA GADING', lat: -6.159389, lng: 106.901416, link: 'antrian_gading.html' }
+        ];
+
+        onSnapshot(collection(dbMLU, "fc_locations"), (snap) => {
+            altStations = [
+                { id: 'gading', name: 'FC KELAPA GADING', lat: -6.159389, lng: 106.901416, link: 'antrian_gading.html' }
+            ];
+            snap.forEach(doc => {
+                const data = doc.data();
+                // Abaikan KC agar tidak muncul di banner bawah
+                if(data.isActive !== false && doc.id !== 'kc' && !data.name.toUpperCase().includes("KARTIKA CHANDRA")) {
+                    altStations.push({ id: doc.id, name: data.name.toUpperCase(), lat: data.lat, lng: data.lng, link: data.appLink || 'lokasi_fc.html' });
+                }
+            });
+            calculateNearestAlt(); // Hitung ulang jarak kalau ada station baru
         });
 
-        function updateBannersUI() {
-            const mainPart = document.getElementById('mainFcBanner'); 
-            const mainTitle = document.getElementById('mainFcTitle');
-            const mainVal = document.getElementById('mainFcVal'); 
-            const mainStatus = document.getElementById('mainFcDesc');
-            
-            const altName = document.getElementById('altFcName');
-            const altDist = document.getElementById('altFcDist');
+        let myLat = null, myLng = null;
+        let closestAlt = { name: "FC KELAPA GADING", dist: "...", link: "antrian_gading.html" };
 
-            // MAIN BANNER: SELALU KARTIKA CHANDRA (FIXED)
-            mainPart.classList.remove('mode-gading');
-            mainTitle.innerHTML = `<i class="fas fa-bolt"></i> FC KARTIKA CHANDRA`;
-            mainVal.innerHTML = statusKCHtml; 
-            mainStatus.innerHTML = `<i class="fas fa-location-arrow"></i> ${window.kcDist === 'Memuat...' ? window.kcDist : window.kcDist + ' KM'}`;
-            
-            // ALT BANNER: DINAMIS SESUAI LOKASI TERDEKAT
-            let closestName = "FC KELAPA GADING";
-            let closestDist = window.gdDist;
-            let isKClosest = false;
+        function calculateNearestAlt() {
+            if(!myLat || !myLng) return;
+            let minDist = 999999;
+            let nearest = null;
 
-            if (window.kcDist !== 'Memuat...' && window.gdDist !== 'Memuat...') {
-                if (parseFloat(window.kcDist) <= parseFloat(window.gdDist)) {
-                    closestName = "FC KARTIKA CHANDRA";
-                    closestDist = window.kcDist;
-                    isKClosest = true;
+            altStations.forEach(st => {
+                const dist = calculateDist(st.lat, st.lng, myLat, myLng);
+                if(dist < minDist) {
+                    minDist = dist;
+                    nearest = st;
                 }
-            } else {
-                // Default value before GPS is acquired
-                closestName = "FC KARTIKA CHANDRA";
-                closestDist = window.kcDist;
-                isKClosest = true;
-            }
+            });
 
-            altName.innerText = closestName;
-            altDist.innerHTML = `<i class="fas fa-location-arrow"></i> ~${closestDist === 'Memuat...' ? '...' : closestDist} KM`;
-            
-            if(isKClosest) {
-                altDist.style.color = "var(--kc-cyan)";
-            } else {
-                altDist.style.color = "var(--success)";
+            if(nearest) {
+                closestAlt = {
+                    name: nearest.name,
+                    dist: minDist.toFixed(1),
+                    link: nearest.link || 'lokasi_fc.html'
+                };
+                
+                document.getElementById('altFcName').innerText = closestAlt.name;
+                document.getElementById('altFcDist').innerHTML = `<i class="fas fa-location-arrow"></i> ~${closestAlt.dist} KM`;
             }
         }
 
-        window.handleFCBannerClick = () => { 
-            window.location.href = 'antriankc.html'; 
-        };
-        
-        window.handleAltFCBannerClick = () => { 
-            const altName = document.getElementById('altFcName').innerText;
-            if(altName.includes("GADING")) {
-                window.location.href = 'antrian_gading.html';
-            } else {
-                window.location.href = 'antriankc.html';
-            }
-        };
+        window.handleFCBannerClick = () => { window.location.href = 'antriankc.html'; };
+        window.handleAltFCBannerClick = () => { window.location.href = closestAlt.link; };
 
         const LAT_KC = -6.2285953; const LNG_KC = 106.819502;
-        const LAT_GADING = -6.159389; const LNG_GADING = 106.901416;
 
         function calculateDist(lat1, lon1, lat2, lon2) { const p = 0.017453292519943295; const c = Math.cos; const a = 0.5 - c((lat2 - lat1) * p)/2 + c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p))/2; return 12742 * Math.asin(Math.sqrt(a)); }
 
+        // 3. TRACKING GPS REALTIME
         if(navigator.geolocation) {
             navigator.geolocation.watchPosition((pos) => {
-                const uLat = pos.coords.latitude; const uLng = pos.coords.longitude;
+                myLat = pos.coords.latitude; 
+                myLng = pos.coords.longitude;
                 
-                const distKC = calculateDist(LAT_KC, LNG_KC, uLat, uLng);
-                const distGading = calculateDist(LAT_GADING, LNG_GADING, uLat, uLng);
-
-                window.kcDist = distKC.toFixed(1); window.gdDist = distGading.toFixed(1);
+                // Hitung & Tulis Jarak KC (Banner Utama)
+                window.kcDist = calculateDist(LAT_KC, LNG_KC, myLat, myLng).toFixed(1);
+                document.getElementById('mainFcDesc').innerHTML = `<i class="fas fa-location-arrow"></i> ${window.kcDist} KM`;
                 
-                updateBannersUI();
+                // Cari & Tulis Stasiun Terdekat (Banner Bawah)
+                calculateNearestAlt();
 
-                setDoc(doc(dbKC, "live_tracking", myPlatClean), { lat: uLat, lng: uLng, nama: myCurrentName, plat: myPlat, hp: uData.hp || uData.wa || "", foto: myCurrentPhoto, timestamp: Date.now() }, { merge: true }).catch(e => console.log(e));
+                // Kirim koordinat live ke server KC
+                setDoc(doc(dbKC, "live_tracking", myPlatClean), { lat: myLat, lng: myLng, nama: myName, plat: myPlat, hp: uData.hp || uData.wa || "", foto: myCurrentPhoto, timestamp: Date.now() }, { merge: true }).catch(e => console.log(e));
 
             }, (err) => { document.getElementById('kcBoardDesc').innerText += ` [GPS Ditolak/Mati]`; }, {enableHighAccuracy: true, maximumAge: 10000});
         }
