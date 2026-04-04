@@ -11,7 +11,7 @@
             document.documentElement.classList.add('theme-soft-blue');
         }
 
-        const TABUNGAN_VERSION = "5.0_ULTIMATE_SECURE"; 
+        const TABUNGAN_VERSION = "6.0_LIGHT_THEME_FIX"; 
         if (localStorage.getItem('maka_tabungan_v') !== TABUNGAN_VERSION) {
             if ('caches' in window) {
                 caches.keys().then((names) => { names.forEach(name => { caches.delete(name); }); });
@@ -24,7 +24,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Space+Grotesk:wght@700;800;900&family=Outfit:wght@500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 
     <style>
         /* === TEMA CYBER NAVY & CYAN === */
@@ -78,14 +78,24 @@
         html.theme-soft-blue .ambient-light { opacity: 0.4; }
         @keyframes floatLight { 0% {transform: translate(0,0);} 100% {transform: translate(20px, 40px);} }
 
+        /* LOADER OVERLAY */
+        .loader-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.9); backdrop-filter:blur(10px); z-index:20000; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+        html.theme-soft-blue .loader-overlay { background:rgba(255,255,255,0.9); }
+        .spinner-ring { width:50px; height:50px; border:4px solid #222; border-top:4px solid var(--cyan-logo); border-radius:50%; animation:spin 1s infinite linear; }
+        html.theme-soft-blue .spinner-ring { border-color: #CBD5E1; border-top-color: var(--cyan-dark); }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
         /* --- SECURITY UI (FACE & PIN SCREEN) --- */
-        #securityScreen { position: fixed; inset: 0; background: rgba(5,11,20,0.95); backdrop-filter: blur(15px); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; transition: opacity 0.5s; }
-        html.theme-soft-blue #securityScreen { background: rgba(255,255,255,0.95); }
+        #securityScreen { position: fixed; inset: 0; background: rgba(5,11,20,0.98); backdrop-filter: blur(15px); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; transition: opacity 0.5s; }
+        html.theme-soft-blue #securityScreen { background: rgba(240, 248, 255, 0.98); }
         
         .sec-icon-box { width: 90px; height: 90px; border-radius: 50%; background: #000; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-cyan); margin-bottom: 20px; position: relative; overflow: hidden; border: 2px solid var(--cyan-logo);}
-        html.theme-soft-blue .sec-icon-box { background: #F8FAFC; }
+        html.theme-soft-blue .sec-icon-box { background: #FFFFFF; border-color: var(--cyan-dark); }
         .sec-icon-box i { font-size: 35px; color: var(--cyan-logo); z-index: 2; }
+        html.theme-soft-blue .sec-icon-box i { color: var(--cyan-dark); }
+        
         .scan-laser { position: absolute; width: 100%; height: 3px; background: var(--cyan-logo); top: 0; animation: scanDown 1.5s infinite; opacity: 0.7; box-shadow: 0 0 15px var(--cyan-logo); z-index: 1; }
+        html.theme-soft-blue .scan-laser { background: var(--cyan-dark); box-shadow: 0 0 15px var(--cyan-dark); }
         @keyframes scanDown { 0% {top:0;} 50% {top:100%;} 100% {top:0;} }
         
         .sec-title { font-family:'Outfit'; font-weight:900; font-size:24px; color:var(--cyan-logo); letter-spacing:1px; text-shadow:0 0 15px rgba(0,229,255,0.5); margin-bottom: 5px;}
@@ -99,13 +109,16 @@
         .face-frame { position: absolute; inset: 15px; border: 3px dashed rgba(255,255,255,0.4); border-radius: 30px; transition: all 0.3s; pointer-events: none; }
         html.theme-soft-blue .face-frame { border-color: rgba(2,132,199,0.4); }
         .face-frame.scanning { border: 4px solid var(--cyan-logo); box-shadow: 0 0 30px rgba(0,229,255,0.5), inset 0 0 30px rgba(0,229,255,0.5); animation: facePulse 0.8s infinite alternate; }
+        html.theme-soft-blue .face-frame.scanning { border-color: var(--cyan-dark); box-shadow: 0 0 20px rgba(2,132,199,0.3); }
         @keyframes facePulse { 0% { transform: scale(0.98); opacity: 0.7;} 100% { transform: scale(1.02); opacity: 1;} }
 
         .btn-action { width: 100%; max-width: 250px; padding: 16px; border: none; border-radius: 16px; font-family: 'Space Grotesk'; font-weight: 800; font-size: 14px; cursor: pointer; box-shadow: var(--shadow-cyan); background: var(--cyan-logo); color: black; transition: 0.2s;}
-        html.theme-soft-blue .btn-action { color: #FFF; box-shadow: 0 10px 25px rgba(2,132,199,0.3); }
+        html.theme-soft-blue .btn-action { color: #FFF; background: var(--cyan-dark); box-shadow: 0 10px 25px rgba(2,132,199,0.3); }
         .btn-action:active { transform: scale(0.95); }
+        
         .btn-outline { background: rgba(0,229,255,0.05); color: var(--cyan-logo); border: 2px solid var(--cyan-logo); box-shadow: none; padding: 14px; }
-        html.theme-soft-blue .btn-outline { background: #FFFFFF; color: var(--cyan-dark); }
+        html.theme-soft-blue .btn-outline { background: #FFFFFF; color: var(--cyan-dark); border-color: var(--cyan-dark); }
+        
         .btn-ghost { background: transparent; color: var(--danger); box-shadow: none; font-size: 12px; margin-top: 5px; border: 1px dashed var(--danger); padding: 12px; border-radius: 12px;}
 
         /* --- PIN PAD --- */
@@ -127,15 +140,15 @@
         .header-main { background: linear-gradient(160deg, var(--navy-bg) 0%, #000 100%); padding: 35px 20px 80px; border-bottom-left-radius:30px; border-bottom-right-radius:30px; color:white; text-align:center; box-shadow: var(--shadow-cyan); border-bottom: 1px solid var(--border-glass);}
         html.theme-soft-blue .header-main { background: linear-gradient(135deg, #FFFFFF 0%, #E0F2FE 100%); color: var(--text-main); }
         .main-title { font-family:'Outfit'; font-size:24px; font-weight:900; margin:0; color: var(--cyan-logo); letter-spacing: 1px; text-shadow: 0 0 15px rgba(0,229,255,0.3);}
-        html.theme-soft-blue .header-main .main-title { color: var(--text-main); text-shadow: none; }
+        html.theme-soft-blue .header-main .main-title { color: var(--cyan-dark); text-shadow: none; }
         .sub-tag { font-size:10px; font-weight:800; display:block; margin-top:5px; font-family:'Space Grotesk'; letter-spacing:3px; color: var(--text-muted); text-transform: uppercase;}
-        html.theme-soft-blue .header-main .sub-tag { color: var(--cyan-dark); }
+        html.theme-soft-blue .header-main .sub-tag { color: var(--cyan-dark); opacity: 0.7;}
 
         .tab-container { display:flex; justify-content:center; gap:10px; margin-top:-40px; padding:0 20px; position:relative; z-index:10; }
         .tab-btn { background: rgba(5,11,20,0.9); backdrop-filter: blur(10px); border:1px solid rgba(255,255,255,0.1); padding:14px 15px; border-radius:20px; font-weight:800; font-size:11px; color:var(--text-muted); box-shadow:0 10px 20px rgba(0,0,0,0.8); cursor:pointer; flex:1; transition:0.3s; }
         html.theme-soft-blue .tab-btn { background: #FFFFFF; color: var(--text-muted); border-color: #CBD5E1; box-shadow: 0 5px 15px rgba(2,132,199,0.1); }
         .tab-btn.active { background:var(--cyan-logo); color:black; box-shadow:0 10px 25px rgba(0,229,255,0.3); transform:scale(1.05); border-color: var(--cyan-logo);}
-        html.theme-soft-blue .tab-btn.active { background: var(--cyan-logo); color: #FFF; box-shadow: 0 10px 25px rgba(2,132,199,0.3); border-color: var(--cyan-logo); }
+        html.theme-soft-blue .tab-btn.active { background: var(--cyan-dark); color: #FFF; box-shadow: 0 10px 25px rgba(2,132,199,0.3); border-color: var(--cyan-dark); }
         
         .content-area { padding:20px; display:none; margin-top: 10px;}
         .content-area.active { display:block; }
@@ -164,23 +177,25 @@
         html.theme-soft-blue .m-plat { color: var(--text-muted); }
         
         .btn-plus { width:40px; height:40px; background:var(--yellow-logo); color:black; border-radius:12px; display:flex; align-items:center; justify-content:center; border:none; cursor:pointer; font-size:16px; box-shadow:0 5px 15px rgba(255,255,0,0.3);}
-        html.theme-soft-blue .btn-plus { color: #FFF; }
+        html.theme-soft-blue .btn-plus { color: #FFF; background: var(--cyan-dark); }
         .btn-reset { width:40px; height:40px; background:rgba(245,158,11,0.1); color:var(--warning); border-radius:12px; display:flex; align-items:center; justify-content:center; border:1px solid rgba(245,158,11,0.3); cursor:pointer; font-size:16px; margin-right: 8px;}
+        html.theme-soft-blue .btn-reset { background: #FEF3C7; border-color: #FDE68A; }
         
         .app-card { background:rgba(5,11,20,0.8); backdrop-filter: blur(10px); padding:15px; border-radius:16px; margin-bottom:12px; box-shadow:0 5px 15px rgba(0,0,0,0.3); display:flex; justify-content:space-between; align-items:center; border: 1px solid rgba(255,255,255,0.05);}
         html.theme-soft-blue .app-card { background: #FFFFFF; color: var(--text-main); box-shadow: 0 5px 15px rgba(2,132,199,0.1); border-color: #CBD5E1; }
         html.theme-soft-blue .app-card h4 { color: var(--text-main); }
 
         .admin-info-box { background:rgba(0,229,255,0.05); padding:15px; border-radius:16px; border:1px dashed var(--border-glass); font-size:11px; color:var(--cyan-logo); margin-bottom:20px; line-height: 1.5; }
-        html.theme-soft-blue .admin-info-box { background: rgba(2, 132, 199, 0.05); color: var(--cyan-dark); }
+        html.theme-soft-blue .admin-info-box { background: rgba(2, 132, 199, 0.05); color: var(--cyan-dark); border-color: rgba(2, 132, 199, 0.3);}
         
-        /* MODALS */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 10000; display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(8px); }
+        /* MODALS & OVERLAYS */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 10000; display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(8px); opacity: 0; transition: opacity 0.3s; }
         html.theme-soft-blue .modal-overlay { background: rgba(15, 23, 42, 0.8); }
+        .modal-overlay.show { opacity: 1; }
         
-        .modal-box { background: var(--navy-bg); width: 100%; max-width: 380px; border-radius: 25px; padding: 30px 25px; text-align: center; box-shadow: 0 30px 80px rgba(0,0,0,0.9); max-height: 85vh; overflow-y: auto; animation: zoomIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 1px solid var(--cyan-logo);}
+        .modal-box { background: var(--navy-bg); width: 100%; max-width: 380px; border-radius: 25px; padding: 30px 25px; text-align: center; box-shadow: 0 30px 80px rgba(0,0,0,0.9); max-height: 85vh; overflow-y: auto; transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 1px solid var(--cyan-logo);}
         html.theme-soft-blue .modal-box { background: #FFFFFF; border-color: transparent; box-shadow: 0 20px 60px rgba(2,132,199,0.2); }
-        @keyframes zoomIn { from {transform:scale(0.8); opacity:0;} to {transform:scale(1); opacity:1;} }
+        .modal-overlay.show .modal-box { transform: scale(1); }
 
         .form-group { margin-bottom:20px; text-align: left;}
         .form-label { display:block; font-size:11px; font-weight:800; color:var(--text-muted); margin-bottom:8px; text-transform:uppercase; letter-spacing:1px;}
@@ -192,9 +207,10 @@
         .btn-submit { width:100%; padding:16px; border:none; border-radius:16px; font-weight:900; color:black; cursor:pointer; margin-top:10px; font-family:'Space Grotesk'; font-size:13px; transition: 0.2s; letter-spacing: 1px;}
         .btn-submit:active { transform: scale(0.95); }
         .btn-outline-modal { background: rgba(0,0,0,0.5); color: var(--cyan-logo); border: 1px solid var(--cyan-logo); font-family: 'Space Grotesk'; font-weight: 800; cursor: pointer; transition: 0.2s;}
+        html.theme-soft-blue .btn-outline-modal { background: #F8FAFC; color: var(--cyan-dark); border-color: var(--cyan-dark); }
         
         .bg-sukses { background:var(--cyan-logo); box-shadow: var(--shadow-cyan); } 
-        html.theme-soft-blue .bg-sukses { color: #FFF; }
+        html.theme-soft-blue .bg-sukses { color: #FFF; background: var(--cyan-dark); box-shadow: 0 10px 20px rgba(2, 132, 199, 0.2); }
         .bg-cancel { background:#111; color:#fff; border: 1px solid #333; box-shadow:none; }
         html.theme-soft-blue .bg-cancel { background: #F1F5F9; color: #64748B; border-color: #CBD5E1; }
         
@@ -212,10 +228,9 @@
     <div class="ambient-light light-1"></div>
     <div class="ambient-light light-2"></div>
 
-    <div id="loaderOverlay" style="position:fixed; inset:0; background:rgba(0,0,0,0.9); backdrop-filter:blur(10px); z-index:20000; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-        <div style="width:50px; height:50px; border:4px solid #222; border-top:4px solid var(--cyan-logo); border-radius:50%; animation:spin 1s infinite linear;"></div>
-        <div style="margin-top:20px; font-weight:900; color:var(--cyan-logo); font-size:12px; letter-spacing: 2px;">MEMUAT DATABASE...</div>
-        <style>@keyframes spin{100%{transform:rotate(360deg)}}</style>
+    <div id="loaderOverlay" class="loader-overlay">
+        <div class="spinner-ring"></div>
+        <div style="margin-top:20px; font-weight:900; color:var(--cyan-logo); font-size:12px; letter-spacing: 2px;" id="loaderTextObj">MEMUAT DATABASE...</div>
     </div>
 
     <div id="securityScreen">
@@ -270,7 +285,7 @@
             <div class="agree-box">
                 <b>PENTING:</b><br><br>1. Buat PIN BARU khusus TABUNGAN (6 Digit).<br>2. BERBEDA DENGAN PIN LOGIN Aplikasi (4 Digit).<br>3. Wajah Anda opsional bisa direkam sebagai kunci ganda biometrik.<br>4. Sistem ini dikunci dan Saldo Anda Dijamin Aman 100%.
             </div>
-            <button class="btn-submit" style="background:var(--cyan-logo); color:black;" onclick="acceptAgreement()">BUAT KUNCI SEKARANG</button>
+            <button class="btn-submit bg-sukses" onclick="acceptAgreement()">BUAT KUNCI SEKARANG</button>
         </div>
     </div>
 
@@ -297,7 +312,7 @@
                 </div>
                 
                 <div style="display:flex; gap:10px; margin-top:20px;">
-                    <button class="btn-nabung" style="flex:1; margin:0; background:var(--success); color: white;" onclick="document.getElementById('modalQris').style.display='flex'">
+                    <button class="btn-nabung" style="flex:1; margin:0; background:var(--success); color: white;" onclick="document.getElementById('modalQris').style.display='flex'; setTimeout(()=>document.getElementById('modalQris').classList.add('show'), 10);">
                         <i class="fas fa-qrcode" style="font-size:14px;"></i> SETOR DANA
                     </button>
                     <button class="btn-nabung" style="flex:1; margin:0; background:var(--danger); color: white; border:1px solid var(--danger); box-shadow: 0 5px 15px rgba(239,68,68,0.2);" onclick="bukaModalTarik()">
@@ -333,7 +348,7 @@
             <input type="text" id="searchMem" class="form-input" placeholder="Cari Nama / Plat Anggota..." style="margin-bottom:15px;" onkeyup="filterMembers()">
             <div id="adminMemberList"></div>
 
-            <button id="btnResetData" class="btn-danger-reset" onclick="resetAllSystem()">
+            <button id="btnResetData" class="btn-ghost" style="display:none; margin-top:20px; width:100%; font-weight:bold;" onclick="resetAllSystem()">
                 ⚠️ RESET SEMUA DATA (HAPUS SALDO & RIWAYAT PERMANEN)
             </button>
         </div>
@@ -381,7 +396,7 @@
             </div>
 
             <div style="display:flex; gap:10px;">
-                <button class="btn-submit bg-cancel" onclick="document.getElementById('modalTarik').style.display='none'">BATAL</button>
+                <button class="btn-submit bg-cancel" onclick="document.getElementById('modalTarik').classList.remove('show'); setTimeout(()=>document.getElementById('modalTarik').style.display='none', 300)">BATAL</button>
                 <button class="btn-submit" style="background:var(--danger); color:white; box-shadow: 0 10px 25px rgba(239,68,68,0.3);" onclick="submitTarikDana()">AJUKAN PENARIKAN</button>
             </div>
         </div>
@@ -403,7 +418,7 @@
             </div>
 
             <div style="display:flex; gap:10px;">
-                <button class="btn-submit bg-cancel" onclick="document.getElementById('modalUploadBukti').style.display='none'">BATAL</button>
+                <button class="btn-submit bg-cancel" onclick="document.getElementById('modalUploadBukti').classList.remove('show'); setTimeout(()=>document.getElementById('modalUploadBukti').style.display='none',300);">BATAL</button>
                 <button class="btn-submit bg-sukses" id="btnSimpanBukti" onclick="simpanBuktiTransfer()">KIRIM BUKTI</button>
             </div>
         </div>
@@ -413,10 +428,10 @@
         <div class="modal-box" style="padding: 20px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                 <div style="font-family:'Outfit'; font-weight:900; color:var(--cyan-logo); font-size: 16px;"><i class="fas fa-receipt"></i> BUKTI TRANSFER</div>
-                <button onclick="document.getElementById('modalViewBukti').style.display='none'" style="background:transparent; border:none; width:30px; height:30px; border-radius:50%; font-size:16px; cursor:pointer; color:var(--text-muted);"><i class="fas fa-times"></i></button>
+                <button onclick="document.getElementById('modalViewBukti').classList.remove('show'); setTimeout(()=>document.getElementById('modalViewBukti').style.display='none',300);" style="background:transparent; border:none; width:30px; height:30px; border-radius:50%; font-size:16px; cursor:pointer; color:var(--text-muted);"><i class="fas fa-times"></i></button>
             </div>
             <img id="imgBukti" src="" style="width:100%; border-radius:12px; border:1px solid #333; margin-bottom:15px; max-height: 50vh; object-fit: contain;">
-            <button class="btn-submit bg-cancel" style="margin-top:0;" onclick="document.getElementById('modalViewBukti').style.display='none'">TUTUP</button>
+            <button class="btn-submit bg-cancel" style="margin-top:0;" onclick="document.getElementById('modalViewBukti').classList.remove('show'); setTimeout(()=>document.getElementById('modalViewBukti').style.display='none',300);">TUTUP</button>
         </div>
     </div>
 
@@ -426,7 +441,10 @@
             <p id="depMemberName" style="font-size:12px; color:var(--text-main); margin-bottom:25px; font-weight:800; border-bottom:1px dashed var(--border-glass); padding-bottom:10px;"></p>
             <input type="hidden" id="depMemberId">
             <div class="form-group"><label class="form-label">Nominal (Rp)</label><input type="number" id="depAmount" class="form-input" placeholder="Contoh: 20000"></div>
-            <div style="display:flex; gap:10px;"><button class="btn-submit bg-cancel" onclick="document.getElementById('modalDeposit').style.display='none'">BATAL</button><button class="btn-submit bg-sukses" onclick="processDeposit()">SIMPAN DATA</button></div>
+            <div style="display:flex; gap:10px;">
+                <button class="btn-submit bg-cancel" onclick="document.getElementById('modalDeposit').classList.remove('show'); setTimeout(()=>document.getElementById('modalDeposit').style.display='none',300);">BATAL</button>
+                <button class="btn-submit bg-sukses" onclick="processDeposit()">SIMPAN DATA</button>
+            </div>
             
             <div style="margin-top:25px; border-top:1px dashed var(--border-glass); padding-top:15px;">
                 <div style="font-size:10px; font-weight:800; color:var(--text-muted); margin-bottom:10px; text-transform:uppercase;">Transaksi Terakhir (Edit/Hapus)</div>
@@ -440,7 +458,10 @@
             <h3 style="margin-top:0; color:var(--warning); font-family:'Outfit'; font-size:18px;">KOREKSI NOMINAL</h3>
             <input type="hidden" id="editTrxId"><input type="hidden" id="editOldAmount">
             <div class="form-group"><label class="form-label">Nominal Baru (Rp)</label><input type="number" id="editNewAmount" class="form-input" style="border-color: rgba(245,158,11,0.5);"></div>
-            <div style="display:flex; gap:10px;"><button class="btn-submit bg-cancel" onclick="document.getElementById('modalEditTrx').style.display='none'">BATAL</button><button class="btn-submit" style="background:var(--warning); color:black;" onclick="saveEditTrx()">UPDATE</button></div>
+            <div style="display:flex; gap:10px;">
+                <button class="btn-submit bg-cancel" onclick="document.getElementById('modalEditTrx').classList.remove('show'); setTimeout(()=>document.getElementById('modalEditTrx').style.display='none',300);">BATAL</button>
+                <button class="btn-submit" style="background:var(--warning); color:black;" onclick="saveEditTrx()">UPDATE</button>
+            </div>
         </div>
     </div>
 
@@ -463,7 +484,7 @@
             </div>
             
             <div style="display:flex; gap:10px;">
-                <button class="btn-submit bg-cancel" onclick="document.getElementById('modalQris').style.display='none'">BATAL</button>
+                <button class="btn-submit bg-cancel" onclick="document.getElementById('modalQris').classList.remove('show'); setTimeout(()=>document.getElementById('modalQris').style.display='none',300);">BATAL</button>
                 <button class="btn-submit bg-sukses" onclick="submitKlaimNabung()">KONFIRMASI TRANSFER</button>
             </div>
         </div>
@@ -509,9 +530,10 @@
                 btnOk.innerText = 'LANJUTKAN';
                 
                 modal.style.display = 'flex';
+                setTimeout(()=>modal.classList.add('show'), 10);
 
-                btnCancel.onclick = () => { modal.style.display = 'none'; resolve(false); };
-                btnOk.onclick = () => { modal.style.display = 'none'; resolve(isPrompt ? input.value : true); };
+                btnCancel.onclick = () => { modal.classList.remove('show'); setTimeout(()=>modal.style.display = 'none', 300); resolve(false); };
+                btnOk.onclick = () => { modal.classList.remove('show'); setTimeout(()=>modal.style.display = 'none', 300); resolve(isPrompt ? input.value : true); };
             });
         };
 
@@ -530,7 +552,9 @@
 
                 btnOk.innerText = 'SAYA MENGERTI';
                 modal.style.display = 'flex';
-                btnOk.onclick = () => { modal.style.display = 'none'; resolve(true); };
+                setTimeout(()=>modal.classList.add('show'), 10);
+                
+                btnOk.onclick = () => { modal.classList.remove('show'); setTimeout(()=>modal.style.display = 'none', 300); resolve(true); };
             });
         };
 
@@ -550,8 +574,10 @@
         window.myKodeUnik = 999; 
         let faceApiLoaded = false;
         
-        // BUG FIX 1: PERISAI FACE API (MENCEGAH STUCK DI LOADING)
+        // BUG FIX: PERISAI FACE API & MENUNGGU DOM LOAD
         async function initApp() {
+            document.getElementById('loaderOverlay').style.display = 'flex';
+            
             try {
                 if (typeof faceapi !== 'undefined') {
                     const MODEL_URL = 'https://justadudewhohacks.github.io/face-api.js/models';
@@ -569,10 +595,12 @@
                 faceApiLoaded = false;
             }
             
-            // Lanjut ke pengecekan status user tanpa menunggu Face API sukses/gagal
+            // Lanjut ke pengecekan status user tanpa delay error Face ID
             checkUserStatus(); 
             if(isTrueAdmin) listenGlobalSaldo(); 
         }
+        
+        // Panggil setelah script siap
         initApp();
 
         function listenGlobalSaldo() {
@@ -612,14 +640,14 @@
             }
         }
 
-        // BUG FIX 1 LANJUTAN: PENANGANAN ALUR PIN SAAT FACE API GAGAL
+        // PENANGANAN ALUR PIN
         function checkUserStatus() {
             onSnapshot(doc(db, "anggota", userId), async (docSnap) => {
                 if(docSnap.exists()) {
                     const d = docSnap.data();
                     await calculateKodeUnik();
 
-                    setTimeout(() => { document.getElementById('loaderOverlay').style.display = 'none'; }, 300);
+                    document.getElementById('loaderOverlay').style.display = 'none';
                     
                     document.getElementById('myBalance').innerText = `Rp ${(d.tabungan||0).toLocaleString('id-ID')}`;
                     loadHistory();
@@ -636,14 +664,13 @@
                             userFaceDesc = new Float32Array(Object.values(d.faceDescriptor)); 
                             showLoginScreen(); 
                         } else { 
-                            // Langsung tembak ke input PIN jika tidak ada/gagal muat Face ID
                             document.getElementById('securityScreen').style.display = 'flex';
                             document.getElementById('btnBawahKamera').style.display = 'none'; 
-                            isFaceMode = true; 
+                            isFaceMode = false; 
                             window.switchMode(true); 
                         }
                     } else { 
-                        // MUNCULKAN POPUP AKTIVASI JIKA BELUM SET PIN 6 ANGKA
+                        // MUNCULKAN POPUP AKTIVASI
                         isSetupMode = true; 
                         showActivationScreen(); 
                     }
@@ -672,7 +699,7 @@
                     type: 'IN', amount: total, desc: 'Pengajuan Setoran (App)', timestamp: Date.now(), status: 'PENDING'
                 });
                 await showCustomAlert("SUKSES", "Pengajuan berhasil dikirim! Saldo akan masuk setelah divalidasi oleh Admin.", "success");
-                document.getElementById('modalQris').style.display = 'none';
+                document.getElementById('modalQris').classList.remove('show'); setTimeout(()=>document.getElementById('modalQris').style.display='none', 300);
                 document.getElementById('inputNabungBase').value = ''; calcTotalTransfer();
             }
         }
@@ -686,7 +713,8 @@
             document.getElementById('inputTarikMetode').value = 'TUNAI';
             document.getElementById('inputTarikRek').value = '';
             document.getElementById('inputTarikDesc').value = '';
-            document.getElementById('modalTarik').style.display = 'flex';
+            const m = document.getElementById('modalTarik');
+            m.style.display = 'flex'; setTimeout(()=>m.classList.add('show'), 10);
         }
 
         window.submitTarikDana = async () => {
@@ -715,13 +743,14 @@
                     status: 'PENDING_APPROVAL', apprKetum: false, apprWaketum: false
                 });
                 await showCustomAlert("SUKSES", "Pengajuan berhasil dikirim! Menunggu ACC Ketum & Waketum.", "success");
-                document.getElementById('modalTarik').style.display = 'none';
+                document.getElementById('modalTarik').classList.remove('show'); setTimeout(()=>document.getElementById('modalTarik').style.display='none', 300);
             }
         }
 
         window.lihatBukti = (url) => {
             document.getElementById('imgBukti').src = url;
-            document.getElementById('modalViewBukti').style.display = 'flex';
+            const m = document.getElementById('modalViewBukti');
+            m.style.display = 'flex'; setTimeout(()=>m.classList.add('show'), 10);
         }
 
         window.konfirmasiTerimaDana = async (trxId) => {
@@ -738,28 +767,34 @@
             document.getElementById('btnTabApprove').style.display = display;
         }
 
+        // BUG FIX 2: PASTIKAN MODAL AKTIVASI MUNCUL SEMPURNA
         function showActivationScreen() { 
             document.getElementById('securityScreen').style.display = 'flex';
-            document.getElementById('agreeModal').style.display = 'flex'; 
+            const modal = document.getElementById('agreeModal');
+            modal.style.display = 'flex'; 
+            setTimeout(() => modal.classList.add('show'), 10);
         }
         
         window.acceptAgreement = () => { 
-            document.getElementById('agreeModal').style.display = 'none'; 
-            
-            if(faceApiLoaded) {
-                document.getElementById('secTitle').innerText = "REGISTRASI WAJAH"; 
-                document.getElementById('btnMainAction').innerText = "SCAN & SIMPAN WAJAH"; 
-                document.getElementById('btnMainAction').style.display = 'block'; 
-                document.getElementById('btnBawahKamera').style.display = 'none'; 
-                startCamera(); 
-            } else {
-                document.getElementById('secTitle').innerText = "BUAT PIN 6 DIGIT"; 
-                document.getElementById('camWrap').style.display = 'none'; 
-                document.getElementById('pinArea').style.display = 'flex'; 
-                document.getElementById('btnMainAction').style.display = 'none'; 
-                isFaceMode = false;
-                if(document.getElementById('btnSwitch')) document.getElementById('btnSwitch').style.display = 'none';
-            }
+            const modal = document.getElementById('agreeModal');
+            modal.classList.remove('show'); 
+            setTimeout(() => {
+                modal.style.display = 'none'; 
+                if(faceApiLoaded) {
+                    document.getElementById('secTitle').innerText = "REGISTRASI WAJAH"; 
+                    document.getElementById('btnMainAction').innerText = "SCAN & SIMPAN WAJAH"; 
+                    document.getElementById('btnMainAction').style.display = 'block'; 
+                    document.getElementById('btnBawahKamera').style.display = 'none'; 
+                    startCamera(); 
+                } else {
+                    document.getElementById('secTitle').innerText = "BUAT PIN 6 DIGIT"; 
+                    document.getElementById('camWrap').style.display = 'none'; 
+                    document.getElementById('pinArea').style.display = 'flex'; 
+                    document.getElementById('btnMainAction').style.display = 'none'; 
+                    isFaceMode = false;
+                    if(document.getElementById('btnSwitch')) document.getElementById('btnSwitch').style.display = 'none';
+                }
+            }, 300);
         };
 
         function showLoginScreen() { 
@@ -919,8 +954,9 @@
                         }
                         else if (data.status === 'WAITING_CONFIRMATION') {
                             actionHtml = `
-                            <div style="margin-top:10px; font-size:11px; text-align:center; padding:8px; background:rgba(245,158,11,0.1); color:var(--warning); border-radius:8px; border:1px dashed var(--warning); font-weight:800;">
-                                <i class="fas fa-spinner fa-spin"></i> MENUNGGU KORFIRMASI MEMBER
+                            <div style="display:flex; gap:5px; margin-top:10px; border-top:1px dashed rgba(255,255,255,0.1); padding-top:10px;">
+                                <button class="btn-outline-modal" style="padding:10px; font-size:11px; border-radius:10px; flex:1;" onclick="window.lihatBukti('${d.buktiTransfer}')"><i class="fas fa-image"></i> BUKTI</button>
+                                <button class="btn-submit bg-sukses" style="padding:10px; margin:0; font-size:11px; border-radius:10px; flex:1.5; color:black;" onclick="window.konfirmasiTerimaDana('${d.id}')"><i class="fas fa-check-circle"></i> TERIMA DANA</button>
                             </div>`;
                         }
                     }
@@ -950,7 +986,8 @@
             document.getElementById('uploadBuktiMemberId').value = memberId;
             document.getElementById('previewBuktiFoto').style.display = 'none';
             currentBuktiBase64 = "";
-            document.getElementById('modalUploadBukti').style.display = 'flex';
+            const m = document.getElementById('modalUploadBukti');
+            m.style.display = 'flex'; setTimeout(()=>m.classList.add('show'), 10);
         }
 
         window.processBuktiFoto = (input) => {
@@ -985,7 +1022,7 @@
                     buktiTransfer: currentBuktiBase64,
                     status: 'WAITING_CONFIRMATION'
                 });
-                document.getElementById('modalUploadBukti').style.display = 'none';
+                document.getElementById('modalUploadBukti').classList.remove('show'); setTimeout(()=>document.getElementById('modalUploadBukti').style.display='none', 300);
                 showCustomAlert("BERHASIL", "Bukti transfer telah dikirim ke User.", "success");
             } catch(e) {
                 showCustomAlert("GAGAL", e.message, "error");
@@ -1068,7 +1105,7 @@
                     </div>
                     <div style="display:flex;">
                         <button class="btn-reset" onclick="window.resetMember('${m.id}', '${namaTampil}')"><i class="fas fa-key"></i></button>
-                        <button class="btn-plus" onclick="document.getElementById('modalDeposit').style.display='flex'; document.getElementById('depMemberId').value='${m.id}'; document.getElementById('depMemberName').innerText='${namaTampil}'; window.loadAdminRecentTrx('${m.id}');"><i class="fas fa-plus"></i></button>
+                        <button class="btn-plus" onclick="document.getElementById('modalDeposit').style.display='flex'; setTimeout(()=>document.getElementById('modalDeposit').classList.add('show'), 10); document.getElementById('depMemberId').value='${m.id}'; document.getElementById('depMemberName').innerText='${namaTampil}'; window.loadAdminRecentTrx('${m.id}');"><i class="fas fa-plus"></i></button>
                     </div>
                 </div>`;
             });
@@ -1107,10 +1144,10 @@
                 const btnDelete = isSuperAdmin ? `<button class="btn-edit" style="color:var(--danger); background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.2);" onclick="window.deleteTrx('${data.id}', ${data.amount}, '${data.type}', '${memberId}')"><i class="fas fa-trash"></i></button>` : ``;
 
                 cont.innerHTML += `
-                <div class="admin-hist-item">
+                <div class="admin-hist-item" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:8px; margin-bottom:8px;">
                     <div style="font-size:11px;"><div style="font-weight:700; color:${isPlus?'var(--success)':'var(--danger)'};">${isPlus?'+':'-'} Rp ${data.amount.toLocaleString('id-ID')}</div><div style="color:var(--text-muted);">${dateStr}</div></div>
                     <div style="display:flex; gap:5px;">
-                        <button class="btn-edit" onclick="window.openEditTrx('${data.id}', ${data.amount})"><i class="fas fa-pencil-alt"></i></button>
+                        <button class="btn-edit" style="background:transparent; color:var(--cyan-logo); border:1px solid var(--cyan-logo); padding:6px; border-radius:8px;" onclick="window.openEditTrx('${data.id}', ${data.amount})"><i class="fas fa-pencil-alt"></i></button>
                         ${btnDelete}
                     </div>
                 </div>`;
@@ -1118,7 +1155,9 @@
         }
 
         window.openEditTrx = (trxId, amount) => {
-            document.getElementById('editTrxId').value = trxId; document.getElementById('editOldAmount').value = amount; document.getElementById('editNewAmount').value = amount; document.getElementById('modalEditTrx').style.display = 'flex';
+            document.getElementById('editTrxId').value = trxId; document.getElementById('editOldAmount').value = amount; document.getElementById('editNewAmount').value = amount; 
+            const m = document.getElementById('modalEditTrx');
+            m.style.display = 'flex'; setTimeout(()=>m.classList.add('show'), 10);
         }
 
         window.saveEditTrx = async () => {
@@ -1129,7 +1168,7 @@
                 const currentBal = memDoc.data().tabungan || 0; const diff = newAmt - oldAmt; const finalBal = currentBal + diff;
                 t.update(memRef, { tabungan: finalBal }); t.update(trxRef, { amount: newAmt });
             });
-            document.getElementById('modalEditTrx').style.display = 'none'; 
+            document.getElementById('modalEditTrx').classList.remove('show'); setTimeout(()=>document.getElementById('modalEditTrx').style.display='none', 300); 
             window.loadAdminRecentTrx(memberId); 
         }
 
