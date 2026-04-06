@@ -11,7 +11,7 @@
             document.documentElement.classList.add('theme-soft-blue');
         }
 
-        const TABUNGAN_VERSION = "6.0_LIGHT_THEME_FIX"; 
+        const TABUNGAN_VERSION = "7.0_ULTIMATE_FIX"; 
         if (localStorage.getItem('maka_tabungan_v') !== TABUNGAN_VERSION) {
             if ('caches' in window) {
                 caches.keys().then((names) => { names.forEach(name => { caches.delete(name); }); });
@@ -112,14 +112,17 @@
         html.theme-soft-blue .face-frame.scanning { border-color: var(--cyan-dark); box-shadow: 0 0 20px rgba(2,132,199,0.3); }
         @keyframes facePulse { 0% { transform: scale(0.98); opacity: 0.7;} 100% { transform: scale(1.02); opacity: 1;} }
 
-        .btn-action { width: 100%; max-width: 250px; padding: 16px; border: none; border-radius: 16px; font-family: 'Space Grotesk'; font-weight: 800; font-size: 14px; cursor: pointer; box-shadow: var(--shadow-cyan); background: var(--cyan-logo); color: black; transition: 0.2s;}
+        .btn-action { width: 100%; padding: 16px; border: none; border-radius: 16px; font-family: 'Space Grotesk'; font-weight: 800; font-size: 14px; cursor: pointer; box-shadow: var(--shadow-cyan); background: var(--cyan-logo); color: black; transition: 0.2s;}
         html.theme-soft-blue .btn-action { color: #FFF; background: var(--cyan-dark); box-shadow: 0 10px 25px rgba(2,132,199,0.3); }
         .btn-action:active { transform: scale(0.95); }
         
-        .btn-outline { background: rgba(0,229,255,0.05); color: var(--cyan-logo); border: 2px solid var(--cyan-logo); box-shadow: none; padding: 14px; }
-        html.theme-soft-blue .btn-outline { background: #FFFFFF; color: var(--cyan-dark); border-color: var(--cyan-dark); }
+        /* FIX TOMBOL BAWAH KAMERA (CENTER & ESTETIK) */
+        #btnBawahKamera { display:flex; flex-direction:column; align-items:center; gap:12px; width:100%; max-width:280px; margin: 25px auto 0;}
         
-        .btn-ghost { background: transparent; color: var(--danger); box-shadow: none; font-size: 12px; margin-top: 5px; border: 1px dashed var(--danger); padding: 12px; border-radius: 12px;}
+        .btn-outline { background: rgba(0,229,255,0.05) !important; color: var(--cyan-logo) !important; border: 2px solid var(--cyan-logo) !important; box-shadow: none !important; }
+        html.theme-soft-blue .btn-outline { background: #FFFFFF !important; color: var(--cyan-dark) !important; border-color: var(--cyan-dark) !important; }
+        
+        .btn-ghost { background: transparent !important; color: var(--danger) !important; box-shadow: none !important; border: 1px dashed var(--danger) !important; font-size: 12px; padding: 14px; border-radius: 14px;}
 
         /* --- PIN PAD --- */
         .pin-area { display: none; width: 100%; max-width: 280px; flex-direction: column; align-items: center; margin-top: 10px;}
@@ -206,8 +209,6 @@
         
         .btn-submit { width:100%; padding:16px; border:none; border-radius:16px; font-weight:900; color:black; cursor:pointer; margin-top:10px; font-family:'Space Grotesk'; font-size:13px; transition: 0.2s; letter-spacing: 1px;}
         .btn-submit:active { transform: scale(0.95); }
-        .btn-outline-modal { background: rgba(0,0,0,0.5); color: var(--cyan-logo); border: 1px solid var(--cyan-logo); font-family: 'Space Grotesk'; font-weight: 800; cursor: pointer; transition: 0.2s;}
-        html.theme-soft-blue .btn-outline-modal { background: #F8FAFC; color: var(--cyan-dark); border-color: var(--cyan-dark); }
         
         .bg-sukses { background:var(--cyan-logo); box-shadow: var(--shadow-cyan); } 
         html.theme-soft-blue .bg-sukses { color: #FFF; background: var(--cyan-dark); box-shadow: 0 10px 20px rgba(2, 132, 199, 0.2); }
@@ -261,7 +262,7 @@
             </div>
         </div>
 
-        <div style="display:flex; flex-direction:column; gap:8px; width:100%; max-width:280px; margin-top:30px;" id="btnBawahKamera">
+        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; width:100%; max-width:280px; margin:25px auto 0;" id="btnBawahKamera">
             <button class="btn-action btn-outline" id="btnSwitch" onclick="switchMode()">Ganti Mode Login</button>
             <button class="btn-action btn-ghost" onclick="window.location.href='dashboard_kc.html'"><i class="fas fa-arrow-left"></i> KEMBALI KE DASHBOARD</button>
         </div>
@@ -508,8 +509,10 @@
 
         const myName = uData.namaKtp || uData.namaWa || uData.nama || "User";
         const myPlat = uData.plat || "B XXXX XX";
-        const userId = uData.id || myPlat.replace(/\s+/g, '').toUpperCase();
         const cleanPlat = myPlat.replace(/\s+/g, '').toUpperCase();
+        
+        // window.realUserId akan di set otomatis oleh sistem pencari ID
+        window.realUserId = null; 
 
         // --- SISTEM MODAL PENGGANTI ALERT ---
         window.showCustomConfirm = (title, msg, isPrompt = false) => {
@@ -574,7 +577,7 @@
         window.myKodeUnik = 999; 
         let faceApiLoaded = false;
         
-        // BUG FIX: PERISAI FACE API & MENUNGGU DOM LOAD
+        // INIT & CARI ID USER
         async function initApp() {
             document.getElementById('loaderOverlay').style.display = 'flex';
             
@@ -595,12 +598,9 @@
                 faceApiLoaded = false;
             }
             
-            // Lanjut ke pengecekan status user tanpa delay error Face ID
             checkUserStatus(); 
             if(isTrueAdmin) listenGlobalSaldo(); 
         }
-        
-        // Panggil setelah script siap
         initApp();
 
         function listenGlobalSaldo() {
@@ -629,7 +629,7 @@
                     return (a.namaKtp || a.nama || "").localeCompare(b.namaKtp || b.nama || "");
                 });
                 
-                let idx = allM.findIndex(m => m.id === userId);
+                let idx = allM.findIndex(m => m.id === window.realUserId);
                 if(idx === -1) idx = allM.length; 
                 
                 window.myKodeUnik = idx + 1; 
@@ -640,10 +640,25 @@
             }
         }
 
-        // PENANGANAN ALUR PIN
-        function checkUserStatus() {
-            onSnapshot(doc(db, "anggota", userId), async (docSnap) => {
-                if(docSnap.exists()) {
+        // PENANGANAN PENCARIAN AKUN (ANTI ERROR)
+        async function checkUserStatus() {
+            try {
+                const snap = await getDocs(collection(db, "anggota"));
+                let foundId = null;
+                snap.forEach(d => {
+                    const p = (d.data().plat || "").replace(/\s+/g, '').toUpperCase();
+                    if(p === cleanPlat) { foundId = d.id; }
+                });
+
+                if(!foundId) {
+                    document.getElementById('loaderOverlay').style.display = 'none';
+                    showCustomAlert("AKUN TIDAK DITEMUKAN", "Sistem tidak dapat menemukan data tabungan Anda. Silakan hubungi pengurus.", "error");
+                    return;
+                }
+
+                window.realUserId = foundId;
+                
+                onSnapshot(doc(db, "anggota", foundId), async (docSnap) => {
                     const d = docSnap.data();
                     await calculateKodeUnik();
 
@@ -665,7 +680,9 @@
                             showLoginScreen(); 
                         } else { 
                             document.getElementById('securityScreen').style.display = 'flex';
-                            document.getElementById('btnBawahKamera').style.display = 'none'; 
+                            document.getElementById('btnBawahKamera').style.display = 'flex'; 
+                            document.getElementById('camWrap').style.display = 'none';
+                            document.getElementById('pinArea').style.display = 'flex';
                             isFaceMode = false; 
                             window.switchMode(true); 
                         }
@@ -674,11 +691,11 @@
                         isSetupMode = true; 
                         showActivationScreen(); 
                     }
-                } else {
-                    document.getElementById('loaderOverlay').style.display = 'none';
-                    showCustomAlert("AKUN TIDAK DITEMUKAN", "Sistem tidak dapat menemukan data tabungan Anda. Silakan hubungi pengurus.", "error");
-                }
-            });
+                });
+            } catch (err) {
+                document.getElementById('loaderOverlay').style.display = 'none';
+                showCustomAlert("ERROR JARINGAN", "Gagal memuat database: " + err.message, "error");
+            }
         }
 
         window.calcTotalTransfer = () => {
@@ -695,7 +712,7 @@
             const konfirm = await showCustomConfirm("KONFIRMASI TRANSFER", `Apakah Anda sudah berhasil transfer dana sebesar <b style="color:var(--cyan-logo);">Rp ${total.toLocaleString('id-ID')}</b> ke QRIS KC?<br><br><span style='color:var(--danger); font-size:11px;'>*Bukti palsu akan otomatis ditolak dan dapat diberikan sanksi.</span>`);
             if(konfirm) {
                 await addDoc(collection(db, "tabungan_trx"), {
-                    memberId: userId, memberName: myName,
+                    memberId: window.realUserId, memberName: myName,
                     type: 'IN', amount: total, desc: 'Pengajuan Setoran (App)', timestamp: Date.now(), status: 'PENDING'
                 });
                 await showCustomAlert("SUKSES", "Pengajuan berhasil dikirim! Saldo akan masuk setelah divalidasi oleh Admin.", "success");
@@ -727,7 +744,7 @@
             if(metode !== 'TUNAI' && !rek) return showCustomAlert("PERHATIAN", "Harap isi Nomor Rekening atau Nomor HP E-Wallet.", "error");
             if(!desc) return showCustomAlert("PERHATIAN", "Harap isi Tujuan / Keperluan penarikan.", "error");
 
-            const mRef = doc(db, "anggota", userId);
+            const mRef = doc(db, "anggota", window.realUserId);
             const mDoc = await getDoc(mRef);
             let currentSaldo = mDoc.data().tabungan || 0;
             
@@ -736,7 +753,7 @@
             const konfirm = await showCustomConfirm("KONFIRMASI", `Ajukan penarikan dana sebesar <b style="color:var(--cyan-logo);">Rp ${amount.toLocaleString('id-ID')}</b>?<br><br><span style='color:var(--danger); font-size:11px;'>*Pencairan membutuhkan validasi KETUM dan WAKETUM. Saldo akan otomatis ditahan.</span>`);
             if(konfirm) {
                 await addDoc(collection(db, "tabungan_trx"), {
-                    memberId: userId, memberName: myName,
+                    memberId: window.realUserId, memberName: myName,
                     type: 'OUT', amount: amount, 
                     metodeTransfer: metode, noRekening: rek,
                     desc: 'Tarik: ' + desc, timestamp: Date.now(), 
@@ -767,7 +784,6 @@
             document.getElementById('btnTabApprove').style.display = display;
         }
 
-        // BUG FIX 2: PASTIKAN MODAL AKTIVASI MUNCUL SEMPURNA
         function showActivationScreen() { 
             document.getElementById('securityScreen').style.display = 'flex';
             const modal = document.getElementById('agreeModal');
@@ -877,7 +893,7 @@
                 const conf = await showCustomConfirm("SIMPAN PIN", `Jadikan <b style="color:var(--cyan-logo);">${currentPinInput}</b> sebagai PIN Tabungan KC Anda?`);
                 if(conf) {
                     const faceObj = userFaceDesc ? { ...userFaceDesc } : null; 
-                    updateDoc(doc(db, "anggota", userId), { faceDescriptor: faceObj, pin_tabungan: currentPinInput }).then(() => { unlockApp(); });
+                    updateDoc(doc(db, "anggota", window.realUserId), { faceDescriptor: faceObj, pin_tabungan: currentPinInput }).then(() => { unlockApp(); });
                 } else { window.clearPin(); }
             } else {
                 if (currentPinInput === userPinTabungan) unlockApp(); 
@@ -955,8 +971,8 @@
                         else if (data.status === 'WAITING_CONFIRMATION') {
                             actionHtml = `
                             <div style="display:flex; gap:5px; margin-top:10px; border-top:1px dashed rgba(255,255,255,0.1); padding-top:10px;">
-                                <button class="btn-outline-modal" style="padding:10px; font-size:11px; border-radius:10px; flex:1;" onclick="window.lihatBukti('${d.buktiTransfer}')"><i class="fas fa-image"></i> BUKTI</button>
-                                <button class="btn-submit bg-sukses" style="padding:10px; margin:0; font-size:11px; border-radius:10px; flex:1.5; color:black;" onclick="window.konfirmasiTerimaDana('${d.id}')"><i class="fas fa-check-circle"></i> TERIMA DANA</button>
+                                <button class="btn-outline-modal" style="padding:10px; font-size:11px; border-radius:10px; flex:1;" onclick="window.lihatBukti('${data.buktiTransfer}')"><i class="fas fa-image"></i> BUKTI</button>
+                                <button class="btn-submit bg-sukses" style="padding:10px; margin:0; font-size:11px; border-radius:10px; flex:1.5; color:black;" onclick="window.konfirmasiTerimaDana('${data.id}')"><i class="fas fa-check-circle"></i> TERIMA DANA</button>
                             </div>`;
                         }
                     }
@@ -1118,7 +1134,7 @@
 
         window.changePinSelf = async () => {
             const konf = await showCustomConfirm("UBAH SISTEM KEAMANAN", "Anda akan menghapus Data Wajah & PIN lama. Anda akan diminta untuk mendaftarkan ulang pada saat masuk tabungan berikutnya. Lanjutkan?");
-            if(konf) updateDoc(doc(db, "anggota", userId), { pin_tabungan: null, faceDescriptor: null }).then(() => location.reload());
+            if(konf) updateDoc(doc(db, "anggota", window.realUserId), { pin_tabungan: null, faceDescriptor: null }).then(() => location.reload());
         }
 
         window.filterMembers = () => { const k=document.getElementById('searchMem').value.toUpperCase(); window.renderMembers(window.allMembersCache.filter(m=>(m.namaKtp&&m.namaKtp.includes(k))||(m.nama&&m.nama.includes(k))||(m.plat&&m.plat.includes(k)))); }
@@ -1220,7 +1236,7 @@
 
         function loadHistory() {
             const list = document.getElementById('historyList');
-            const qHist = query(collection(db, "tabungan_trx"), where("memberId", "==", userId));
+            const qHist = query(collection(db, "tabungan_trx"), where("memberId", "==", window.realUserId));
             onSnapshot(qHist, (snap) => {
                 list.innerHTML = ""; let arr = []; snap.forEach(d => arr.push({id: d.id, ...d.data()})); arr.sort((a,b) => b.timestamp - a.timestamp);
                 if(arr.length===0) { list.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-muted); font-size:12px;">Belum ada Riwayat Mutasi Rekening.</div>`; return; }
