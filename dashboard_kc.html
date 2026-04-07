@@ -11,7 +11,7 @@
             document.documentElement.classList.add('theme-soft-blue');
         }
 
-        const DASH_VERSION = "18.0_ULTIMATE_FIX"; 
+        const DASH_VERSION = "18.1_LOGO_ABSEN_FIX"; 
         if (localStorage.getItem('maka_dash_kc_v') !== DASH_VERSION) {
             if ('caches' in window) { caches.keys().then((names) => { names.forEach(name => { caches.delete(name); }); }); }
             localStorage.setItem('maka_dash_kc_v', DASH_VERSION); window.location.reload(true); 
@@ -94,6 +94,7 @@
         html.theme-soft-blue .btn-theme-mini { background: var(--kc-cyan-dark); color: #FFF; }
         .btn-theme-mini:active { transform: scale(0.9); }
 
+        /* PILL MENU KANAN ATAS */
         .header-actions-pill { display: flex; align-items: center; background: rgba(0, 229, 255, 0.05); backdrop-filter: blur(15px); border: 1px solid rgba(0, 229, 255, 0.3); border-radius: 50px; padding: 4px 8px; gap: 5px;}
         html.theme-soft-blue .header-actions-pill { background: rgba(255, 255, 255, 0.6); border-color: rgba(2, 132, 199, 0.3); }
         
@@ -114,16 +115,17 @@
 
         /* --- VIP CARD --- */
         .vip-card { margin: 10px 20px 25px; border-radius: 24px; background: linear-gradient(135deg, #0A2E5C 0%, #03152E 100%); position: relative; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.5); border: 1px solid rgba(0,229,255,0.3); display: flex; flex-direction: column;}
+        
         html.theme-soft-blue .vip-card { background: linear-gradient(135deg, #0284C7 0%, #38BDF8 100%); box-shadow: 0 20px 40px rgba(2, 132, 199, 0.3); border-color: rgba(255,255,255,0.6); }
 
         .vip-card::after { content: ''; position: absolute; inset: 0; background-image: radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 15px 15px; opacity: 0.3; pointer-events: none; z-index: 1;}
         .vip-card::before { content: ''; position: absolute; right: -20px; top: -20px; width: 120px; height: 120px; background: radial-gradient(circle, rgba(0,229,255,0.2) 0%, transparent 70%); border-radius: 50%; z-index: 1;}
         
-        /* WATERMARK BESAR: DIKECILIN KE 75%, CENTER MUTLAK BIAR ADA JARAK KIRI KANAN */
-        .vc-watermark-logo { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 75%; max-height: 160px; object-fit: contain; z-index: 1; opacity: 0.12; pointer-events: none;}
+        /* WATERMARK BESAR: DIBESARKAN SEDIKIT TAPI TETAP CENTER */
+        .vc-watermark-logo { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 88%; max-height: 190px; object-fit: contain; z-index: 1; opacity: 0.12; pointer-events: none;}
         
-        /* LOGO KECIL TAJAM: SEJAJAR DENGAN CHIP (TOP: 20PX) */
-        .vc-small-logo { position: absolute; right: 25px; top: 20px; height: 35px; width: auto; object-fit: contain; z-index: 5; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.4));}
+        /* LOGO KECIL TAJAM: DIPERBESAR DAN DISESUAIKAN POSISINYA */
+        .vc-small-logo { position: absolute; right: 20px; top: 15px; height: 50px; width: auto; object-fit: contain; z-index: 5; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.4));}
 
         .vc-top { padding: 20px 25px 5px; display: flex; justify-content: flex-start; align-items: flex-start; position: relative; z-index: 3;}
         .vc-chip { width: 45px; height: 32px; background: linear-gradient(135deg, #FDE047, #CA8A04); border-radius: 8px; position: relative; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.3);}
@@ -236,6 +238,7 @@
         
         .icon-box { width: 55px; height: 55px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 12px; color: #000; box-shadow: 0 5px 20px rgba(0, 229, 255, 0.4); font-weight: 900;}
         
+        /* THEME SOFT BLUE IKON BOX CLEAN */
         html.theme-soft-blue .icon-box { background: #E0F2FE !important; color: var(--kc-cyan-dark) !important; box-shadow: none !important; border: 1px solid rgba(2, 132, 199, 0.2) !important; }
         html.theme-soft-blue .ic-urc { background: #FEF2F2 !important; color: var(--danger) !important; border-color: rgba(220, 38, 38, 0.2) !important; }
         html.theme-soft-blue .ic-broadcast { background: #FEF3C7 !important; color: var(--kc-yellow-dark) !important; border-color: rgba(217, 119, 6, 0.2) !important; }
@@ -246,8 +249,7 @@
         .ic-keuangan { background: linear-gradient(135deg, var(--kc-cyan) 0%, var(--kc-cyan-dark) 100%); } 
         .ic-tabungan { background: linear-gradient(135deg, var(--kc-cyan) 0%, var(--kc-cyan-dark) 100%); } 
         .ic-info { background: linear-gradient(135deg, var(--kc-cyan) 0%, var(--kc-cyan-dark) 100%); } 
-        
-        .ic-absen { background: linear-gradient(135deg, #10B981, #059669); color: white; box-shadow: 0 5px 20px rgba(16,185,129,0.4); }
+        .ic-absen { background: linear-gradient(135deg, var(--kc-cyan) 0%, var(--kc-cyan-dark) 100%); }
         .ic-urc { background: linear-gradient(135deg, #ef4444, #991b1b); color: white; box-shadow: 0 5px 20px rgba(239,68,68,0.4); }
         .ic-broadcast { background: linear-gradient(135deg, var(--kc-yellow), var(--kc-yellow-dark)); color: #000; box-shadow: 0 5px 20px rgba(202, 138, 4, 0.4); }
 
@@ -745,8 +747,18 @@
             }
         }
 
-        window.handleFCBannerClick = () => { window.location.href = 'antriankc.html'; };
-        window.handleAltFCBannerClick = () => { window.location.href = closestAlt.link; };
+        window.handleFCBannerClick = () => { 
+            window.location.href = 'antriankc.html'; 
+        };
+        
+        window.handleAltFCBannerClick = () => { 
+            const altName = document.getElementById('altFcName').innerText;
+            if(altName.includes("GADING")) {
+                window.location.href = 'antrian_gading.html';
+            } else {
+                window.location.href = closestAlt.link;
+            }
+        };
 
         const LAT_KC = -6.2285953; const LNG_KC = 106.819502;
 
