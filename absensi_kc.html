@@ -11,7 +11,7 @@
             document.documentElement.classList.add('theme-soft-blue');
         }
 
-        const ABSEN_VERSION = "2.0_KC_EDITION"; 
+        const ABSEN_VERSION = "2.1_EVENT_FIX"; 
         if (localStorage.getItem('maka_absen_kc_v') !== ABSEN_VERSION) {
             if ('caches' in window) { caches.keys().then((names) => { names.forEach(name => { caches.delete(name); }); }); }
             localStorage.setItem('maka_absen_kc_v', ABSEN_VERSION);
@@ -104,13 +104,13 @@
         #reader__dashboard_section_csr span { font-family: 'Inter'; font-weight: bold; color: var(--text-main); }
         #reader__dashboard_section_swaplink { display: none; } 
         #reader button { background: var(--kc-cyan); color: black; border: none; padding: 12px 20px; border-radius: 12px; font-family: 'Space Grotesk'; font-weight: 900; cursor: pointer; margin-top: 15px; transition: 0.2s; letter-spacing: 1px; box-shadow: var(--shadow-cyan);}
-        html.theme-soft-blue #reader button { color: #FFF; }
+        html.theme-soft-blue #reader button { color: #FFF; background: var(--kc-cyan-dark); }
         #reader button:active { transform: scale(0.95); }
 
         /* DAFTAR ABSENSI */
         .list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 0 5px;}
-        .list-title { font-family: 'Outfit'; font-size: 18px; font-weight: 900; color: var(--text-main); display: flex; align-items: center; gap: 8px;}
-        .list-title i { color: var(--success); }
+        .list-title { font-family: 'Outfit'; font-size: 15px; font-weight: 900; color: var(--text-main); display: flex; align-items: center; gap: 8px;}
+        .list-title i { color: var(--success); font-size: 18px; }
         .badge-count { background: rgba(16,185,129,0.1); color: var(--success); padding: 6px 14px; border-radius: 50px; font-size: 12px; font-weight: 900; font-family: 'Space Grotesk'; border: 1px solid rgba(16,185,129,0.3);}
 
         .absen-list-container { display: flex; flex-direction: column; gap: 10px; }
@@ -129,7 +129,7 @@
         /* BOTTOM NAV */
         .back-nav { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); width: 85%; max-width: 350px; z-index: 1000;}
         .btn-premium-back { background: var(--bg-panel); backdrop-filter: blur(15px); border: 1px solid var(--border-glass); padding: 16px; border-radius: 50px; font-family: 'Space Grotesk'; font-weight: 900; font-size: 13px; color: var(--kc-cyan); text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: var(--shadow-cyan); transition: 0.2s;}
-        html.theme-soft-blue .btn-premium-back { background: #FFFFFF; border-color: var(--kc-cyan); }
+        html.theme-soft-blue .btn-premium-back { background: #FFFFFF; border-color: var(--kc-cyan); color: var(--kc-cyan-dark); }
         .btn-premium-back:active { transform: scale(0.95); }
 
         /* MODAL ALERT */
@@ -144,6 +144,7 @@
         .m-gagal { background: rgba(239,68,68,0.1); color: var(--danger); box-shadow: 0 0 30px rgba(239,68,68,0.3); border-color: rgba(239,68,68,0.5); }
         
         .modal-title { font-family: 'Outfit'; font-size: 22px; font-weight: 900; color: var(--text-main); margin-bottom: 10px;}
+        html.theme-soft-blue .modal-title { color: var(--text-main); }
         .modal-msg { font-size: 13px; color: var(--text-muted); margin-bottom: 25px; line-height: 1.6; font-weight: 600;}
         .btn-close-modal { width: 100%; padding: 16px; border: none; border-radius: 16px; font-family: 'Space Grotesk'; font-weight: 900; font-size: 14px; cursor: pointer; color: black; letter-spacing: 1px; transition: 0.2s;}
         .btn-close-modal:active { transform: scale(0.95); }
@@ -161,8 +162,11 @@
 
     <div class="content-area">
         <div class="scan-card">
-            <div style="font-size: 10px; color: var(--text-muted); font-weight: 800; margin-bottom: 5px; text-transform: uppercase; text-align: left;">Nama Acara / Event:</div>
-            <input type="text" id="eventName" class="event-input" placeholder="NAMA ACARA (Cth: KOPDAR MARET)" value="KOPDAR KC">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <div style="font-size: 10px; color: var(--text-muted); font-weight: 800; text-transform: uppercase;">Pilih / Ketik Nama Acara:</div>
+            </div>
+            
+            <input type="text" id="eventName" class="event-input" placeholder="NAMA ACARA (Cth: KOPDAR MARET)" value="KOPDAR KC" onchange="window.loadAbsensiEvent()">
             
             <div style="font-size: 11px; color: var(--kc-cyan); font-weight: 800; margin-bottom: 15px; margin-top: 10px; background: rgba(0,229,255,0.1); padding: 8px; border-radius: 8px; border: 1px dashed rgba(0,229,255,0.3);"><i class="fas fa-camera"></i> Arahkan Kamera ke QR Code Member</div>
             
@@ -170,12 +174,15 @@
         </div>
 
         <div class="list-header">
-            <div class="list-title"><i class="fas fa-clipboard-list"></i> Riwayat Hadir</div>
+            <div class="list-title">
+                <i class="fas fa-clipboard-list"></i> Hadir: 
+                <span id="lblEventAktif" style="color:var(--kc-cyan); margin-left: 5px;">KOPDAR KC</span>
+            </div>
             <div class="badge-count" id="totalHadir">0 Orang</div>
         </div>
 
         <div class="absen-list-container" id="absenListBody">
-            <div style="text-align:center; padding:30px; color:var(--text-muted); font-size:12px; background:var(--bg-panel); border-radius:20px; border:1px dashed var(--border-glass);">Belum ada member yang di-scan.</div>
+            <div style="text-align:center; padding:30px; color:var(--text-muted); font-size:12px; background:var(--bg-panel); border-radius:20px; border:1px dashed var(--border-glass);">Memuat daftar absensi...</div>
         </div>
     </div>
 
@@ -225,105 +232,28 @@
 
         let isScanningPaused = false;
         let html5QrcodeScanner;
+        let unsubAbsen = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             // INIT KAMERA SCANNER
             html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250} }, false);
             html5QrcodeScanner.render(onScanSuccess, onScanFailure);
             
-            // LOAD DATA ABSEN HARI INI
-            loadAbsensiHariIni();
+            // LOAD DATA ABSEN BERDASARKAN ACARA
+            window.loadAbsensiEvent();
         });
 
-        async function onScanSuccess(decodedText, decodedResult) {
-            if (isScanningPaused) return;
-            isScanningPaused = true; // Pause scanner biar gak scan dobel
-
+        // FUNGSI LOAD ABSENSI DINAMIS BERDASARKAN INPUT NAMA ACARA
+        window.loadAbsensiEvent = () => {
             const eventName = document.getElementById('eventName').value.trim() || "KOPDAR KC";
-            const cleanId = decodedText.replace(/\s+/g, '').toUpperCase(); // Ini adalah ID (Plat / ID Unik) dari QR
-
-            document.getElementById('alertIcon').className = "modal-icon m-sukses";
-            document.getElementById('alertIcon').innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            document.getElementById('alertTitle').innerText = "Memproses...";
-            document.getElementById('alertMsg').innerText = "Sedang mencari data member di database KC...";
-            document.getElementById('alertBtn').style.background = "var(--text-muted)";
-            document.getElementById('alertBtn').innerText = "TUNGGU";
-            document.getElementById('alertModal').style.display = 'flex';
-
-            try {
-                // 1. CEK APAKAH SUDAH ABSEN DI ACARA INI HARI INI
-                const todayStr = new Date().toLocaleDateString('id-ID');
-                const qCek = query(collection(db, "absensi_kc"), 
-                    where("memberId", "==", cleanId), 
-                    where("event", "==", eventName),
-                    where("dateString", "==", todayStr)
-                );
-                const cekSnap = await getDocs(qCek);
-                
-                if (!cekSnap.empty) {
-                    showModalResult("m-warning", "fa-exclamation-triangle", "SUDAH ABSEN", `Member dengan ID <b>${cleanId}</b> sudah absen untuk acara ini hari ini.`, "var(--warning)");
-                    return;
-                }
-
-                // 2. CARI NAMA MEMBER DI DATABASE KC (Koleksi "anggota")
-                let namaMember = "MEMBER KC";
-                let platAsli = decodedText;
-                
-                const qMember = query(collection(db, "anggota"));
-                const memSnap = await getDocs(qMember);
-                memSnap.forEach(doc => {
-                    const data = doc.data();
-                    // Cocokkan plat (tanpa spasi) atau ID dokumen
-                    if ((data.plat && data.plat.replace(/\s+/g, '').toUpperCase() === cleanId) || doc.id === cleanId) {
-                        namaMember = data.namaKtp || data.namaWa || data.nama || "Member KC";
-                        platAsli = data.plat || decodedText;
-                    }
-                });
-
-                // 3. SIMPAN KE DATABASE ABSENSI KC
-                await addDoc(collection(db, "absensi_kc"), {
-                    memberId: cleanId,
-                    nama: namaMember,
-                    plat: platAsli,
-                    event: eventName,
-                    dateString: todayStr,
-                    timestamp: Date.now(),
-                    scanBy: uData.namaKtp || uData.namaWa || "Admin KC"
-                });
-
-                showModalResult("m-sukses", "fa-check", "ABSEN BERHASIL", `<b style="color:var(--text-main); font-size:16px;">${namaMember}</b><br><span style="color:var(--kc-cyan); font-family:'Space Grotesk'; font-weight:900;">${platAsli}</span><br><br>Berhasil hadir di acara ${eventName}.`, "var(--success)");
-                if(navigator.vibrate) navigator.vibrate([100, 50, 100]); // Getar sukses
-
-            } catch (error) {
-                showModalResult("m-gagal", "fa-times", "ERROR SISTEM", "Terjadi kesalahan: " + error.message, "var(--danger)");
-            }
-        }
-
-        function onScanFailure(error) {
-            // Abaikan error saat sedang mencari QR (normal terjadi tiap frame)
-        }
-
-        function showModalResult(iconClass, iconFa, title, msg, btnColor) {
-            document.getElementById('alertIcon').className = `modal-icon ${iconClass}`;
-            document.getElementById('alertIcon').innerHTML = `<i class="fas ${iconFa}"></i>`;
-            document.getElementById('alertTitle').innerText = title;
-            document.getElementById('alertMsg').innerHTML = msg;
-            document.getElementById('alertBtn').style.background = btnColor;
-            document.getElementById('alertBtn').innerText = "LANJUT SCAN BERIKUTNYA";
-        }
-
-        window.tutupAlert = () => {
-            document.getElementById('alertModal').style.display = 'none';
-            // Resume scanner setelah delay 1 detik biar nggak langsung scan ulang ga sengaja
-            setTimeout(() => { isScanningPaused = false; }, 1000);
-        };
-
-        // RENDER LIVE DATA ABSENSI DARI FIREBASE KC
-        function loadAbsensiHariIni() {
-            const todayStr = new Date().toLocaleDateString('id-ID');
+            document.getElementById('lblEventAktif').innerText = eventName.toUpperCase();
             
-            const qAbsen = query(collection(db, "absensi_kc"), where("dateString", "==", todayStr));
-            onSnapshot(qAbsen, (snap) => {
+            if(unsubAbsen) unsubAbsen(); // Matikan listener acara sebelumnya
+            
+            // Hanya ngambil absen untuk acara ini (enggak reset otomatis jam 12 malem biar aman buat acara lewat tengah malem)
+            const qAbsen = query(collection(db, "absensi_kc"), where("event", "==", eventName));
+            
+            unsubAbsen = onSnapshot(qAbsen, (snap) => {
                 const list = document.getElementById('absenListBody');
                 let count = 0;
                 let htmlStr = '';
@@ -340,7 +270,7 @@
                         <div class="ab-left">
                             <div class="ab-name">${d.nama}</div>
                             <div class="ab-plat"><i class="fas fa-car"></i> ${d.plat}</div>
-                            <div class="ab-time"><i class="fas fa-clock"></i> ${timeStr} WIB &nbsp;•&nbsp; ${d.event}</div>
+                            <div class="ab-time"><i class="fas fa-clock"></i> ${timeStr} WIB</div>
                         </div>
                         <div class="ab-icon"><i class="fas fa-check-circle"></i></div>
                     </div>`;
@@ -351,10 +281,106 @@
                 if (count > 0) {
                     list.innerHTML = htmlStr;
                 } else {
-                    list.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-muted); font-size:12px; background:var(--bg-panel); border-radius:20px; border:1px dashed var(--border-glass);">Belum ada member yang absen hari ini.</div>`;
+                    list.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-muted); font-size:12px; background:var(--bg-panel); border-radius:20px; border:1px dashed var(--border-glass);">Belum ada member yang absen di acara ini.</div>`;
                 }
             });
         }
+
+        async function onScanSuccess(decodedText, decodedResult) {
+            if (isScanningPaused) return;
+            isScanningPaused = true; 
+
+            const eventName = document.getElementById('eventName').value.trim() || "KOPDAR KC";
+            
+            // PERBAIKAN 1: BACA QR CODE TANPA MERUSAK HURUF BESAR/KECIL
+            const rawId = decodedText.trim(); 
+            const cleanPlat = decodedText.replace(/\s+/g, '').toUpperCase();
+
+            document.getElementById('alertIcon').className = "modal-icon m-sukses";
+            document.getElementById('alertIcon').innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            document.getElementById('alertTitle').innerText = "Memproses...";
+            document.getElementById('alertMsg').innerText = "Sedang mencari data member di database KC...";
+            document.getElementById('alertBtn').style.background = "var(--text-muted)";
+            document.getElementById('alertBtn').innerText = "TUNGGU";
+            document.getElementById('alertModal').style.display = 'flex';
+
+            try {
+                // 1. CARI MEMBER DULU DI DATABASE KC
+                let targetDocId = null;
+                let namaMember = "TIDAK DIKENAL";
+                let platAsli = rawId;
+
+                const qMember = query(collection(db, "anggota"));
+                const memSnap = await getDocs(qMember);
+                
+                memSnap.forEach(doc => {
+                    const data = doc.data();
+                    const dbPlatClean = (data.plat || "").replace(/\s+/g, '').toUpperCase();
+                    
+                    // Cocokkan exact Document ID ATAU Plat tanpa spasi
+                    if (doc.id === rawId || dbPlatClean === cleanPlat) {
+                        targetDocId = doc.id;
+                        namaMember = data.namaKtp || data.namaWa || data.nama || "Member KC";
+                        platAsli = data.plat || rawId;
+                    }
+                });
+
+                if (!targetDocId) {
+                    showModalResult("m-gagal", "fa-times", "TIDAK DITEMUKAN", `QR Code tidak terdaftar di sistem. Pastikan member login pakai aplikasi versi terbaru.`, "var(--danger)");
+                    return;
+                }
+
+                // 2. CEK DUPLIKAT (Apakah sudah absen di ACARA INI)
+                const qCek = query(collection(db, "absensi_kc"), 
+                    where("memberId", "==", targetDocId), 
+                    where("event", "==", eventName)
+                );
+                const cekSnap = await getDocs(qCek);
+                
+                if (!cekSnap.empty) {
+                    showModalResult("m-warning", "fa-exclamation-triangle", "SUDAH ABSEN", `<b style="color:var(--text-main); font-size:16px;">${namaMember}</b><br>Sudah tercatat hadir di acara ini.`, "var(--warning)");
+                    return;
+                }
+
+                // 3. SIMPAN KE DATABASE ABSENSI KC
+                await addDoc(collection(db, "absensi_kc"), {
+                    memberId: targetDocId,
+                    nama: namaMember,
+                    plat: platAsli,
+                    event: eventName,
+                    timestamp: Date.now(),
+                    scanBy: uData.namaKtp || uData.namaWa || "Admin KC"
+                });
+
+                showModalResult("m-sukses", "fa-check", "ABSEN BERHASIL", `<b style="color:var(--text-main); font-size:16px;">${namaMember}</b><br><span style="color:var(--kc-cyan); font-family:'Space Grotesk'; font-weight:900;">${platAsli}</span><br><br>Berhasil hadir di acara ${eventName}.`, "var(--success)");
+                if(navigator.vibrate) navigator.vibrate([100, 50, 100]); // Getar sukses
+
+            } catch (error) {
+                showModalResult("m-gagal", "fa-times", "ERROR SISTEM", "Terjadi kesalahan: " + error.message, "var(--danger)");
+            }
+        }
+
+        function onScanFailure(error) {
+            // Abaikan error saat sedang mencari QR
+        }
+
+        function showModalResult(iconClass, iconFa, title, msg, btnColor) {
+            document.getElementById('alertIcon').className = `modal-icon ${iconClass}`;
+            document.getElementById('alertIcon').innerHTML = `<i class="fas ${iconFa}"></i>`;
+            document.getElementById('alertTitle').innerText = title;
+            document.getElementById('alertMsg').innerHTML = msg;
+            document.getElementById('alertBtn').style.background = btnColor;
+            document.getElementById('alertBtn').innerText = "LANJUT SCAN BERIKUTNYA";
+            if (document.documentElement.classList.contains('theme-soft-blue')) {
+                document.getElementById('alertBtn').style.color = "white";
+            }
+        }
+
+        window.tutupAlert = () => {
+            document.getElementById('alertModal').style.display = 'none';
+            // Resume scanner setelah delay 1.5 detik biar nggak double scan
+            setTimeout(() => { isScanningPaused = false; }, 1500);
+        };
     </script>
 </body>
 </html>
