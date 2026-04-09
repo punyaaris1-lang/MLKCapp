@@ -11,7 +11,7 @@
             document.documentElement.classList.add('theme-soft-blue');
         }
 
-        const DASH_VERSION = "18.1_LOGO_ABSEN_FIX"; 
+        const DASH_VERSION = "18.2_LOGO_MAX_OPACITY"; 
         if (localStorage.getItem('maka_dash_kc_v') !== DASH_VERSION) {
             if ('caches' in window) { caches.keys().then((names) => { names.forEach(name => { caches.delete(name); }); }); }
             localStorage.setItem('maka_dash_kc_v', DASH_VERSION); window.location.reload(true); 
@@ -121,11 +121,11 @@
         .vip-card::after { content: ''; position: absolute; inset: 0; background-image: radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 15px 15px; opacity: 0.3; pointer-events: none; z-index: 1;}
         .vip-card::before { content: ''; position: absolute; right: -20px; top: -20px; width: 120px; height: 120px; background: radial-gradient(circle, rgba(0,229,255,0.2) 0%, transparent 70%); border-radius: 50%; z-index: 1;}
         
-        /* WATERMARK BESAR: DIBESARKAN SEDIKIT TAPI TETAP CENTER */
-        .vc-watermark-logo { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 88%; max-height: 190px; object-fit: contain; z-index: 1; opacity: 0.12; pointer-events: none;}
+        /* WATERMARK BESAR: DIGEDEIN JADI 90%, OPACITY NAIK JADI 0.2 */
+        .vc-watermark-logo { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 90%; max-height: 200px; object-fit: contain; z-index: 1; opacity: 0.2; pointer-events: none;}
         
-        /* LOGO KECIL TAJAM: DIPERBESAR DAN DISESUAIKAN POSISINYA */
-        .vc-small-logo { position: absolute; right: 20px; top: 15px; height: 50px; width: auto; object-fit: contain; z-index: 5; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.4));}
+        /* LOGO KECIL TAJAM: DIPERBESAR JADI 60PX, POSISI DISESUAIKAN */
+        .vc-small-logo { position: absolute; right: 20px; top: 15px; height: 60px; width: auto; object-fit: contain; z-index: 5; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.4));}
 
         .vc-top { padding: 20px 25px 5px; display: flex; justify-content: flex-start; align-items: flex-start; position: relative; z-index: 3;}
         .vc-chip { width: 45px; height: 32px; background: linear-gradient(135deg, #FDE047, #CA8A04); border-radius: 8px; position: relative; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.3);}
@@ -249,7 +249,7 @@
         .ic-keuangan { background: linear-gradient(135deg, var(--kc-cyan) 0%, var(--kc-cyan-dark) 100%); } 
         .ic-tabungan { background: linear-gradient(135deg, var(--kc-cyan) 0%, var(--kc-cyan-dark) 100%); } 
         .ic-info { background: linear-gradient(135deg, var(--kc-cyan) 0%, var(--kc-cyan-dark) 100%); } 
-        .ic-absen { background: linear-gradient(135deg, var(--kc-cyan) 0%, var(--kc-cyan-dark) 100%); }
+        .ic-absen { background: linear-gradient(135deg, var(--kc-cyan) 0%, var(--kc-cyan-dark) 100%); } 
         .ic-urc { background: linear-gradient(135deg, #ef4444, #991b1b); color: white; box-shadow: 0 5px 20px rgba(239,68,68,0.4); }
         .ic-broadcast { background: linear-gradient(135deg, var(--kc-yellow), var(--kc-yellow-dark)); color: #000; box-shadow: 0 5px 20px rgba(202, 138, 4, 0.4); }
 
