@@ -6,18 +6,12 @@
     <title>KC - Directory Anggota</title>
 
     <script>
-        // ==========================================
-        // 1. SISTEM BACA TEMA ANTI-KEDIP (FOUC PREVENTION)
-        // ==========================================
         const savedTheme = localStorage.getItem('maka_theme');
         if (savedTheme === 'soft-blue') {
             document.documentElement.classList.add('theme-soft-blue');
         }
 
-        // ==========================================
-        // 2. SISTEM AUTO-UPDATE PAKSA (PENGHANCUR CACHE)
-        // ==========================================
-        const DATA_VERSION = "3.6_FAST_LOAD_KODE"; 
+        const DATA_VERSION = "4.0_FAST_SYNC_LOAD"; 
         if (localStorage.getItem('maka_data_version') !== DATA_VERSION) {
             if ('caches' in window) {
                 caches.keys().then((names) => { names.forEach(name => { caches.delete(name); }); });
@@ -367,9 +361,6 @@
         const firebaseConfig = { apiKey: "AIzaSyDfsTAGclYUSRe6YhiljS-xb-v-9RBYVEM", authDomain: "antriankcnew.firebaseapp.com", projectId: "antriankcnew" };
         const app = initializeApp(firebaseConfig); const db = getFirestore(app);
 
-        // ===============================================
-        // SISTEM HAK AKSES ADMIN DATA ANGGOTA
-        // ===============================================
         let uData = null;
         let isAdmin = false;
         let isSuperAdmin = false;
@@ -379,20 +370,11 @@
             if(uData) {
                 const plat = (uData.plat || "").replace(/\s+/g, '').toUpperCase();
                 
-                // HANYA 5 ORANG INI + SUPER ADMIN YANG BISA EDIT/HAPUS & ZOOM FOTO
                 const allowedAdmins = [
-                    "B4124SWI", // Agus Sukmana
-                    "B4426SWF", // Rifky alfiansyah
-                    "B4959SWF", // Alfian
-                    "B4372SWJ", // FITO
-                    "B4903SWG", // Dino Three
-                    "B4248SWF"  // Plat Lu (Super Admin)
+                    "B4124SWI", "B4426SWF", "B4959SWF", "B4372SWJ", "B4903SWG", "B4248SWF"
                 ];
                 
-                if(allowedAdmins.includes(plat) || uData.id === "ghost_admin") {
-                    isAdmin = true;
-                }
-
+                if(allowedAdmins.includes(plat) || uData.id === "ghost_admin") { isAdmin = true; }
                 if(plat === "B4248SWF" || uData.id === "ghost_admin") {
                     isSuperAdmin = true;
                     document.getElementById('mataDewaGroup').style.display = 'block';
@@ -407,9 +389,8 @@
             document.head.appendChild(style);
         }
 
-        // --- SISTEM LIGHTBOX FOTO PROFIL (HANYA AKTIF JIKA ISADMIN = TRUE) ---
         window.viewPhoto = (src) => { 
-            if(!isAdmin) return; // GEMBOK ZOOM FOTO UNTUK MEMBER BIASA
+            if(!isAdmin) return; 
             if(!src || src === 'null' || src.length < 50) return;
             document.getElementById('pvImage').src = src; 
             const pv = document.getElementById('photoViewer');
@@ -423,7 +404,6 @@
             setTimeout(() => pv.style.display = 'none', 300);
         };
 
-        // --- SISTEM CUSTOM MODAL PENGGANTI ALERT & CONFIRM ---
         window.showCustomAlert = (title, message, type = 'info') => {
             return new Promise((resolve) => {
                 const modal = document.getElementById('customAlertModal');
@@ -516,24 +496,22 @@
         };
 
         const hierarchy = { "KETUA UMUM": 1, "WAKIL KETUA": 2, "PEMBINA": 3, "PENASEHAT": 4, "SEKRETARIS": 5, "BENDAHARA": 6, "HUMAS INTERNAL": 7, "HUMAS EKSTERNAL": 8, "KREATOR": 9, "URC KC": 10, "URC": 10, "MEMBER": 11 };
-        
-        // BUG FIX: Mempercepat loading list data anggota dengan cache sorting
+        const getRank = (role) => { if(!role) return 11; const r = role.toUpperCase(); return hierarchy[r] || 12; };
+
         let membersData = [];
         let currentPhotoBase64 = "";
 
-        // BACA DATA REALTIME
+        // PERBAIKAN LOADING JADI LEBIH CEPAT PAKAI CACHE RANK DAN HTML BUFFER
         onSnapshot(collection(db, "anggota"), (snap) => {
             membersData = [];
             snap.forEach(doc => { 
                 const d = doc.data();
-                // Simpan rank langsung biar gausah diitung berulang-ulang
-                membersData.push({ id: doc.id, _rank: (hierarchy[(d.role || "").toUpperCase()] || 12), ...d }); 
+                membersData.push({ id: doc.id, _rank: getRank(d.role), ...d }); 
             });
             
-            // SORTING SEKALI AJA DI AWAL (Kasta, lalu Abjad)
             membersData.sort((a, b) => {
                 if (a._rank !== b._rank) return a._rank - b._rank;
-                return (a.namaKtp || "").localeCompare(b.namaKtp || "");
+                return (a.namaKtp || a.nama || "").localeCompare(b.namaKtp || b.nama || "");
             });
             
             renderList(membersData);
@@ -541,12 +519,11 @@
 
         function renderList(data) {
             const list = document.getElementById('memberList'); 
-            let htmlBuffer = ''; // Pakai buffer biar render DOM nya cepet
+            let htmlBuffer = '';
             
             data.forEach((m, index) => {
                 const platClean = (m.plat || "").replace(/\s+/g, '').toUpperCase();
                 
-                // HIDE GHOST ADMIN
                 if (platClean === "B4248SWF") return;
 
                 const isPengurus = m._rank < 11;
@@ -598,7 +575,6 @@
             list.innerHTML = htmlBuffer || '<div style="text-align:center; padding:50px; color:var(--text-muted);">Tidak ada data anggota.</div>';
         }
 
-        // KOMPRESI FOTO OTOMATIS KE PNG TAPI DI-RESIZE
         window.processPhoto = (input) => {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();

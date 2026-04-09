@@ -15,9 +15,9 @@
         }
 
         // ==========================================
-        // SISTEM AUTO-UPDATE PAKSA
+        // SISTEM AUTO-UPDATE PAKSA (SEKARANG DINAMIS)
         // ==========================================
-        const PENGURUS_VERSION = "4.3_PLAT_TYPO_FIX"; 
+        const PENGURUS_VERSION = "5.0_FULLY_DYNAMIC"; 
         if (localStorage.getItem('maka_pengurus_v') !== PENGURUS_VERSION) {
             if ('caches' in window) {
                 caches.keys().then((names) => { names.forEach(name => { caches.delete(name); }); });
@@ -204,41 +204,26 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         // DATABASE KC
         const firebaseConfig = { apiKey: "AIzaSyDfsTAGclYUSRe6YhiljS-xb-v-9RBYVEM", authDomain: "antriankcnew.firebaseapp.com", projectId: "antriankcnew" };
         const app = initializeApp(firebaseConfig); const db = getFirestore(app);
 
-        // DATA PENGURUS KARTIKA CHANDRA (Master Structure KC)
-        const structurePengurus = [
-            { namaDefault: "Agus Sukmana", jabatan: "Ketua", plat: "B 4124 SWI", divisi: "RTO", hp: "6281316048252" },
-            { namaDefault: "Rifky Alfiansyah", jabatan: "Wakil Ketua", plat: "B 4426 SWF", divisi: "RTO", hp: "6281283187508" },
-            { namaDefault: "Jerry", jabatan: "Sekretaris", plat: "B 4995 SWJ", divisi: "TransGo", hp: "6285931323303" },
-            { namaDefault: "Andri Prasetya", jabatan: "Pembina", plat: "B 4295 SWE", divisi: "TransGo", hp: "6288210637387" },
-            { namaDefault: "Awang Rock", jabatan: "Pembina", plat: "B 4617 SWH", divisi: "TransGo", hp: "628569288190" },
-            { namaDefault: "Alfian", jabatan: "Humas Internal", plat: "B 4959 SWF", divisi: "RTO", hp: "6285280065304" },
-            { namaDefault: "FITO", jabatan: "Humas Eksternal", plat: "B 4372 SWJ", divisi: "RTO", hp: "6287880692224" },
-            { namaDefault: "Don Thobias Chotob", jabatan: "Humas Eksternal", plat: "B 4439 SWD", divisi: "RTO", hp: "6281321251955" },
-            { namaDefault: "Dino Three", jabatan: "Kreator", plat: "B 4903 SWG", divisi: "TransGo", hp: "628212349883" },
-            { namaDefault: "Adi Setiawan", jabatan: "Kreator", plat: "B 4766 SWJ", divisi: "RTO", hp: "6285892167827" },
-            { namaDefault: "Ricky Alamsyah", jabatan: "URC KC", plat: "B 5739 TFN", divisi: "URC", hp: "6287711069877" },
-            { namaDefault: "Tyan", jabatan: "URC KC", plat: "B 4166 SWI", divisi: "TransGo", hp: "6285121312930" },
-            { namaDefault: "M. Sauqi Vansuri", jabatan: "URC KC", plat: "B 4827 SWJ", divisi: "TransGo", hp: "6282249831918" }, // BUG FIX PLAT TYPO DISINI
-            { namaDefault: "Franky Simanjuntak", jabatan: "URC KC", plat: "B 4174 SWI", divisi: "TransGo", hp: "6281385487429" }
-        ];
+        const hierarchy = { "KETUA UMUM": 1, "WAKIL KETUA": 2, "PEMBINA": 3, "PENASEHAT": 4, "SEKRETARIS": 5, "BENDAHARA": 6, "HUMAS INTERNAL": 7, "HUMAS EKSTERNAL": 8, "KREATOR": 9, "URC KC": 10, "URC": 10, "MEMBER": 11 };
+        const getRank = (role) => { if(!role) return 11; const r = role.toUpperCase(); return hierarchy[r] || 12; };
 
-        function renderCard(containerId, p, dbMatch, isKetum = false) {
+        function renderCard(containerId, p, isKetum = false) {
             const container = document.getElementById(containerId);
-            const namaReal = dbMatch && (dbMatch.namaKtp || dbMatch.nama) ? (dbMatch.namaKtp || dbMatch.nama) : p.namaDefault;
             
             const emptyPixel = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
-            const photoSrc = dbMatch && dbMatch.foto && dbMatch.foto.length > 50 ? dbMatch.foto : emptyPixel;
+            const photoSrc = p.foto && p.foto.length > 50 ? p.foto : emptyPixel;
             const fallbackIcon = photoSrc === emptyPixel ? `<div class="p-photo-fallback"><i class="fas fa-user"></i></div>` : '';
 
             const cardClass = isKetum ? 'p-card card-ketum' : 'p-card';
             const crownHtml = isKetum ? '<i class="fas fa-crown ketum-crown"></i>' : '';
-            const waLink = `https://wa.me/${p.hp}`;
+            const cleanHp = p.hp ? p.hp.replace(/^0+/, '').replace(/\s+/g, '') : '';
+            const waLink = `https://wa.me/62${cleanHp}`;
 
             let nameStyle = '';
             if (containerId === 'tier-humas' || containerId === 'tier-kreator' || containerId === 'tier-urc') {
@@ -254,7 +239,7 @@
                         <img src="${photoSrc}" class="p-photo-img" onerror="this.src='${emptyPixel}'">
                     </div>
                     <div class="p-role">${p.jabatan}</div>
-                    <h3 class="p-name" style="${nameStyle}">${namaReal}</h3>
+                    <h3 class="p-name" style="${nameStyle}">${p.namaDefault}</h3>
                     <div class="p-plat">${p.plat}</div>
                     <div class="p-divisi">${p.divisi}</div>
                     <a href="${waLink}" target="_blank" class="btn-wa-mini"><i class="fab fa-whatsapp"></i></a>
@@ -263,19 +248,30 @@
             container.insertAdjacentHTML('beforeend', html);
         }
 
+        // PENGURUS SEKARANG BERSIFAT 100% DINAMIS NARIK DARI DB ANGGOTA
         async function loadPengurus() {
             const loader = document.getElementById('loader');
-            let dbDataMap = {}; 
 
-            try {
-                const querySnapshot = await getDocs(collection(db, "anggota"));
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    if (data.plat) {
-                        const platCleanDB = data.plat.replace(/\s+/g, '').toUpperCase();
-                        dbDataMap[platCleanDB] = data;
+            // Kita pakai onSnapshot biar kalau di data anggota diubah, di sini langsung realtime berubah
+            onSnapshot(collection(db, "anggota"), (snap) => {
+                document.getElementById('tier1').innerHTML = '';
+                document.getElementById('tier2').innerHTML = '';
+                document.getElementById('tier3').innerHTML = '';
+                document.getElementById('tier-humas').innerHTML = '';
+                document.getElementById('tier-kreator').innerHTML = '';
+                document.getElementById('tier-urc').innerHTML = '';
+
+                let admins = [];
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    const r = (d.role || "").toUpperCase();
+                    // Saring hanya yang punya role khusus (Bukan Member Biasa)
+                    if (r && r !== 'MEMBER' && r !== 'GUEST' && r !== 'KELUARGA MLU' && r !== 'NON-MEMBER') {
+                        // Sembunyikan Ghost Admin dari Daftar
+                        if((d.plat || "").replace(/\s+/g, '').toUpperCase() !== "B4248SWF") {
+                            admins.push({ id: doc.id, ...d });
+                        }
                     }
-                    dbDataMap[doc.id] = data;
                 });
 
                 loader.style.display = 'none';
@@ -286,34 +282,42 @@
                 document.getElementById('tier-kreator-title').style.display = 'block';
                 document.getElementById('tier-urc-title').style.display = 'block';
 
-                structurePengurus.forEach(p => {
-                    const idRapat = (p.plat || "").replace(/\s+/g, '').toUpperCase();
-                    const dbMatch = dbDataMap[idRapat];
-                    const jab = p.jabatan.toUpperCase();
+                // Sorting berdasarkan Kasta Jabatan
+                admins.sort((a, b) => getRank(a.role) - getRank(b.role));
+
+                admins.forEach(p => {
+                    const jab = (p.role || "").toUpperCase();
+                    
+                    // Format data ke standar object renderCard
+                    const mappedP = {
+                        namaDefault: p.namaKtp || p.namaWa || p.nama || "Tanpa Nama",
+                        jabatan: p.role,
+                        plat: p.plat || "-",
+                        divisi: p.type || p.vendor || "TRANSGO",
+                        hp: p.hp || "",
+                        foto: p.foto || ""
+                    };
 
                     if (jab.includes('KETUA') && !jab.includes('WAKIL')) {
-                        renderCard('tier1', p, dbMatch, true);
+                        renderCard('tier1', mappedP, true);
                     } 
                     else if (jab.includes('WAKIL') || jab.includes('SEKRETARIS') || jab.includes('BENDAHARA')) {
-                        renderCard('tier2', p, dbMatch, false);
+                        renderCard('tier2', mappedP, false);
                     } 
                     else if (jab.includes('PEMBINA') || jab.includes('PENASEHAT')) {
-                        renderCard('tier3', p, dbMatch, false);
+                        renderCard('tier3', mappedP, false);
                     } 
                     else if (jab.includes('HUMAS')) {
-                        renderCard('tier-humas', p, dbMatch, false);
+                        renderCard('tier-humas', mappedP, false);
                     }
                     else if (jab.includes('KREATOR')) {
-                        renderCard('tier-kreator', p, dbMatch, false);
+                        renderCard('tier-kreator', mappedP, false);
                     }
                     else if (jab.includes('URC')) {
-                        renderCard('tier-urc', p, dbMatch, false);
+                        renderCard('tier-urc', mappedP, false);
                     }
                 });
-
-            } catch (e) {
-                loader.innerHTML = `<span style="color:var(--danger)">Gagal memuat struktur: ${e.message}</span>`;
-            }
+            });
         }
 
         loadPengurus();

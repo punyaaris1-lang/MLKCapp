@@ -11,7 +11,7 @@
             document.documentElement.classList.add('theme-soft-blue');
         }
 
-        const DASH_VERSION = "18.2_LOGO_MAX_OPACITY"; 
+        const DASH_VERSION = "18.3_ALT_FC_GPS_FIX"; 
         if (localStorage.getItem('maka_dash_kc_v') !== DASH_VERSION) {
             if ('caches' in window) { caches.keys().then((names) => { names.forEach(name => { caches.delete(name); }); }); }
             localStorage.setItem('maka_dash_kc_v', DASH_VERSION); window.location.reload(true); 
@@ -121,10 +121,7 @@
         .vip-card::after { content: ''; position: absolute; inset: 0; background-image: radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 15px 15px; opacity: 0.3; pointer-events: none; z-index: 1;}
         .vip-card::before { content: ''; position: absolute; right: -20px; top: -20px; width: 120px; height: 120px; background: radial-gradient(circle, rgba(0,229,255,0.2) 0%, transparent 70%); border-radius: 50%; z-index: 1;}
         
-        /* WATERMARK BESAR: DIGEDEIN JADI 90%, OPACITY NAIK JADI 0.2 */
-        .vc-watermark-logo { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 90%; max-height: 200px; object-fit: contain; z-index: 1; opacity: 0.2; pointer-events: none;}
-        
-        /* LOGO KECIL TAJAM: DIPERBESAR JADI 60PX, POSISI DISESUAIKAN */
+        .vc-watermark-logo { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 88%; max-height: 190px; object-fit: contain; z-index: 1; opacity: 0.2; pointer-events: none;}
         .vc-small-logo { position: absolute; right: 20px; top: 15px; height: 60px; width: auto; object-fit: contain; z-index: 5; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.4));}
 
         .vc-top { padding: 20px 25px 5px; display: flex; justify-content: flex-start; align-items: flex-start; position: relative; z-index: 3;}
@@ -249,7 +246,7 @@
         .ic-keuangan { background: linear-gradient(135deg, var(--kc-cyan) 0%, var(--kc-cyan-dark) 100%); } 
         .ic-tabungan { background: linear-gradient(135deg, var(--kc-cyan) 0%, var(--kc-cyan-dark) 100%); } 
         .ic-info { background: linear-gradient(135deg, var(--kc-cyan) 0%, var(--kc-cyan-dark) 100%); } 
-        .ic-absen { background: linear-gradient(135deg, var(--kc-cyan) 0%, var(--kc-cyan-dark) 100%); } 
+        .ic-absen { background: linear-gradient(135deg, var(--kc-cyan) 0%, var(--kc-cyan-dark) 100%); }
         .ic-urc { background: linear-gradient(135deg, #ef4444, #991b1b); color: white; box-shadow: 0 5px 20px rgba(239,68,68,0.4); }
         .ic-broadcast { background: linear-gradient(135deg, var(--kc-yellow), var(--kc-yellow-dark)); color: #000; box-shadow: 0 5px 20px rgba(202, 138, 4, 0.4); }
 
@@ -400,7 +397,7 @@
             <div class="fc-alt-part" id="altFcBanner" onclick="window.handleAltFCBannerClick()">
                 <div style="display:flex; align-items:center; gap:8px;">
                     <span style="font-size:10px; font-weight:800; color:var(--text-muted); text-transform:uppercase;"><i class="fas fa-map-signs"></i> Alt:</span>
-                    <span id="altFcName" style="font-size:12px; font-weight:900; color:var(--text-main);">FC KELAPA GADING</span>
+                    <span id="altFcName" style="font-size:12px; font-weight:900; color:var(--text-main);">Memuat Radar...</span>
                 </div>
                 <div id="altFcDist" style="font-size:11px; font-weight:900; color:var(--kc-cyan);"><i class="fas fa-location-arrow"></i> ... KM</div>
             </div>
@@ -580,7 +577,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, onSnapshot, updateDoc, collection, query, orderBy, limit, setDoc, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, updateDoc, collection, query, orderBy, limit, setDoc, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         // =========================================================================
         // 1. DEKLARASI FUNGSI UI & TEMA
@@ -632,11 +629,7 @@
         const appKC = initializeApp(firebaseConfig, "AppKC"); const dbKC = getFirestore(appKC);
         const refKC = doc(dbKC, "antrian", "utama");
 
-        // Gading DB tetap diload (tapi tidak untuk render queue di banner)
-        const appGadingConfig = { apiKey: "AIzaSyB666i9lYWIpxOdkwpoX9EvFvHLmHczeq8", authDomain: "fcgadingnew22.firebaseapp.com", projectId: "fcgadingnew22" };
-        const appGading = initializeApp(appGadingConfig, "AppGading"); const dbGading = getFirestore(appGading);
-
-        // MLU DB UNTUK MENGAMBIL DATA fc_locations
+        // MLU DB UNTUK MENGAMBIL DATA fc_locations & CHAT
         const appMLUConfig = { apiKey: "AIzaSyAk3G5aQUBVe_g7_peVu1F6xllP_RejGq0", authDomain: "rtomaka-e67b5.firebaseapp.com", projectId: "rtomaka-e67b5" };
         const appMLU = initializeApp(appMLUConfig, "AppMLU");
         const dbMLU = getFirestore(appMLU);
@@ -683,12 +676,18 @@
         }
 
         // =========================================================================
-        // 4. SISTEM ANTRIAN (MAIN: KC FIXED, ALT: DINAMIS DARI DB MLU)
+        // 4. SISTEM ANTRIAN & LOKASI (FIX: AUTO FETCH DB BEFORE GPS)
         // =========================================================================
         let statusKCHtml = "Memuat...";
         window.kcDist = "Memuat...";
-        
-        // 1. Ambil Status Antrean KC (Banner Utama)
+        let altStations = [];
+        let myLat = null, myLng = null;
+        let closestAlt = { name: "FC KELAPA GADING", dist: "...", link: "antrian_gading.html" };
+
+        const LAT_KC = -6.2285953; const LNG_KC = 106.819502;
+        function calculateDist(lat1, lon1, lat2, lon2) { const p = 0.017453292519943295; const c = Math.cos; const a = 0.5 - c((lat2 - lat1) * p)/2 + c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p))/2; return 12742 * Math.asin(Math.sqrt(a)); }
+
+        // Fetch Status Antrian KC
         onSnapshot(refKC, (snap) => { 
             if(!snap.exists()) return; 
             const d = snap.data(); let qLen = (d.waitingQueue||[]).length; 
@@ -700,30 +699,24 @@
             document.getElementById('mainFcVal').innerHTML = statusKCHtml;
         }); 
 
-        // 2. Load Semua Station Alternatif (Kecuali KC) dari DB MLU
-        let altStations = [
-            { id: 'gading', name: 'FC KELAPA GADING', lat: -6.159389, lng: 106.901416, link: 'antrian_gading.html' }
-        ];
-
-        onSnapshot(collection(dbMLU, "fc_locations"), (snap) => {
-            altStations = [
-                { id: 'gading', name: 'FC KELAPA GADING', lat: -6.159389, lng: 106.901416, link: 'antrian_gading.html' }
-            ];
+        // Tampil Awal sebelum GPS nyala (Baca DB dulu)
+        getDocs(collection(dbMLU, "fc_locations")).then((snap) => {
+            altStations = [];
             snap.forEach(doc => {
                 const data = doc.data();
-                // Abaikan KC agar tidak muncul di banner bawah
                 if(data.isActive !== false && doc.id !== 'kc' && !data.name.toUpperCase().includes("KARTIKA CHANDRA")) {
                     altStations.push({ id: doc.id, name: data.name.toUpperCase(), lat: data.lat, lng: data.lng, link: data.appLink || 'lokasi_fc.html' });
                 }
             });
-            calculateNearestAlt(); // Hitung ulang jarak kalau ada station baru
+            // Kalau belum dapet GPS, set ke station pertama yg didapat (Biasanya Gading)
+            if(!myLat && altStations.length > 0) {
+                closestAlt = { name: altStations[0].name, dist: "...", link: altStations[0].link };
+                updateBannersUI();
+            }
         });
 
-        let myLat = null, myLng = null;
-        let closestAlt = { name: "FC KELAPA GADING", dist: "...", link: "antrian_gading.html" };
-
         function calculateNearestAlt() {
-            if(!myLat || !myLng) return;
+            if(!myLat || !myLng || altStations.length === 0) return;
             let minDist = 999999;
             let nearest = null;
 
@@ -741,43 +734,32 @@
                     dist: minDist.toFixed(1),
                     link: nearest.link || 'lokasi_fc.html'
                 };
-                
-                document.getElementById('altFcName').innerText = closestAlt.name;
-                document.getElementById('altFcDist').innerHTML = `<i class="fas fa-location-arrow"></i> ~${closestAlt.dist} KM`;
+                updateBannersUI();
             }
         }
 
-        window.handleFCBannerClick = () => { 
-            window.location.href = 'antriankc.html'; 
-        };
-        
-        window.handleAltFCBannerClick = () => { 
-            const altName = document.getElementById('altFcName').innerText;
-            if(altName.includes("GADING")) {
-                window.location.href = 'antrian_gading.html';
-            } else {
-                window.location.href = closestAlt.link;
-            }
-        };
+        function updateBannersUI() {
+            // MAIN BANNER: SELALU KARTIKA CHANDRA
+            document.getElementById('mainFcDesc').innerHTML = `<i class="fas fa-location-arrow"></i> ${window.kcDist === 'Memuat...' ? window.kcDist : window.kcDist + ' KM'}`;
+            
+            // ALT BANNER: BERDASARKAN CLOSEST ALT
+            document.getElementById('altFcName').innerText = closestAlt.name;
+            document.getElementById('altFcDist').innerHTML = `<i class="fas fa-location-arrow"></i> ~${closestAlt.dist === '...' ? '...' : closestAlt.dist} KM`;
+        }
 
-        const LAT_KC = -6.2285953; const LNG_KC = 106.819502;
+        window.handleAltFCBannerClick = () => { window.location.href = closestAlt.link; };
 
-        function calculateDist(lat1, lon1, lat2, lon2) { const p = 0.017453292519943295; const c = Math.cos; const a = 0.5 - c((lat2 - lat1) * p)/2 + c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p))/2; return 12742 * Math.asin(Math.sqrt(a)); }
-
-        // 3. TRACKING GPS REALTIME
+        // TRACKING GPS REALTIME
         if(navigator.geolocation) {
             navigator.geolocation.watchPosition((pos) => {
                 myLat = pos.coords.latitude; 
                 myLng = pos.coords.longitude;
                 
-                // Hitung & Tulis Jarak KC (Banner Utama)
                 window.kcDist = calculateDist(LAT_KC, LNG_KC, myLat, myLng).toFixed(1);
-                document.getElementById('mainFcDesc').innerHTML = `<i class="fas fa-location-arrow"></i> ${window.kcDist} KM`;
                 
-                // Cari & Tulis Stasiun Terdekat (Banner Bawah)
+                // Cari Stasiun Terdekat (Banner Bawah) setelah GPS dapat
                 calculateNearestAlt();
 
-                // Kirim koordinat live ke server KC
                 setDoc(doc(dbKC, "live_tracking", myPlatClean), { lat: myLat, lng: myLng, nama: myName, plat: myPlat, hp: uData.hp || uData.wa || "", foto: myCurrentPhoto, timestamp: Date.now() }, { merge: true }).catch(e => console.log(e));
 
             }, (err) => { document.getElementById('kcBoardDesc').innerText += ` [GPS Ditolak/Mati]`; }, {enableHighAccuracy: true, maximumAge: 10000});

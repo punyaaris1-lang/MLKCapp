@@ -11,7 +11,7 @@
             document.documentElement.classList.add('theme-soft-blue');
         }
 
-        const ANTRIAN_VERSION = "10.0_ULTIMATE_LIST_FIX"; 
+        const ANTRIAN_VERSION = "10.1_MEMBER_BATRE_FIX"; 
         if (localStorage.getItem('maka_antrian_kc_v') !== ANTRIAN_VERSION) {
             if ('caches' in window) { caches.keys().then((names) => { names.forEach(name => { caches.delete(name); }); }); }
             localStorage.setItem('maka_antrian_kc_v', ANTRIAN_VERSION);
@@ -566,7 +566,7 @@
         // UTAMA FIREBASE LISTENER
         let localSlots = [null, null, null, null, null]; let localQueue = []; let blockedList = [];
         function cleanStr(s) { return s ? s.replace(/[^A-Z0-9]/gi, '').toUpperCase() : ''; }
-        function escapeHtml(text) { if (!text) return ""; return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
+        function escapeHtml(text) { if (!text) return ""; return text.replace(/&/g, "&lt;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
 
         onSnapshot(mainRef, (snap) => { 
             if (!snap.exists()) return; 
@@ -647,14 +647,20 @@
             } catch(e) { showCustomAlert("GAGAL", e.message || e, "error"); }
         };
 
+        // FUNGSI MEMBER UNTUK MENGISI BATRE SEBELUM MASUK ANTRIAN/SLOT
         window.mintaBatre = (tipeAction, slotIndex) => {
             if(blockedList.includes(cleanStr(myPlat))) return showCustomAlert("DIBLOKIR", "Plat Anda diblokir Admin.", "error");
-            window.memberActionType = tipeAction; window.memberActionSlotIdx = slotIndex;
-            document.getElementById('inpMemberBatre').value = ''; bukaModal('sheetInputBatre');
+            window.memberActionType = tipeAction; 
+            window.memberActionSlotIdx = slotIndex;
+            document.getElementById('inpMemberBatre').value = ''; 
+            bukaModal('sheetInputBatre');
         };
 
         window.prosesSubmitMember = async () => {
-            const rawBatre = document.getElementById('inpMemberBatre').value.trim(); const batreFinal = rawBatre === "" ? "-" : rawBatre + "%"; tutupModal('sheetInputBatre');
+            const rawBatre = document.getElementById('inpMemberBatre').value.trim(); 
+            const batreFinal = rawBatre === "" ? "-" : rawBatre + "%"; 
+            tutupModal('sheetInputBatre');
+
             try {
                 if(window.memberActionType === 'antrian') {
                     await runTransaction(dbKC, async(t) => {
@@ -784,6 +790,7 @@
             tutupModal('sheetManageAntrian'); setTimeout(() => { bukaModal('sheetDaftarAdmin'); }, 300);
         };
 
+        // INI FUNGSI ADMIN KETIKA NGE-DAFTARIN ORANG (MINTA NAMA PLAT BATRE LENGKAP)
         window.adminSubmitDaftar = async (jalur) => {
             const nama = document.getElementById('inpAdminNama').value.trim().toUpperCase(); const plat = document.getElementById('inpAdminPlat').value.trim().toUpperCase(); const batre = document.getElementById('inpAdminBatre').value.trim();
             if(!nama || !plat) return showCustomAlert("PERHATIAN", "Nama dan Plat wajib diisi!", "error");
