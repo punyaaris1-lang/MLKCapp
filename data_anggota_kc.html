@@ -17,7 +17,7 @@
         // ==========================================
         // 2. SISTEM AUTO-UPDATE PAKSA (PENGHANCUR CACHE)
         // ==========================================
-        const DATA_VERSION = "3.5_THEME_SYNC"; 
+        const DATA_VERSION = "3.6_FAST_LOAD_KODE"; 
         if (localStorage.getItem('maka_data_version') !== DATA_VERSION) {
             if ('caches' in window) {
                 caches.keys().then((names) => { names.forEach(name => { caches.delete(name); }); });
@@ -82,7 +82,6 @@
             min-height: 100vh;
         }
 
-        /* Sinkronisasi warna background gradien ke biru langit */
         html.theme-soft-blue body { background-image: linear-gradient(180deg, #A5D6F7 0%, #F0F8FF 100%); }
 
         * { box-sizing: border-box; outline: none; text-decoration: none; }
@@ -132,12 +131,19 @@
         .m-photo-fallback { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 28px; color: rgba(255,255,255,0.8); z-index: 2; font-weight: 900;}
         html.theme-soft-blue .m-photo-fallback { color: rgba(2, 132, 199, 0.5); }
         
-        .m-info { flex: 1; min-width: 0; }
+        .m-info { flex: 1; min-width: 0; position: relative;}
+        
+        /* KODE UNIK KANAN BAWAH */
+        .m-kode { position: absolute; bottom: -5px; right: 0; font-family: 'Space Grotesk'; font-size: 14px; font-weight: 900; color: rgba(255,255,255,0.1); letter-spacing: 2px; }
+        html.theme-soft-blue .m-kode { color: rgba(2, 132, 199, 0.1); }
+        .is-pengurus .m-kode { color: rgba(0,229,255,0.15); }
+        html.theme-soft-blue .is-pengurus .m-kode { color: rgba(2, 132, 199, 0.15); }
+
         .m-name { font-family: 'Outfit'; font-size: 16px; font-weight: 900; color: var(--text-main); text-transform: uppercase; margin-bottom: 4px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
         .m-name-wa { font-size: 11px; font-weight: 800; color: var(--cyan-logo); margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
         html.theme-soft-blue .m-name-wa { color: var(--cyan-dark); }
         
-        .m-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
+        .m-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; position: relative; z-index: 2;}
         .badge { font-size: 10px; font-weight: 900; padding: 5px 10px; border-radius: 8px; text-transform: uppercase; letter-spacing: 1px; border: 1px solid transparent; }
         .bg-plat { background: rgba(0, 229, 255, 0.15); color: var(--cyan-logo); border-color: var(--cyan-logo); }
         html.theme-soft-blue .bg-plat { background: rgba(2, 132, 199, 0.1); color: var(--cyan-dark); border-color: var(--cyan-logo); }
@@ -148,10 +154,10 @@
         .bg-admin { background: linear-gradient(90deg, var(--yellow-logo) 0%, var(--yellow-dark) 100%); color: #000; box-shadow: 0 0 15px rgba(255,255,0,0.4); font-weight: 900;}
         html.theme-soft-blue .bg-admin { color: #FFFFFF; box-shadow: none; }
         
-        .m-darurat { font-size: 10px; font-weight: 900; color: white; background: var(--danger); padding: 5px 10px; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; margin-top: 4px; border: 2px solid #B91C1C; box-shadow: 0 0 10px rgba(239,68,68,0.4);}
+        .m-darurat { font-size: 10px; font-weight: 900; color: white; background: var(--danger); padding: 5px 10px; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; margin-top: 4px; border: 2px solid #B91C1C; box-shadow: 0 0 10px rgba(239,68,68,0.4); position: relative; z-index: 2;}
         html.theme-soft-blue .m-darurat { box-shadow: none; }
 
-        .m-actions { display: flex; flex-direction: column; gap: 10px; }
+        .m-actions { display: flex; flex-direction: column; gap: 10px; position: relative; z-index: 5;}
         .btn-act { width: 42px; height: 42px; border-radius: 12px; border: none; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; font-weight: 900;}
         .btn-call { background: var(--success); color: white; border: 2px solid #047857; box-shadow: 0 0 10px rgba(16,185,129,0.3); }
         .btn-edit { background: var(--cyan-logo); color: #000; border: 2px solid var(--cyan-dark); display: none; box-shadow: 0 0 10px rgba(0,229,255,0.3);}
@@ -510,41 +516,44 @@
         };
 
         const hierarchy = { "KETUA UMUM": 1, "WAKIL KETUA": 2, "PEMBINA": 3, "PENASEHAT": 4, "SEKRETARIS": 5, "BENDAHARA": 6, "HUMAS INTERNAL": 7, "HUMAS EKSTERNAL": 8, "KREATOR": 9, "URC KC": 10, "URC": 10, "MEMBER": 11 };
-        const getRank = (role) => { if(!role) return 11; const r = role.toUpperCase(); return hierarchy[r] || 12; };
-
+        
+        // BUG FIX: Mempercepat loading list data anggota dengan cache sorting
         let membersData = [];
         let currentPhotoBase64 = "";
 
         // BACA DATA REALTIME
         onSnapshot(collection(db, "anggota"), (snap) => {
             membersData = [];
-            snap.forEach(doc => { membersData.push({ id: doc.id, ...doc.data() }); });
+            snap.forEach(doc => { 
+                const d = doc.data();
+                // Simpan rank langsung biar gausah diitung berulang-ulang
+                membersData.push({ id: doc.id, _rank: (hierarchy[(d.role || "").toUpperCase()] || 12), ...d }); 
+            });
+            
+            // SORTING SEKALI AJA DI AWAL (Kasta, lalu Abjad)
+            membersData.sort((a, b) => {
+                if (a._rank !== b._rank) return a._rank - b._rank;
+                return (a.namaKtp || "").localeCompare(b.namaKtp || "");
+            });
+            
             renderList(membersData);
         });
 
         function renderList(data) {
-            const list = document.getElementById('memberList'); list.innerHTML = '';
+            const list = document.getElementById('memberList'); 
+            let htmlBuffer = ''; // Pakai buffer biar render DOM nya cepet
             
-            // SORTING BERDASARKAN KASTA, LALU ABJAD
-            data.sort((a, b) => {
-                const rankA = getRank(a.role); const rankB = getRank(b.role);
-                if (rankA !== rankB) return rankA - rankB;
-                return (a.namaKtp || "").localeCompare(b.namaKtp || "");
-            });
-
-            data.forEach((m) => {
+            data.forEach((m, index) => {
                 const platClean = (m.plat || "").replace(/\s+/g, '').toUpperCase();
                 
-                // HIDE GHOST ADMIN: NAMA/PLAT LU GAK BAKAL TAMPIL!
+                // HIDE GHOST ADMIN
                 if (platClean === "B4248SWF") return;
 
-                const isPengurus = getRank(m.role) < 11;
+                const isPengurus = m._rank < 11;
                 const hasPhoto = (m.foto && m.foto.length > 50);
-                const photoHtml = hasPhoto ? `<img src="${m.foto}" class="m-photo-img">` : `<div class="m-photo-fallback"><i class="fas fa-user"></i></div>`;
+                const photoHtml = hasPhoto ? `<img src="${m.foto}" class="m-photo-img" loading="lazy">` : `<div class="m-photo-fallback"><i class="fas fa-user"></i></div>`;
                 
-                // HANYA ADMIN YANG BISA ZOOM FOTO
                 const photoClick = (hasPhoto && isAdmin) ? `onclick="viewPhoto('${m.foto}')" class="m-photo-wrap zoomable"` : `class="m-photo-wrap"`;
-                
                 const waLink = m.hp ? `https://wa.me/62${m.hp.replace(/^0+/, '').replace(/\s+/g, '')}` : '#';
 
                 const namaUtama = m.namaKtp || m.nama || "MEMBER KC";
@@ -554,16 +563,16 @@
                     if(callName !== namaUtama) namaWaHtml = `<div class="m-name-wa">NAMA WA: ${callName}</div>`;
                 }
 
-                // TAMPILAN KONTAK DARURAT
                 let daruratInfo = '';
                 if (m.daruratHp) {
                     let hub = m.daruratHub ? `(${m.daruratHub})` : '';
                     daruratInfo = `<div class="m-darurat"><i class="fas fa-ambulance"></i> DARURAT: ${m.daruratHp} ${hub}</div>`;
                 }
 
+                const noUrut = String(index + 1).padStart(3, '0');
                 const encodedData = encodeURIComponent(JSON.stringify(m));
 
-                list.innerHTML += `
+                htmlBuffer += `
                     <div class="member-card ${isPengurus?'is-pengurus':''}">
                         <div ${photoClick}><div class="m-photo-bg"></div>${photoHtml}</div>
                         <div class="m-info">
@@ -575,6 +584,7 @@
                                 ${isPengurus ? `<span class="badge bg-admin">${m.role}</span>` : ''}
                             </div>
                             ${daruratInfo}
+                            <div class="m-kode">#${noUrut}</div>
                         </div>
                         <div class="m-actions">
                             <a href="${waLink}" class="btn-act btn-call" target="_blank"><i class="fab fa-whatsapp"></i></a>
@@ -584,11 +594,11 @@
                     </div>
                 `;
             });
+            
+            list.innerHTML = htmlBuffer || '<div style="text-align:center; padding:50px; color:var(--text-muted);">Tidak ada data anggota.</div>';
         }
 
-        // ===============================================
         // KOMPRESI FOTO OTOMATIS KE PNG TAPI DI-RESIZE
-        // ===============================================
         window.processPhoto = (input) => {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
@@ -598,13 +608,11 @@
                         const cvs = document.createElement('canvas'); const ctx = cvs.getContext('2d');
                         let w = img.width; let h = img.height;
                         
-                        // Limit resolusi maksimal 600px agar enteng
                         if (w > h) { if (w > 600) { h *= 600/w; w = 600; } } else { if (h > 600) { w *= 600/h; h = 600; } }
                         
                         cvs.width = w; cvs.height = h; 
                         ctx.drawImage(img, 0, 0, w, h);
                         
-                        // UBAH KE PNG AGAR BISA TRANSPARAN
                         currentPhotoBase64 = cvs.toDataURL('image/png');
                         
                         const p = document.getElementById('previewFoto'); 
@@ -630,7 +638,6 @@
                 document.getElementById('formPlat').value = '';
                 document.getElementById('formHp').value = '';
                 
-                // Reset Darurat
                 document.getElementById('formDaruratHp').value = '';
                 document.getElementById('formDaruratHub').value = '';
 
@@ -649,14 +656,12 @@
                 document.getElementById('formPlat').value = d.plat || '';
                 document.getElementById('formHp').value = d.hp || '';
                 
-                // Populate Darurat
                 document.getElementById('formDaruratHp').value = d.daruratHp || '';
                 document.getElementById('formDaruratHub').value = d.daruratHub || '';
 
                 document.getElementById('formRole').value = d.role || 'MEMBER';
                 document.getElementById('formType').value = d.type || d.vendor || 'TRANSGO';
                 
-                // MATA DEWA: BACA PIN LOGIN
                 if (isSuperAdmin) {
                     document.getElementById('formPinLogin').value = d.pin_login || d.pin || '';
                 }
@@ -700,7 +705,6 @@
             btn.innerText = "MENYIMPAN..."; btn.style.opacity = '0.7';
 
             try {
-                // PLAT CLEAN (TANPA SPASI) ADALAH ID DOKUMEN MUTLAK
                 const newId = platClean;
                 
                 let payload = {
@@ -715,7 +719,6 @@
                     type: type,
                 };
 
-                // JIKA SUPER ADMIN (MATA DEWA) MENGISI PIN, SIMPAN PIN-NYA
                 if (isSuperAdmin) {
                     const inputPin = document.getElementById('formPinLogin').value.trim();
                     if (inputPin !== "") {

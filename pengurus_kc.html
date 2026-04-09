@@ -17,7 +17,7 @@
         // ==========================================
         // SISTEM AUTO-UPDATE PAKSA
         // ==========================================
-        const PENGURUS_VERSION = "4.1"; // Pemisahan Divisi Humas, Kreator, URC
+        const PENGURUS_VERSION = "4.3_PLAT_TYPO_FIX"; 
         if (localStorage.getItem('maka_pengurus_v') !== PENGURUS_VERSION) {
             if ('caches' in window) {
                 caches.keys().then((names) => { names.forEach(name => { caches.delete(name); }); });
@@ -224,7 +224,7 @@
             { namaDefault: "Adi Setiawan", jabatan: "Kreator", plat: "B 4766 SWJ", divisi: "RTO", hp: "6285892167827" },
             { namaDefault: "Ricky Alamsyah", jabatan: "URC KC", plat: "B 5739 TFN", divisi: "URC", hp: "6287711069877" },
             { namaDefault: "Tyan", jabatan: "URC KC", plat: "B 4166 SWI", divisi: "TransGo", hp: "6285121312930" },
-            { namaDefault: "M. Sauqi Vansuri", jabatan: "URC KC", plat: "B 4728 SWJ", divisi: "TransGo", hp: "6282249831918" },
+            { namaDefault: "M. Sauqi Vansuri", jabatan: "URC KC", plat: "B 4827 SWJ", divisi: "TransGo", hp: "6282249831918" }, // BUG FIX PLAT TYPO DISINI
             { namaDefault: "Franky Simanjuntak", jabatan: "URC KC", plat: "B 4174 SWI", divisi: "TransGo", hp: "6281385487429" }
         ];
 
@@ -240,7 +240,6 @@
             const crownHtml = isKetum ? '<i class="fas fa-crown ketum-crown"></i>' : '';
             const waLink = `https://wa.me/${p.hp}`;
 
-            // Sesuaikan ukuran font nama berdasarkan kontainer agar tidak terlalu sempit
             let nameStyle = '';
             if (containerId === 'tier-humas' || containerId === 'tier-kreator' || containerId === 'tier-urc') {
                 nameStyle = 'font-size:13px;';
@@ -266,17 +265,21 @@
 
         async function loadPengurus() {
             const loader = document.getElementById('loader');
-            let dbDataMap = {};
+            let dbDataMap = {}; 
 
             try {
                 const querySnapshot = await getDocs(collection(db, "anggota"));
                 querySnapshot.forEach((doc) => {
-                    dbDataMap[doc.id] = doc.data();
+                    const data = doc.data();
+                    if (data.plat) {
+                        const platCleanDB = data.plat.replace(/\s+/g, '').toUpperCase();
+                        dbDataMap[platCleanDB] = data;
+                    }
+                    dbDataMap[doc.id] = data;
                 });
 
                 loader.style.display = 'none';
 
-                // Tampilkan Judul Section
                 document.getElementById('tier2-title').style.display = 'block';
                 document.getElementById('tier3-title').style.display = 'block';
                 document.getElementById('tier-humas-title').style.display = 'block';
@@ -288,7 +291,6 @@
                     const dbMatch = dbDataMap[idRapat];
                     const jab = p.jabatan.toUpperCase();
 
-                    // PEMBAGIAN TIER BERDASARKAN JABATAN KC SECARA SPESIFIK
                     if (jab.includes('KETUA') && !jab.includes('WAKIL')) {
                         renderCard('tier1', p, dbMatch, true);
                     } 
