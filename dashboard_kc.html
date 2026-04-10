@@ -11,7 +11,7 @@
             document.documentElement.classList.add('theme-soft-blue');
         }
 
-        const DASH_VERSION = "18.5_ALT_GADING_RESTORED"; 
+        const DASH_VERSION = "18.6_AVATAR_BG_FIX"; 
         if (localStorage.getItem('maka_dash_kc_v') !== DASH_VERSION) {
             if ('caches' in window) { caches.keys().then((names) => { names.forEach(name => { caches.delete(name); }); }); }
             localStorage.setItem('maka_dash_kc_v', DASH_VERSION); window.location.reload(true); 
@@ -128,9 +128,12 @@
         .vc-chip::before { content: ''; position: absolute; left: 50%; top: 0; height: 100%; width: 1px; background: rgba(0,0,0,0.2); }
         
         .vc-middle { padding: 10px 25px 0; position: relative; z-index: 4; display: flex; align-items: center; gap: 18px;}
-        .vc-avatar { width: 85px; height: 85px; border-radius: 24px; background: #000; padding: 3px; box-shadow: 0 10px 25px rgba(0,229,255,0.4); flex-shrink: 0; border: 2px solid var(--kc-cyan);}
-        html.theme-soft-blue .vc-avatar { border-color: #FFF; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-        .vc-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 20px;}
+        
+        /* FIX: Tambahan Background di belakang Avatar User */
+        .vc-avatar { width: 85px; height: 85px; border-radius: 24px; background: #000; padding: 3px; box-shadow: 0 10px 25px rgba(0,229,255,0.4); flex-shrink: 0; border: 2px solid var(--kc-cyan); position: relative; overflow: hidden;}
+        html.theme-soft-blue .vc-avatar { border-color: #FFF; box-shadow: 0 10px 25px rgba(0,0,0,0.2); background: #E2E8F0; }
+        .vc-avatar::before { content: ''; position: absolute; inset: 0; background-image: url('bg_maka.jpg'); background-size: cover; background-position: center; opacity: 0.6; z-index: 1;}
+        .vc-avatar img { position: relative; width: 100%; height: 100%; object-fit: cover; border-radius: 20px; z-index: 3;}
         
         .vc-info { flex: 1; }
         .vc-name { font-family: 'Outfit'; font-size: 24px; font-weight: 900; color: white; line-height: 1.1; margin-bottom: 4px; text-shadow: 0 2px 10px rgba(0,0,0,0.8); text-transform: uppercase;}
@@ -233,6 +236,7 @@
         
         .icon-box { width: 55px; height: 55px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 12px; color: #000; box-shadow: 0 5px 20px rgba(0, 229, 255, 0.4); font-weight: 900;}
         
+        /* THEME SOFT BLUE IKON BOX CLEAN */
         html.theme-soft-blue .icon-box { background: #E0F2FE !important; color: var(--kc-cyan-dark) !important; box-shadow: none !important; border: 1px solid rgba(2, 132, 199, 0.2) !important; }
         html.theme-soft-blue .ic-urc { background: #FEF2F2 !important; color: var(--danger) !important; border-color: rgba(220, 38, 38, 0.2) !important; }
         html.theme-soft-blue .ic-broadcast { background: #FEF3C7 !important; color: var(--kc-yellow-dark) !important; border-color: rgba(217, 119, 6, 0.2) !important; }
@@ -346,7 +350,6 @@
 
     <div class="vip-card">
         <img src="logo_kc.png" class="vc-watermark-logo" onerror="this.style.display='none'">
-        
         <img src="logo_kc.png" class="vc-small-logo" onerror="this.style.display='none'">
 
         <div class="vc-top">
