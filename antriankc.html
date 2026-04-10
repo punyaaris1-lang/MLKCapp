@@ -11,7 +11,7 @@
             document.documentElement.classList.add('theme-soft-blue');
         }
 
-        const ANTRIAN_VERSION = "10.3_CRASH_FIX"; 
+        const ANTRIAN_VERSION = "10.4_BADGE_FIX"; 
         if (localStorage.getItem('maka_antrian_kc_v') !== ANTRIAN_VERSION) {
             if ('caches' in window) { caches.keys().then((names) => { names.forEach(name => { caches.delete(name); }); }); }
             localStorage.setItem('maka_antrian_kc_v', ANTRIAN_VERSION);
@@ -158,18 +158,24 @@
         .slot-bay.is-admin .sb-num { background: var(--kc-yellow); color: #000; box-shadow: 0 5px 15px rgba(255,255,0,0.4); border-color: var(--kc-yellow);}
         html.theme-soft-blue .slot-bay.is-admin .sb-num { box-shadow: none; }
 
-        .sb-info { flex: 1; min-width: 0; }
-        .sb-name { font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 6px;}
+        .sb-info { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
+        
+        /* FIX: Nama otomatis memotong baris jika terlalu panjang, Badge tetap aman */
+        .sb-name-wrap { display: flex; align-items: flex-start; gap: 6px; flex-wrap: wrap; margin-bottom: 4px; }
+        .sb-name { font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; line-height: 1.4; word-wrap: break-word;}
+        .sb-badges { display: flex; align-items: center; gap: 5px; flex-shrink: 0; margin-top: 1px;}
+        
         .sb-plat { font-family: 'Space Grotesk'; font-size: 20px; font-weight: 900; color: var(--kc-cyan); line-height: 1; }
         .slot-bay.is-empty .sb-plat { color: #64748B; }
         .sb-timer { font-size: 10px; font-weight: 700; color: var(--text-muted); margin-top: 6px; display: flex; align-items: center; gap: 5px; }
         
-        .badge-pengurus { background: rgba(255,255,0,0.1); color: var(--kc-yellow); border: 1px solid rgba(255,255,0,0.3); font-size: 8px; font-weight: 900; padding: 3px 6px; border-radius: 6px; letter-spacing: 1px; }
+        /* Proteksi Flex Shrink 0 untuk Badge agar tidak kegencet teks panjang */
+        .badge-pengurus { background: rgba(255,255,0,0.1); color: var(--kc-yellow); border: 1px solid rgba(255,255,0,0.3); font-size: 8px; font-weight: 900; padding: 3px 6px; border-radius: 6px; letter-spacing: 1px; flex-shrink: 0; white-space: nowrap;}
         html.theme-soft-blue .badge-pengurus { color: var(--kc-yellow-dark); border-color: var(--kc-yellow); }
-        .badge-batre { color: var(--kc-cyan); font-size: 10px; font-weight: 900; }
+        .badge-batre { color: var(--kc-cyan); font-size: 10px; font-weight: 900; flex-shrink: 0; white-space: nowrap;}
         html.theme-soft-blue .badge-batre { color: var(--kc-cyan-dark); }
 
-        .btn-dots { width: 40px; height: 40px; border-radius: 50%; background: #111; color: var(--text-main); border: 1px solid #333; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; position: relative; z-index: 20; }
+        .btn-dots { width: 40px; height: 40px; border-radius: 50%; background: #111; color: var(--text-main); border: 1px solid #333; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; position: relative; z-index: 20; flex-shrink: 0;}
         html.theme-soft-blue .btn-dots { background: #F1F5F9; border-color: #CBD5E1; color: #64748B; }
         .btn-dots:active { background: rgba(0,229,255,0.1); border-color: var(--kc-cyan); color: var(--kc-cyan); transform: scale(0.9); }
         html.theme-soft-blue .btn-dots:active { background: var(--kc-cyan); color: #FFF; }
@@ -522,15 +528,7 @@
             } catch (e) { console.error("Gagal log", e); }
         }
 
-        // LISTENERS INFO BOARD & STATS
-        onSnapshot(doc(dbKC, "settings", "board_info"), (snap) => {
-            if(snap.exists()) {
-                const data = snap.data();
-                const rt = document.getElementById('runningTextDesc');
-                if(rt) rt.innerText = `${data.title || "INFO KARTIKA CHANDRA"} • ${data.desc || "-"}`;
-            }
-        });
-
+        // LISTENERS STATS
         onSnapshot(statsRef, (snap) => {
             if(snap.exists()) {
                 const d = snap.data(); const today = new Date().toLocaleDateString('id-ID');
@@ -570,7 +568,6 @@
 
         onSnapshot(mainRef, (snap) => { 
             if (!snap.exists()) {
-                // FALLBACK JIKA DATABASE KOSONG
                 localSlots = [null, null, null, null, null];
                 localQueue = [];
                 blockedList = [];
@@ -580,7 +577,6 @@
             const d = snap.data(); localSlots = d.chargingSlots || [null, null, null, null, null]; localQueue = d.waitingQueue || []; blockedList = d.blockedPlates || []; 
             updateUI(); 
             
-            // JIKA SEDANG BUKA MODAL, REFRESH DAFTAR AGAR REALTIME
             if(document.getElementById('sheetManageAntrian').classList.contains('show')) renderQueueAdmin();
             if(document.getElementById('sheetDaftarAntrian').classList.contains('show')) renderQueueList();
         });
@@ -614,7 +610,10 @@
                     let batreInfo = (s.batre && s.batre !== '-' && s.batre !== 'undefined') ? `<span class="badge-batre"><i class="fas fa-bolt"></i> ${s.batre}</span>` : '';
                     let roleBadge = (s.role && s.role !== 'MEMBER' && s.role !== 'GUEST' && s.role !== 'KELUARGA MLU' && s.role !== 'MANUAL' && s.role !== 'KUDETA') ? `<span class="badge-pengurus">${s.role}</span>` : '';
 
-                    div.innerHTML = `<div class="sb-num">${i+1}</div><div class="sb-info"><div class="sb-name">${escapeHtml(s.userName)} ${batreInfo} ${roleBadge}</div><div class="sb-plat">${s.plat}</div>${timerHTML}</div>${adminBtn}`;
+                    // FIX: Nama akan turun baris jika kepanjangan (FLEX WRAP), dan badge tidak ikut kegencet
+                    let nameSpan = `<div class="sb-name-wrap"><span style="word-wrap:break-word;">${escapeHtml(s.userName)}</span> <div class="sb-badges">${batreInfo} ${roleBadge}</div></div>`;
+                    
+                    div.innerHTML = `<div class="sb-num">${i+1}</div><div class="sb-info"><div class="sb-name">${nameSpan}</div><div class="sb-plat">${s.plat}</div>${timerHTML}</div>${adminBtn}`;
                     if(isMe) { div.onclick = async (e) => { e.stopPropagation(); const ok = await showCustomConfirm("SELESAI PENGISIAN?", "Apakah Anda sudah selesai dan ingin mengosongkan slot ini?"); if(ok) stopCharging(i); }; div.style.cursor = "pointer"; }
                 } else {
                     div.className = `slot-bay is-empty`;
@@ -636,7 +635,6 @@
             document.getElementById('totalQDisplay').innerText = localQueue.length; document.getElementById('nextQDisplay').innerText = localQueue.length > 0 ? localQueue[0].userName : "KOSONG";
         }
 
-        // USER ACTIONS
         window.pindahDariAntrianKeSlot = async (slotIndex) => {
             try {
                 await runTransaction(dbKC, async(t) => {
@@ -655,20 +653,14 @@
             } catch(e) { showCustomAlert("GAGAL", e.message || e, "error"); }
         };
 
-        // FUNGSI MEMBER UNTUK MENGISI BATRE SEBELUM MASUK ANTRIAN/SLOT
         window.mintaBatre = (tipeAction, slotIndex) => {
             if(blockedList.includes(cleanStr(myPlat))) return showCustomAlert("DIBLOKIR", "Plat Anda diblokir Admin.", "error");
-            window.memberActionType = tipeAction; 
-            window.memberActionSlotIdx = slotIndex;
-            document.getElementById('inpMemberBatre').value = ''; 
-            bukaModal('sheetInputBatre');
+            window.memberActionType = tipeAction; window.memberActionSlotIdx = slotIndex;
+            document.getElementById('inpMemberBatre').value = ''; bukaModal('sheetInputBatre');
         };
 
         window.prosesSubmitMember = async () => {
-            const rawBatre = document.getElementById('inpMemberBatre').value.trim(); 
-            const batreFinal = rawBatre === "" ? "-" : rawBatre + "%"; 
-            tutupModal('sheetInputBatre');
-
+            const rawBatre = document.getElementById('inpMemberBatre').value.trim(); const batreFinal = rawBatre === "" ? "-" : rawBatre + "%"; tutupModal('sheetInputBatre');
             try {
                 if(window.memberActionType === 'antrian') {
                     await runTransaction(dbKC, async(t) => {
@@ -736,9 +728,8 @@
             }
         };
 
-        // ADMIN COMMANDS (DENGAN SENSOR GPS BARU UNTUK DAFTAR VIA ADMIN)
+        // ADMIN COMMANDS (DENGAN SENSOR GPS)
         window.bukaDaftarAdmin = (slotIndex) => {
-            // PERBAIKAN: PENGURUS HARUS DI LOKASI BUAT BUKA MENU INI (KECUALI SUPER ADMIN)
             if (!isUserDewa && !isInLocation) {
                 return showCustomAlert("AKSES DITOLAK", "Pengurus harus berada di lokasi (Maks 70M) untuk mendaftarkan member secara manual. Akses jarak jauh hanya untuk Super Admin.", "error");
             }
@@ -748,7 +739,6 @@
         };
 
         window.adminSubmitDaftar = async (jalur) => {
-            // DOUBLE CHECK KEAMANAN (JAGA-JAGA)
             if (!isUserDewa && !isInLocation) {
                 return showCustomAlert("AKSES DITOLAK", "Pengurus harus berada di lokasi (Maks 70M) untuk mendaftarkan member secara manual.", "error");
             }
