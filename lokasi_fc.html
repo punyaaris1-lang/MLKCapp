@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>KC - Station Locator</title>
     
+    <script>
+        const savedTheme = localStorage.getItem('maka_theme');
+        if (savedTheme === 'soft-blue') {
+            document.documentElement.classList.add('theme-soft-blue');
+        }
+    </script>
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Space+Grotesk:wght@700;900&family=Outfit:wght@800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -12,46 +19,109 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <style>
-        /* TEMA KC */
-        :root { --kc-yellow: #D4FF00; --kc-green: #10B981; --danger: #EF4444; --bg-black: #050505; }
-        body { margin: 0; padding: 0; font-family: 'Inter', sans-serif; overflow: hidden; background: #E2E8F0; }
+        /* TEMA KC DARK CYBER */
+        :root { 
+            --kc-cyan: #00E5FF;     
+            --kc-cyan-dark: #0077B6;     
+            --kc-yellow: #FFFF00;   
+            --kc-yellow-dark: #D4AF37;   
+            --danger: #EF4444; 
+            --success: #10B981;
+            --bg-panel: rgba(5, 11, 20, 0.85);
+            --border-glass: rgba(0, 229, 255, 0.3);
+            --text-main: #FFFFFF;
+            --text-muted: #94A3B8;
+        }
+
+        /* TEMA KC SOFT BLUE */
+        html.theme-soft-blue {
+            --kc-cyan: #0284C7;
+            --kc-cyan-dark: #0369A1;
+            --kc-yellow: #D97706;
+            --kc-yellow-dark: #B45309;
+            --danger: #DC2626; 
+            --success: #059669;
+            --bg-panel: rgba(255, 255, 255, 0.95);
+            --border-glass: rgba(2, 132, 199, 0.3);
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+        }
+
+        body { margin: 0; padding: 0; font-family: 'Inter', sans-serif; overflow: hidden; background: #050B14; }
+        html.theme-soft-blue body { background: #E2E8F0; }
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent;}
 
         #map { position: absolute; top: 0; bottom: 0; left: 0; right: 0; width: 100vw; height: 100vh; z-index: 1; }
 
-        /* HEADER OVERLAY KC (GELAP KE BAWAH) */
-        .header-overlay { position: absolute; top: 0; left: 0; width: 100%; padding: 40px 20px 20px; background: linear-gradient(180deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.8) 60%, transparent 100%); z-index: 1000; text-align: center; pointer-events: none; }
-        .header-title { font-family: 'Outfit'; font-size: 26px; font-weight: 900; color: var(--kc-yellow); margin: 0; text-shadow: 0 2px 10px rgba(0,0,0,0.8); letter-spacing: 1px;}
-        .gps-status { display: inline-flex; align-items: center; gap: 8px; background: #111; padding: 8px 20px; border-radius: 50px; font-family: 'Space Grotesk'; font-weight: 800; font-size: 10px; color: var(--kc-yellow); box-shadow: 0 5px 15px rgba(0,0,0,0.5); margin-top: 10px; pointer-events: auto; cursor: pointer; border: 1px solid rgba(212,255,0,0.2);}
-        .gps-dot { width: 8px; height: 8px; background: var(--kc-green); border-radius: 50%; animation: blink 1.5s infinite; box-shadow: 0 0 10px var(--kc-green);}
+        /* HEADER OVERLAY KC */
+        .header-overlay { position: absolute; top: 0; left: 0; width: 100%; padding: 40px 20px 20px; background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 60%, transparent 100%); z-index: 1000; text-align: center; pointer-events: none; }
+        html.theme-soft-blue .header-overlay { background: linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.7) 60%, transparent 100%); }
+        
+        .header-title { font-family: 'Outfit'; font-size: 26px; font-weight: 900; color: var(--kc-cyan); margin: 0; text-shadow: 0 2px 10px rgba(0,229,255,0.5); letter-spacing: 1px;}
+        html.theme-soft-blue .header-title { color: var(--kc-cyan-dark); text-shadow: none; }
+        
+        .gps-status { display: inline-flex; align-items: center; gap: 8px; background: var(--bg-panel); backdrop-filter: blur(10px); padding: 8px 20px; border-radius: 50px; font-family: 'Space Grotesk'; font-weight: 800; font-size: 10px; color: var(--text-main); box-shadow: 0 5px 15px rgba(0,0,0,0.5); margin-top: 10px; pointer-events: auto; cursor: pointer; border: 1px solid var(--border-glass);}
+        .gps-dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; animation: blink 1.5s infinite; box-shadow: 0 0 10px var(--success);}
         @keyframes blink { 50% { opacity: 0.3; } }
 
         /* CUSTOM MARKER CSS */
         .custom-div-icon { background: transparent; border: none; }
-        .marker-on { width: 35px; height: 35px; background: var(--kc-yellow); color: black; border-radius: 50%; border: 3px solid black; display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); transition: 0.2s; }
-        .marker-off { width: 35px; height: 35px; background: var(--danger); color: white; border-radius: 50%; border: 3px solid black; display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); opacity: 0.8; }
-        .marker-label { position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); background: #111; color: var(--kc-yellow); padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 800; white-space: nowrap; box-shadow: 0 3px 10px rgba(0,0,0,0.5); border: 1px solid rgba(212,255,0,0.3);}
-        .marker-label.lbl-off { color: white; background: var(--danger); border-color: darkred;}
+        .marker-on { width: 35px; height: 35px; background: var(--kc-cyan); color: #000; border-radius: 50%; border: 2px solid #000; display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 0 15px rgba(0,229,255,0.6); transition: 0.2s; }
+        html.theme-soft-blue .marker-on { background: var(--kc-cyan-dark); color: #FFF; border-color: #FFF; box-shadow: 0 5px 15px rgba(2,132,199,0.4); }
         
-        .user-dot { width: 20px; height: 20px; background: var(--kc-green); border-radius: 50%; border: 3px solid white; box-shadow: 0 0 0 10px rgba(16,185,129,0.2), 0 5px 15px rgba(0,0,0,0.5); }
+        .marker-off { width: 35px; height: 35px; background: var(--danger); color: white; border-radius: 50%; border: 2px solid #000; display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 5px 15px rgba(239,68,68,0.5); opacity: 0.8; }
+        html.theme-soft-blue .marker-off { border-color: #FFF; }
 
-        /* BOTTOM SHEET POPUP (MODE GELAP) */
-        .bottom-sheet { position: fixed; bottom: -100%; left: 0; width: 100%; background: #111; border-top-left-radius: 30px; border-top-right-radius: 30px; padding: 25px; box-shadow: 0 -10px 40px rgba(0,0,0,0.8); z-index: 2000; transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; flex-direction: column; border-top: 1px solid #333;}
+        .marker-label { position: absolute; bottom: -22px; left: 50%; transform: translateX(-50%); background: var(--bg-panel); backdrop-filter: blur(5px); color: var(--text-main); padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 800; white-space: nowrap; box-shadow: 0 3px 10px rgba(0,0,0,0.5); border: 1px solid var(--border-glass);}
+        .marker-label.lbl-off { color: #FFF; background: var(--danger); border-color: darkred;}
+        
+        /* EFEK RADAR USER */
+        .user-dot-wrap { position: relative; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px;}
+        .user-dot { width: 16px; height: 16px; background: var(--kc-cyan); border-radius: 50%; border: 2px solid #000; position: relative; z-index: 2; box-shadow: 0 0 10px var(--kc-cyan);}
+        html.theme-soft-blue .user-dot { background: var(--kc-cyan-dark); border-color: #FFF; }
+        .user-pulse { position: absolute; inset: 0; background: rgba(0, 229, 255, 0.4); border-radius: 50%; z-index: 1; animation: radarPulse 2s infinite; }
+        html.theme-soft-blue .user-pulse { background: rgba(2, 132, 199, 0.3); }
+        @keyframes radarPulse { 0% { transform: scale(0.5); opacity: 1; } 100% { transform: scale(3); opacity: 0; } }
+
+        /* --- WIDGET NEAREST FC (NEW) --- */
+        .nearest-widget { position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%); width: 88%; max-width: 380px; background: var(--bg-panel); backdrop-filter: blur(15px); border: 1px solid var(--border-glass); border-radius: 20px; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; z-index: 1500; box-shadow: 0 10px 30px rgba(0,0,0,0.6); cursor: pointer; transition: 0.3s; opacity: 0; visibility: hidden; }
+        html.theme-soft-blue .nearest-widget { box-shadow: 0 10px 30px rgba(2,132,199,0.15); }
+        .nearest-widget.show { opacity: 1; visibility: visible; bottom: 95px;}
+        .nearest-widget:active { transform: translateX(-50%) scale(0.96); }
+        
+        .nw-left { display: flex; flex-direction: column; gap: 4px; }
+        .nw-title { font-size: 9px; font-weight: 900; color: var(--kc-yellow); text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 5px;}
+        html.theme-soft-blue .nw-title { color: var(--kc-yellow-dark); }
+        .nw-name { font-family: 'Outfit'; font-size: 16px; font-weight: 900; color: var(--text-main); }
+        
+        .nw-right { text-align: right; }
+        .nw-dist { font-family: 'Space Grotesk'; font-size: 20px; font-weight: 900; color: var(--kc-cyan); }
+        html.theme-soft-blue .nw-dist { color: var(--kc-cyan-dark); }
+        .nw-btn { font-size: 10px; background: rgba(0,229,255,0.1); color: var(--kc-cyan); padding: 4px 10px; border-radius: 8px; margin-top: 4px; display: inline-block; font-weight: 800; border: 1px solid rgba(0,229,255,0.3);}
+        html.theme-soft-blue .nw-btn { background: var(--kc-cyan-dark); color: #FFF; border-color: var(--kc-cyan-dark); }
+
+        /* BOTTOM SHEET POPUP */
+        .bottom-sheet { position: fixed; bottom: -100%; left: 0; width: 100%; background: var(--bg-surface); border-top-left-radius: 30px; border-top-right-radius: 30px; padding: 25px; box-shadow: 0 -10px 40px rgba(0,0,0,0.8); z-index: 2000; transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; flex-direction: column; border-top: 1px solid var(--border-glass);}
+        html.theme-soft-blue .bottom-sheet { box-shadow: 0 -10px 40px rgba(2,132,199,0.2); }
         .bottom-sheet.show { bottom: 0; }
         
         .bs-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .bs-title { font-family: 'Outfit'; font-size: 22px; font-weight: 900; color: white; margin: 0; text-transform: uppercase; }
-        .btn-close { width: 35px; height: 35px; background: #222; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; border: none; font-size: 16px; cursor: pointer; }
+        .bs-title { font-family: 'Outfit'; font-size: 22px; font-weight: 900; color: var(--text-main); margin: 0; text-transform: uppercase; }
+        .btn-close { width: 35px; height: 35px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text-main); border: none; font-size: 16px; cursor: pointer; }
+        html.theme-soft-blue .btn-close { background: #E2E8F0; color: #64748B; }
 
-        .info-bar { background: rgba(212,255,0,0.1); border: 1px solid rgba(212,255,0,0.2); border-radius: 12px; padding: 15px; display: flex; align-items: center; gap: 15px; margin-bottom: 20px; font-family: 'Space Grotesk'; font-weight: 800; color: var(--kc-yellow); }
+        .info-bar { background: rgba(0,229,255,0.1); border: 1px solid rgba(0,229,255,0.2); border-radius: 12px; padding: 15px; display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 20px; font-family: 'Space Grotesk'; font-weight: 800; color: var(--kc-cyan); }
+        html.theme-soft-blue .info-bar { background: #E0F2FE; border-color: #BAE6FD; color: var(--kc-cyan-dark); }
         .info-bar i { font-size: 18px; }
 
-        .btn-nav { width: 100%; padding: 18px; border: none; border-radius: 16px; background: var(--kc-yellow); color: black; font-family: 'Space Grotesk'; font-weight: 900; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 10px 25px rgba(212,255,0,0.3); transition: 0.2s;}
+        .btn-nav { width: 100%; padding: 18px; border: none; border-radius: 16px; background: var(--kc-cyan); color: #000; font-family: 'Space Grotesk'; font-weight: 900; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 10px 25px rgba(0,229,255,0.3); transition: 0.2s;}
+        html.theme-soft-blue .btn-nav { color: #FFF; background: var(--kc-cyan-dark); box-shadow: 0 10px 25px rgba(2,132,199,0.3); }
         .btn-nav:active { transform: scale(0.96); }
         .btn-nav.disabled { background: var(--danger); color: white; box-shadow: 0 10px 25px rgba(239,68,68,0.3); cursor: not-allowed; }
 
         /* TOMBOL KEMBALI KE HOME */
-        .btn-home { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); background: #111; color: var(--kc-yellow); padding: 15px 30px; border-radius: 50px; font-family: 'Space Grotesk'; font-weight: 800; font-size: 12px; display: flex; align-items: center; gap: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); border: 1px solid rgba(212,255,0,0.2); text-decoration: none; z-index: 1500; transition: 0.3s;}
+        .btn-home { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); background: var(--bg-panel); backdrop-filter: blur(15px); color: var(--kc-cyan); padding: 15px 30px; border-radius: 50px; font-family: 'Space Grotesk'; font-weight: 800; font-size: 12px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); border: 1px solid var(--border-glass); text-decoration: none; z-index: 1500; transition: 0.3s; width: 88%; max-width: 380px;}
+        html.theme-soft-blue .btn-home { background: #FFFFFF; color: var(--kc-cyan-dark); box-shadow: 0 10px 25px rgba(2,132,199,0.2); }
         .btn-home.hide { bottom: -100px; } 
     </style>
 </head>
@@ -60,9 +130,20 @@
     <div id="map"></div>
 
     <div class="header-overlay">
-        <h1 class="header-title">LOKASI FC</h1>
+        <h1 class="header-title">RADAR STASIUN KC</h1>
         <div class="gps-status" onclick="recenterMap()">
-            <div class="gps-dot" id="gpsIndicator"></div> <span id="gpsText">MENCARI GPS...</span>
+            <div class="gps-dot" id="gpsIndicator"></div> <span id="gpsText">MENCARI SATELIT...</span>
+        </div>
+    </div>
+
+    <div class="nearest-widget" id="nearestCard" onclick="navToNearest()">
+        <div class="nw-left">
+            <div class="nw-title"><i class="fas fa-bolt"></i> Stasiun Terdekat</div>
+            <div class="nw-name" id="nwName">Mencari...</div>
+        </div>
+        <div class="nw-right">
+            <div class="nw-dist" id="nwDist">0 KM</div>
+            <div class="nw-btn">LIHAT RUTE</div>
         </div>
     </div>
 
@@ -72,12 +153,12 @@
             <button class="btn-close" onclick="closeSheet()"><i class="fas fa-times"></i></button>
         </div>
         <div class="info-bar" id="sheetInfoBar">
-            <i class="fas fa-route"></i> <span id="sheetDist">0 KM</span> • <i class="fas fa-clock"></i> <span id="sheetTime">0 MNT</span>
+            <i class="fas fa-route"></i> <span id="sheetDist">0 KM</span> &nbsp;•&nbsp; <i class="fas fa-clock"></i> <span id="sheetTime">0 MNT</span>
         </div>
-        <button class="btn-nav" id="btnNav"><i class="fas fa-location-arrow"></i> BUKA NAVIGASI MAPS</button>
+        <button class="btn-nav" id="btnNav"><i class="fas fa-location-arrow"></i> BUKA GOOGLE MAPS</button>
     </div>
 
-    <a href="dashboard_kc.html" class="btn-home" id="btnHome"><i class="fas fa-home"></i> KEMBALI KE HOME</a>
+    <a href="dashboard_kc.html" class="btn-home" id="btnHome"><i class="fas fa-arrow-left"></i> KEMBALI KE DASHBOARD</a>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -96,10 +177,20 @@
         let map, userMarker, watchId;
         let myLat = -6.1754, myLng = 106.8272; // Default Jakarta
         let fcMarkers = [];
+        let allFcData = [];
+        let currentNearest = null;
+        let isInitialZoomDone = false; // Flag untuk Fly-To Animation awal
 
-        // INIT MAP (TETAP PUTIH/TERANG)
-        map = L.map('map', { zoomControl: false }).setView([myLat, myLng], 12);
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+        // CEK TEMA UNTUK GANTI TILE MAPS (DARK/LIGHT)
+        const isLightMode = document.documentElement.classList.contains('theme-soft-blue');
+        // Pake CartoDB Dark Matter untuk Cyber Navy, Voyager untuk Soft Blue
+        const tileUrl = isLightMode 
+            ? 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png' 
+            : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+
+        // INIT MAP
+        map = L.map('map', { zoomControl: false }).setView([myLat, myLng], 11);
+        L.tileLayer(tileUrl, { attribution: '© OpenStreetMap' }).addTo(map);
 
         // DATA DEFAULT (JAGA-JAGA)
         const fixedStations = [
@@ -107,46 +198,97 @@
             { id: 'kc', name: 'FC Kartika Chandra', lat: -6.2285953, lng: 106.819502, isActive: true, mapLink: '' }
         ];
 
-        // TRACK GPS USER
+        // FUNGSI NGITUNG JARAK
+        function calculateDist(lat1, lon1, lat2, lon2) { 
+            const p = 0.017453292519943295, c = Math.cos; 
+            const a = 0.5 - c((lat2 - lat1) * p)/2 + c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p))/2; 
+            return 12742 * Math.asin(Math.sqrt(a)); 
+        }
+
+        // FUNGSI UPDATE WIDGET TERDEKAT
+        function findNearestFC() {
+            if(!myLat || allFcData.length === 0) return;
+            
+            let min = Infinity;
+            let nearest = null;
+
+            allFcData.forEach(loc => {
+                // Hanya hitung yang stationnya lagi ON/Aktif
+                if(loc.isActive !== false) {
+                    let d = calculateDist(myLat, myLng, loc.lat, loc.lng);
+                    if(d < min) { min = d; nearest = loc; }
+                }
+            });
+
+            if(nearest) {
+                currentNearest = nearest;
+                document.getElementById('nwName').innerText = nearest.name;
+                document.getElementById('nwDist').innerText = min.toFixed(1) + ' KM';
+                document.getElementById('nearestCard').classList.add('show');
+            } else {
+                document.getElementById('nearestCard').classList.remove('show');
+            }
+        }
+
+        window.navToNearest = () => {
+            if(currentNearest) {
+                map.flyTo([currentNearest.lat, currentNearest.lng], 15, {animate: true, duration: 1});
+                openSheet(currentNearest);
+            }
+        };
+
+        // TRACK GPS USER (DENGAN EFEK ANIMASI)
         if (navigator.geolocation) {
             watchId = navigator.geolocation.watchPosition((pos) => {
                 myLat = pos.coords.latitude;
                 myLng = pos.coords.longitude;
                 
-                document.getElementById('gpsText').innerText = "GPS AKTIF (TAP UTK RE-CENTER)";
-                document.getElementById('gpsIndicator').style.background = "var(--kc-green)";
+                document.getElementById('gpsText').innerText = "RADAR AKTIF (TAP RE-CENTER)";
+                document.getElementById('gpsIndicator').style.background = "var(--success)";
 
                 if (!userMarker) {
-                    const uIcon = L.divIcon({ className: 'custom-div-icon', html: `<div class="user-dot"></div>`, iconSize: [20,20] });
+                    // Bikin marker dengan efek pulse radar
+                    const uIcon = L.divIcon({ className: 'custom-div-icon', html: `<div class="user-dot-wrap"><div class="user-pulse"></div><div class="user-dot"></div></div>`, iconSize: [40,40], iconAnchor:[20,20] });
                     userMarker = L.marker([myLat, myLng], { icon: uIcon, zIndexOffset: 1000 }).addTo(map);
-                    map.setView([myLat, myLng], 13);
                 } else {
                     userMarker.setLatLng([myLat, myLng]);
                 }
+
+                // Terbang ke lokasi user saat pertama kali dapet sinyal
+                if(!isInitialZoomDone) {
+                    map.flyTo([myLat, myLng], 13, {animate: true, duration: 1.5});
+                    isInitialZoomDone = true;
+                }
+
+                // Tiap GPS update, itung ulang FC terdekat
+                findNearestFC();
+
             }, (err) => {
-                document.getElementById('gpsText').innerText = "GPS MATI / TIDAK DIIZINKAN";
+                document.getElementById('gpsText').innerText = "GPS MATI / DITOLAK";
                 document.getElementById('gpsIndicator').style.background = "var(--danger)";
             }, { enableHighAccuracy: true });
         }
 
-        window.recenterMap = () => { if(userMarker) map.setView([myLat, myLng], 14); }
+        window.recenterMap = () => { 
+            if(userMarker) {
+                map.flyTo([myLat, myLng], 14, {animate: true, duration: 1});
+            } 
+        }
 
         // BACA DATABASE FIREBASE SECARA REALTIME DARI MLU
         onSnapshot(locRef, (snap) => {
             fcMarkers.forEach(m => map.removeLayer(m));
             fcMarkers = [];
-
-            let allLocations = [...fixedStations]; 
+            allFcData = [...fixedStations]; 
             
             snap.forEach(doc => {
-                // Cek agar tidak duplikat dengan fixedStations jika ID nya sama
                 if(doc.id !== 'gading' && doc.id !== 'kc') {
-                    allLocations.push({ id: doc.id, ...doc.data() });
+                    allFcData.push({ id: doc.id, ...doc.data() });
                 }
             });
 
-            // Render ke Peta
-            allLocations.forEach(loc => {
+            // Render Ulang Peta
+            allFcData.forEach(loc => {
                 const isOff = loc.isActive === false;
                 
                 const iconHtml = isOff 
@@ -157,39 +299,44 @@
                 const marker = L.marker([loc.lat, loc.lng], { icon: mIcon }).addTo(map);
                 
                 marker.on('click', () => {
+                    map.flyTo([loc.lat, loc.lng], 15, {animate: true, duration: 0.8});
                     openSheet(loc);
-                    map.setView([loc.lat, loc.lng], 14);
                 });
 
                 fcMarkers.push(marker);
             });
+
+            findNearestFC(); // Itung ulang siapa tau ada stasiun yg baru nyala/mati
         });
 
         // LOGIKA BOTTOM SHEET
         function openSheet(loc) {
             document.getElementById('sheetTitle').innerText = loc.name;
+            document.getElementById('nearestCard').classList.remove('show'); // Sembunyiin card terdekat
             
             const dist = calculateDist(myLat, myLng, loc.lat, loc.lng);
             document.getElementById('sheetDist').innerText = `${dist.toFixed(1)} KM`;
             document.getElementById('sheetTime').innerText = `${Math.ceil((dist/25)*60)} MNT`;
 
             const btnNav = document.getElementById('btnNav');
+            const infoBar = document.getElementById('sheetInfoBar');
 
             if (loc.isActive !== false) {
-                document.getElementById('sheetInfoBar').style.background = "rgba(212,255,0,0.1)";
-                document.getElementById('sheetInfoBar').style.color = "var(--kc-yellow)";
-                document.getElementById('sheetInfoBar').style.borderColor = "rgba(212,255,0,0.2)";
+                // TEMA MENGIKUTI MODE (DARK/LIGHT)
+                infoBar.style.background = isLightMode ? "#E0F2FE" : "rgba(0,229,255,0.1)";
+                infoBar.style.color = isLightMode ? "var(--kc-cyan-dark)" : "var(--kc-cyan)";
+                infoBar.style.borderColor = isLightMode ? "#BAE6FD" : "rgba(0,229,255,0.2)";
                 
                 btnNav.className = 'btn-nav';
-                btnNav.innerHTML = '<i class="fas fa-location-arrow"></i> BUKA NAVIGASI MAPS';
+                btnNav.innerHTML = '<i class="fas fa-location-arrow"></i> BUKA GOOGLE MAPS';
                 btnNav.onclick = () => {
-                    const destUrl = loc.mapLink || `http://maps.google.com/maps?daddr=${loc.lat},${loc.lng}`;
+                    const destUrl = loc.mapLink || `http://googleusercontent.com/maps.google.com/maps?q=${loc.lat},${loc.lng}`;
                     window.open(destUrl, '_blank');
                 };
             } else {
-                document.getElementById('sheetInfoBar').style.background = "rgba(239,68,68,0.1)";
-                document.getElementById('sheetInfoBar').style.color = "var(--danger)";
-                document.getElementById('sheetInfoBar').style.borderColor = "rgba(239,68,68,0.2)";
+                infoBar.style.background = isLightMode ? "#FEE2E2" : "rgba(239,68,68,0.1)";
+                infoBar.style.color = "var(--danger)";
+                infoBar.style.borderColor = isLightMode ? "#FECACA" : "rgba(239,68,68,0.2)";
 
                 btnNav.className = 'btn-nav disabled';
                 btnNav.innerHTML = `<i class="fas fa-lock"></i> OFFLINE: ${loc.statusMsg || 'Sedang Perbaikan'}`;
@@ -203,13 +350,8 @@
         window.closeSheet = () => {
             document.getElementById('bottomSheet').classList.remove('show');
             document.getElementById('btnHome').classList.remove('hide');
+            findNearestFC(); // Munculin lagi card terdekat
             recenterMap(); 
-        }
-
-        function calculateDist(lat1, lon1, lat2, lon2) { 
-            const p = 0.017453292519943295, c = Math.cos; 
-            const a = 0.5 - c((lat2 - lat1) * p)/2 + c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p))/2; 
-            return 12742 * Math.asin(Math.sqrt(a)); 
         }
 
         map.on('click', () => { closeSheet(); });
