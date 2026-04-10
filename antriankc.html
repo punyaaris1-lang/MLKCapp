@@ -11,7 +11,7 @@
             document.documentElement.classList.add('theme-soft-blue');
         }
 
-        const ANTRIAN_VERSION = "10.2_ADMIN_GPS_LOCK"; 
+        const ANTRIAN_VERSION = "10.3_CRASH_FIX"; 
         if (localStorage.getItem('maka_antrian_kc_v') !== ANTRIAN_VERSION) {
             if ('caches' in window) { caches.keys().then((names) => { names.forEach(name => { caches.delete(name); }); }); }
             localStorage.setItem('maka_antrian_kc_v', ANTRIAN_VERSION);
@@ -407,7 +407,7 @@
             <div class="sheet-title">Atur Daftar Antrian</div>
             <div id="qAdminBody" style="margin-bottom: 20px;"></div>
             
-            <button class="sm-btn" onclick="window.bukaDaftarAdmin(-1);" style="margin-bottom: 10px;"><div class="sm-icon bg-blue"><i class="fas fa-plus"></i></div> Daftar via Admin</button>
+            <button class="sm-btn" onclick="tutupModal('sheetManageAntrian'); setTimeout(() => { window.bukaDaftarAdmin(-1); }, 150);" style="margin-bottom: 10px;"><div class="sm-icon bg-blue"><i class="fas fa-plus"></i></div> Daftar via Admin</button>
             <button class="sm-btn" onclick="unblockAll()"><div class="sm-icon bg-dark"><i class="fas fa-unlock"></i></div> Buka Semua Daftar Blokir</button>
         </div>
     </div>
@@ -569,7 +569,14 @@
         function escapeHtml(text) { if (!text) return ""; return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
 
         onSnapshot(mainRef, (snap) => { 
-            if (!snap.exists()) return; 
+            if (!snap.exists()) {
+                // FALLBACK JIKA DATABASE KOSONG
+                localSlots = [null, null, null, null, null];
+                localQueue = [];
+                blockedList = [];
+                updateUI();
+                return;
+            } 
             const d = snap.data(); localSlots = d.chargingSlots || [null, null, null, null, null]; localQueue = d.waitingQueue || []; blockedList = d.blockedPlates || []; 
             updateUI(); 
             
@@ -612,7 +619,6 @@
                 } else {
                     div.className = `slot-bay is-empty`;
                     
-                    // PERBAIKAN: TOMBOL + DI SLOT KOSONG HARUS LEWAT BUKADAFTARADMIN() AGAR KENA SENSOR GPS
                     let adminBtn = isPengurusOrURC ? `<button class="btn-dots" onclick="event.stopPropagation(); window.bukaDaftarAdmin(${i});"><i class="fas fa-plus"></i></button>` : '';
                     let actionHtml = '';
 
@@ -649,14 +655,20 @@
             } catch(e) { showCustomAlert("GAGAL", e.message || e, "error"); }
         };
 
+        // FUNGSI MEMBER UNTUK MENGISI BATRE SEBELUM MASUK ANTRIAN/SLOT
         window.mintaBatre = (tipeAction, slotIndex) => {
             if(blockedList.includes(cleanStr(myPlat))) return showCustomAlert("DIBLOKIR", "Plat Anda diblokir Admin.", "error");
-            window.memberActionType = tipeAction; window.memberActionSlotIdx = slotIndex;
-            document.getElementById('inpMemberBatre').value = ''; bukaModal('sheetInputBatre');
+            window.memberActionType = tipeAction; 
+            window.memberActionSlotIdx = slotIndex;
+            document.getElementById('inpMemberBatre').value = ''; 
+            bukaModal('sheetInputBatre');
         };
 
         window.prosesSubmitMember = async () => {
-            const rawBatre = document.getElementById('inpMemberBatre').value.trim(); const batreFinal = rawBatre === "" ? "-" : rawBatre + "%"; tutupModal('sheetInputBatre');
+            const rawBatre = document.getElementById('inpMemberBatre').value.trim(); 
+            const batreFinal = rawBatre === "" ? "-" : rawBatre + "%"; 
+            tutupModal('sheetInputBatre');
+
             try {
                 if(window.memberActionType === 'antrian') {
                     await runTransaction(dbKC, async(t) => {
@@ -724,9 +736,9 @@
             }
         };
 
-        // ADMIN COMMANDS (DENGAN SENSOR GPS BARU)
+        // ADMIN COMMANDS (DENGAN SENSOR GPS BARU UNTUK DAFTAR VIA ADMIN)
         window.bukaDaftarAdmin = (slotIndex) => {
-            // PERBAIKAN: PENGURUS HARUS DI LOKASI BUAT BUKA MENU INI (KECUALI DEWA)
+            // PERBAIKAN: PENGURUS HARUS DI LOKASI BUAT BUKA MENU INI (KECUALI SUPER ADMIN)
             if (!isUserDewa && !isInLocation) {
                 return showCustomAlert("AKSES DITOLAK", "Pengurus harus berada di lokasi (Maks 70M) untuk mendaftarkan member secara manual. Akses jarak jauh hanya untuk Super Admin.", "error");
             }
@@ -887,4 +899,9 @@
         };
         
         window.unblockAll = async () => { 
-            const ok = await showCustomConfirm("H
+            const ok = await showCustomConfirm("HAPUS BLOKIR", "Hapus semua daftar plat blokir?"); 
+            if(ok) { await updateDoc(mainRef, {blockedPlates: []}); tutupModal('sheetManageAntrian'); }
+        };
+    </script>
+</body>
+</html>
