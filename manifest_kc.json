@@ -1,0 +1,22 @@
+{
+  "name": "FC KARTIKA CHANDRA",
+  "short_name": "KC APP",
+  "description": "Aplikasi Premium Member Maka Lintas Kartika Chandra",
+  "start_url": "./index_kc.html",
+  "display": "standalone",
+  "background_color": "#050B14",
+  "theme_color": "#00E5FF",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "logo_kc.jpg",
+      "sizes": "192x192",
+      "type": "image/jpg"
+    },
+    {
+      "src": "logo_kc.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
