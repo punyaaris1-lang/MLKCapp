@@ -11,7 +11,7 @@
             document.documentElement.classList.add('theme-soft-blue');
         }
 
-        const DASH_VERSION = "18.4_GPS_DB_FIX"; 
+        const DASH_VERSION = "18.5_ALT_GADING_RESTORED"; 
         if (localStorage.getItem('maka_dash_kc_v') !== DASH_VERSION) {
             if ('caches' in window) { caches.keys().then((names) => { names.forEach(name => { caches.delete(name); }); }); }
             localStorage.setItem('maka_dash_kc_v', DASH_VERSION); window.location.reload(true); 
@@ -172,7 +172,7 @@
         html.theme-soft-blue #btnEditBoard { color: var(--kc-yellow-dark); }
         #btnEditBoard:active { transform: scale(0.9); }
 
-        /* --- FC BANNER (MAIN FIXED, ALT DINAMIS) --- */
+        /* --- FC BANNER --- */
         .fc-combined-box { background: var(--bg-panel); border-radius: 16px; border: 1px solid var(--border-glass); box-shadow: var(--shadow-soft); overflow: hidden; backdrop-filter: blur(20px);}
         .fc-main-part { padding: 18px 20px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--kc-cyan); cursor: pointer; transition: 0.2s;}
         .fc-main-part:active { background: rgba(0,0,0,0.2); }
@@ -346,6 +346,7 @@
 
     <div class="vip-card">
         <img src="logo_kc.png" class="vc-watermark-logo" onerror="this.style.display='none'">
+        
         <img src="logo_kc.png" class="vc-small-logo" onerror="this.style.display='none'">
 
         <div class="vc-top">
@@ -676,7 +677,7 @@
         }
 
         // =========================================================================
-        // 4. SISTEM ANTRIAN (MAIN: KC FIXED, ALT: DINAMIS DARI DB MLU)
+        // 4. SISTEM ANTRIAN & LOKASI
         // =========================================================================
         let statusKCHtml = "Memuat...";
         window.kcDist = "Memuat...";
@@ -693,26 +694,26 @@
             document.getElementById('mainFcVal').innerHTML = statusKCHtml;
         }); 
 
-        // 2. Load Semua Station Alternatif (Kecuali KC) dari DB MLU secara aman
+        // 2. Load Semua Station Alternatif dari DB MLU, SELALU SERTAKAN KELAPA GADING SECARA MANUAL
         let altStations = [];
         let myLat = null, myLng = null;
         let closestAlt = { name: "Mencari Radar...", dist: "...", link: "lokasi_fc.html" };
 
+        const fixedGading = { id: 'gading', name: 'FC KELAPA GADING', lat: -6.159389, lng: 106.901416, link: 'antrian_gading.html' };
+
         onSnapshot(collection(dbMLU, "fc_locations"), (snap) => {
-            altStations = [];
+            altStations = [fixedGading]; // Selalu masukkan Gading sebagai opsi prioritas
+            
             snap.forEach(doc => {
                 const data = doc.data();
-                // Abaikan KC agar tidak muncul di banner bawah
-                if(data.isActive !== false && doc.id !== 'kc' && !data.name.toUpperCase().includes("KARTIKA CHANDRA")) {
+                // Abaikan KC dan Gading dari DB (karena Gading udah di-hardcode)
+                if(data.isActive !== false && doc.id !== 'kc' && doc.id !== 'gading' && !data.name.toUpperCase().includes("KARTIKA CHANDRA") && !data.name.toUpperCase().includes("GADING")) {
                     
                     let lat = parseFloat(data.lat || data.latitude);
                     let lng = parseFloat(data.lng || data.longitude);
                     
                     if(!isNaN(lat) && !isNaN(lng)) {
                         let link = data.appLink || 'lokasi_fc.html';
-                        if(doc.id === 'gading' || data.name.toUpperCase().includes("GADING")) {
-                            link = 'antrian_gading.html';
-                        }
                         altStations.push({ id: doc.id, name: data.name.toUpperCase(), lat: lat, lng: lng, link: link });
                     }
                 }
