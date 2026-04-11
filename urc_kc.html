@@ -11,7 +11,7 @@
             document.documentElement.classList.add('theme-soft-blue');
         }
 
-        const URC_VERSION = "3.0_ULTIMATE_SOS_FIX"; 
+        const URC_VERSION = "4.0_AVATAR_RADAR"; 
         if (localStorage.getItem('maka_urc_kc_v') !== URC_VERSION) {
             if ('caches' in window) { caches.keys().then((names) => { names.forEach(name => { caches.delete(name); }); }); }
             localStorage.setItem('maka_urc_kc_v', URC_VERSION); window.location.reload(true); 
@@ -77,31 +77,50 @@
         .btn-back:active { transform: scale(0.9); }
         
         .header-title h1 { margin: 0; font-family: 'Space Grotesk'; font-size: 20px; color: var(--kc-cyan); letter-spacing: 1px; text-shadow: 0 0 10px rgba(0,229,255,0.3);}
-        html.theme-soft-blue .header-title h1 { text-shadow: none; }
+        html.theme-soft-blue .header-title h1 { text-shadow: none; color: var(--kc-cyan-dark); }
         .header-title p { margin: 0; font-size: 10px; color: var(--text-muted); font-weight: 800; letter-spacing: 2px; }
         
         .live-indicator { display: flex; align-items: center; gap: 8px; font-family: 'Space Grotesk'; font-size: 12px; font-weight: 900; color: var(--kc-cyan); background: rgba(0,229,255,0.1); padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border-glass);}
-        html.theme-soft-blue .live-indicator { background: rgba(2,132,199,0.1); }
+        html.theme-soft-blue .live-indicator { background: rgba(2,132,199,0.1); color: var(--kc-cyan-dark); }
         .dot-pulse { width: 8px; height: 8px; background: var(--danger); border-radius: 50%; animation: blink 1s infinite; box-shadow: 0 0 10px var(--danger);}
         @keyframes blink { 0% {opacity:1;} 50% {opacity:0.2;} 100% {opacity:1;} }
 
         /* MAP AREA */
-        #map { width: 100vw; height: 100vh; z-index: 1; background: #E5E3DF; }
+        #map { width: 100vw; height: 100vh; z-index: 1; background: #050B14; }
+        html.theme-soft-blue #map { background: #E2E8F0; }
 
-        /* MARKERS */
-        .fc-marker { width: 40px; height: 40px; background: #000; border: 3px solid var(--kc-cyan); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--kc-cyan); font-size: 18px; box-shadow: 0 0 20px rgba(0,229,255,0.8); z-index: 1000 !important;}
-        html.theme-soft-blue .fc-marker { background: #FFF; box-shadow: 0 0 15px rgba(2,132,199,0.5); }
+        /* --- MARKERS AVATAR SUPER PREMIUM --- */
+        .custom-div-icon { background: transparent; border: none; }
         
-        .member-normal { width: 15px; height: 15px; background: var(--kc-cyan-dark); border: 2px solid var(--kc-cyan); border-radius: 50%; box-shadow: 0 0 10px rgba(0,229,255,0.5); }
-        .member-label { background: var(--bg-panel); color: var(--text-main); border: 1px solid var(--kc-cyan); padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 800; font-family: 'Outfit'; white-space: nowrap; margin-top: -5px; margin-left: 10px;}
+        /* Container untuk membungkus Foto & Efek Sonar */
+        .avatar-wrap { position: relative; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; }
         
-        .member-sos { width: 25px; height: 25px; background: var(--danger); border: 3px solid white; border-radius: 50%; box-shadow: 0 0 20px rgba(239,68,68,0.8); animation: pulseSOS 1s infinite; }
-        .sos-label { background: var(--danger); color: white; border: 1px solid white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 900; font-family: 'Outfit'; white-space: nowrap; margin-top: -10px; margin-left: 15px; box-shadow: 0 0 10px rgba(239,68,68,0.5);}
-        @keyframes pulseSOS { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239,68,68,0.7); } 70% { transform: scale(1.2); box-shadow: 0 0 0 20px rgba(239,68,68,0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239,68,68,0); } }
+        /* Efek Sonar Berdenyut di Belakang Avatar */
+        .avatar-pulse { position: absolute; inset: -5px; background: rgba(0,229,255,0.4); border-radius: 50%; z-index: 1; animation: radarPulse 2s infinite; }
+        html.theme-soft-blue .avatar-pulse { background: rgba(2,132,199,0.4); }
+        @keyframes radarPulse { 0% { transform: scale(0.8); opacity: 1; } 100% { transform: scale(2); opacity: 0; } }
+
+        /* Foto Avatar Asli */
+        .avatar-img { position: relative; width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 3px solid var(--kc-cyan); z-index: 2; box-shadow: 0 0 15px rgba(0,229,255,0.8); background: #000;}
+        html.theme-soft-blue .avatar-img { border-color: var(--kc-cyan-dark); box-shadow: 0 5px 15px rgba(2,132,199,0.5); background: #FFF; }
+        
+        /* Fallback kalau gak ada foto */
+        .avatar-fallback { position: relative; width: 35px; height: 35px; background: var(--kc-cyan-dark); border: 2px solid var(--kc-cyan); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #FFF; z-index: 2; box-shadow: 0 0 10px rgba(0,229,255,0.5); }
+        html.theme-soft-blue .avatar-fallback { background: var(--kc-cyan); border-color: var(--kc-cyan-dark); }
+
+        /* Label Nama Bawah Marker (Anti Kepotong) */
+        .member-label { position: absolute; bottom: -25px; left: 50%; transform: translateX(-50%); background: var(--bg-panel); backdrop-filter: blur(5px); color: var(--text-main); border: 1px solid var(--kc-cyan); padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 900; font-family: 'Space Grotesk'; white-space: nowrap; box-shadow: 0 5px 10px rgba(0,0,0,0.5); z-index: 3;}
+        html.theme-soft-blue .member-label { background: #FFF; border-color: var(--kc-cyan-dark); color: var(--kc-cyan-dark); box-shadow: 0 5px 15px rgba(2,132,199,0.2); }
+
+        /* MARKER SOS KORBAN */
+        .avatar-sos { border-color: var(--danger); box-shadow: 0 0 20px rgba(239,68,68,0.9); }
+        .pulse-sos { background: rgba(239,68,68,0.6); animation: pulseSOS 1s infinite; }
+        .label-sos { background: var(--danger); color: white; border-color: white; box-shadow: 0 0 15px rgba(239,68,68,0.8); }
+        @keyframes pulseSOS { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(2.5); opacity: 0; } }
 
         /* PANEL SOS KIRI BAWAH */
         .sos-panel { position: absolute; bottom: 30px; left: 20px; width: 340px; max-width: calc(100% - 40px); background: var(--bg-panel); backdrop-filter: blur(15px); border: 1px solid var(--border-glass); border-radius: 16px; padding: 15px; z-index: 1000; box-shadow: var(--shadow-cyan); display: flex; flex-direction: column; gap: 10px; transition: 0.3s;}
-        html.theme-soft-blue .sos-panel { box-shadow: 0 10px 30px rgba(2,132,199,0.2); }
+        html.theme-soft-blue .sos-panel { box-shadow: 0 10px 30px rgba(2,132,199,0.2); background: rgba(255,255,255,0.95); }
         
         .panel-header { font-family: 'Outfit'; font-size: 14px; font-weight: 900; color: var(--danger); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(239,68,68,0.3); padding-bottom: 10px; cursor: pointer;}
         .sos-badge { background: white; color: var(--danger); padding: 2px 6px; border-radius: 10px; font-size: 10px; font-family: 'Space Grotesk'; font-weight: 900; margin-left: 5px; box-shadow: 0 0 10px rgba(255,255,255,0.5); }
@@ -116,7 +135,7 @@
         .sos-panel.minimized .panel-header { border-bottom: none; padding-bottom: 0; }
 
         .sos-card { background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-top: 4px solid var(--danger); padding: 12px; border-radius: 8px; display: flex; flex-direction: column; gap: 8px; position: relative;}
-        html.theme-soft-blue .sos-card { background: #F8FAFC; border-color: #E2E8F0; }
+        html.theme-soft-blue .sos-card { background: #F8FAFC; border-color: #E2E8F0; border-top-color: var(--danger); }
         
         .sos-name { font-family: 'Space Grotesk'; font-size: 18px; font-weight: 900; color: var(--text-main); margin: 0; line-height: 1;}
         .sos-plat { font-size: 11px; color: var(--kc-yellow); font-weight: 800; background: rgba(255,255,0,0.1); padding: 2px 6px; border-radius: 4px; width: fit-content;}
@@ -127,18 +146,22 @@
         html.theme-soft-blue .nearest-box { background: #FFFFFF; border-color: var(--kc-cyan); }
         
         .nearest-title { font-size: 9px; color: var(--kc-cyan); font-weight: 900; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; border-bottom: 1px dashed var(--border-glass); padding-bottom: 5px; display: flex; align-items: center; gap: 5px;}
+        html.theme-soft-blue .nearest-title { color: var(--kc-cyan-dark); border-bottom-color: var(--border-glass); }
+        
         .nearest-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.05);}
         html.theme-soft-blue .nearest-item { border-bottom-color: #E2E8F0; }
         .nearest-item:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none;}
+        
         .ni-name { font-family: 'Outfit'; font-size: 12px; font-weight: 800; color: var(--text-main); margin-bottom: 2px;}
         .ni-dist { font-size: 9px; font-weight: 800; color: var(--kc-cyan); background: rgba(0,229,255,0.1); padding: 2px 6px; border-radius: 4px;}
-        html.theme-soft-blue .ni-dist { background: rgba(2,132,199,0.1); }
+        html.theme-soft-blue .ni-dist { background: rgba(2,132,199,0.1); color: var(--kc-cyan-dark); }
         
         .btn-wa-mini { background: var(--success); color: white; border: none; padding: 6px 10px; border-radius: 6px; font-weight: 900; font-family: 'Space Grotesk'; font-size: 10px; cursor: pointer; text-decoration: none; display: flex; align-items: center; gap: 5px; transition: 0.2s;}
         .btn-wa-mini:active { transform: scale(0.9); }
 
         .btn-lacak { background: var(--danger); color: white; border: none; padding: 8px; border-radius: 6px; font-family: 'Outfit'; font-weight: 900; font-size: 11px; cursor: pointer; margin-top: 5px; width: 100%; box-shadow: 0 0 15px rgba(239,68,68,0.3);}
         .btn-resolve { background: transparent; color: var(--kc-cyan); border: 1px dashed var(--kc-cyan); padding: 6px; border-radius: 6px; font-size: 10px; font-weight: 800; cursor: pointer; width: 100%; transition: 0.2s;}
+        html.theme-soft-blue .btn-resolve { color: var(--kc-cyan-dark); border-color: var(--kc-cyan-dark); }
         .btn-resolve:hover { background: rgba(0,229,255,0.1); }
         html.theme-soft-blue .btn-resolve:hover { background: rgba(2,132,199,0.1); }
     </style>
@@ -226,25 +249,31 @@
         };
 
         // ==========================================
-        // 3. INISIALISASI MAP PREMIUM WHITE (CARTODB)
+        // 3. INISIALISASI MAP PREMIUM (DARK / LIGHT)
         // ==========================================
         const STATION_LAT = -6.2285953; 
         const STATION_LNG = 106.819502;
 
+        const isLightMode = document.documentElement.classList.contains('theme-soft-blue');
+        const tileUrl = isLightMode 
+            ? 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png' 
+            : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+
         const map = L.map('map', { zoomControl: false }).setView([STATION_LAT, STATION_LNG], 14);
 
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        L.tileLayer(tileUrl, {
             attribution: '© OpenStreetMap | CartoDB',
             maxZoom: 19
         }).addTo(map);
 
+        // MARKER KARTIKA CHANDRA BASE
         const fcIcon = L.divIcon({
             className: 'custom-div-icon',
-            html: "<div class='fc-marker'><i class='fas fa-charging-station'></i></div>",
+            html: "<div class='fc-marker'><i class='fas fa-charging-station'></i></div><div class='member-label' style='bottom:-20px;'>COMMAND CENTER</div>",
             iconSize: [40, 40],
             iconAnchor: [20, 20]
         });
-        L.marker([STATION_LAT, STATION_LNG], {icon: fcIcon, zIndexOffset: 1000}).addTo(map).bindPopup("<b style='font-family:Space Grotesk; font-size:14px; color:black;'>FC KARTIKA CHANDRA</b><br><span style='color:black;'>Command Center</span>").openPopup();
+        L.marker([STATION_LAT, STATION_LNG], {icon: fcIcon, zIndexOffset: 500}).addTo(map);
 
         function hitungJarak(lat1, lon1, lat2, lon2) {
             const R = 6371e3; 
@@ -258,7 +287,7 @@
         }
 
         // ==========================================
-        // 4. SISTEM RADAR & AUTO-EXPAND
+        // 4. SISTEM RADAR & AVATAR MARKER
         // ==========================================
         let activeMarkers = {}; 
         let previousSosCount = 0;
@@ -279,25 +308,44 @@
                 }
             });
 
-            // UPDATE MARKER DI MAP
+            // UPDATE MARKER DI MAP (PAKAI AVATAR FOTO JIKA ADA)
             const allUsers = [...sosUsers, ...normalUsers];
             allUsers.forEach(data => {
                 const isSOS = data.isSOS === true;
+                const namaSingkat = (data.nama || data.plat || "Unknown").split(' ')[0]; // Ambil nama depan aja biar ringkas di map
+                
+                // Cek Foto Wajah
+                const hasPhoto = data.foto && data.foto.length > 50;
+                
+                // Susun HTML Ikon Avatar
+                let avatarCore = hasPhoto 
+                    ? `<img src="${data.foto}" class="avatar-img ${isSOS ? 'avatar-sos' : ''}">` 
+                    : `<div class="avatar-fallback ${isSOS ? 'avatar-sos' : ''}"><i class="fas fa-user"></i></div>`;
+                
+                let pulseClass = isSOS ? 'pulse-sos' : 'avatar-pulse';
+                let labelClass = isSOS ? 'label-sos' : 'member-label';
+                
+                let markerHTML = `
+                    <div class="avatar-wrap">
+                        <div class="${pulseClass}"></div>
+                        ${avatarCore}
+                        <div class="${labelClass}">${isSOS ? 'SOS: ' : ''}${namaSingkat}</div>
+                    </div>
+                `;
+
                 const userIcon = L.divIcon({
                     className: 'custom-div-icon',
-                    html: isSOS 
-                        ? `<div class='member-sos'></div><div class='sos-label'>SOS: ${data.nama || data.plat}</div>` 
-                        : `<div class='member-normal'></div><div class='member-label'>${data.nama || data.plat}</div>`,
-                    iconSize: isSOS ? [25, 25] : [15, 15],
-                    iconAnchor: isSOS ? [12, 12] : [7, 7]
+                    html: markerHTML,
+                    iconSize: [45, 45],
+                    iconAnchor: [22, 22]
                 });
 
                 if(activeMarkers[data.id]) {
                     activeMarkers[data.id].setLatLng([data.lat, data.lng]);
                     activeMarkers[data.id].setIcon(userIcon);
-                    activeMarkers[data.id].setZIndexOffset(isSOS ? 999 : 1);
+                    activeMarkers[data.id].setZIndexOffset(isSOS ? 999 : 100);
                 } else {
-                    activeMarkers[data.id] = L.marker([data.lat, data.lng], {icon: userIcon, zIndexOffset: isSOS ? 999 : 1}).addTo(map);
+                    activeMarkers[data.id] = L.marker([data.lat, data.lng], {icon: userIcon, zIndexOffset: isSOS ? 999 : 100}).addTo(map);
                 }
             });
 
@@ -320,7 +368,12 @@
             } else {
                 badge.style.display = 'none';
                 panel.style.borderColor = "var(--border-glass)";
-                panel.style.boxShadow = "var(--shadow-cyan)";
+                
+                if(!isLightMode) {
+                    panel.style.boxShadow = "var(--shadow-cyan)";
+                } else {
+                    panel.style.boxShadow = "0 10px 30px rgba(2,132,199,0.2)";
+                }
             }
             previousSosCount = sosUsers.length;
 
