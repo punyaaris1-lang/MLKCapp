@@ -11,7 +11,7 @@
             document.documentElement.classList.add('theme-soft-blue');
         }
 
-        const TABUNGAN_VERSION = "7.0_ULTIMATE_FIX"; 
+        const TABUNGAN_VERSION = "7.1_SUPER_FUZZY_FIX"; 
         if (localStorage.getItem('maka_tabungan_v') !== TABUNGAN_VERSION) {
             if ('caches' in window) {
                 caches.keys().then((names) => { names.forEach(name => { caches.delete(name); }); });
@@ -116,7 +116,6 @@
         html.theme-soft-blue .btn-action { color: #FFF; background: var(--cyan-dark); box-shadow: 0 10px 25px rgba(2,132,199,0.3); }
         .btn-action:active { transform: scale(0.95); }
         
-        /* FIX TOMBOL BAWAH KAMERA (CENTER & ESTETIK) */
         #btnBawahKamera { display:flex; flex-direction:column; align-items:center; gap:12px; width:100%; max-width:280px; margin: 25px auto 0;}
         
         .btn-outline { background: rgba(0,229,255,0.05) !important; color: var(--cyan-logo) !important; border: 2px solid var(--cyan-logo) !important; box-shadow: none !important; }
@@ -509,9 +508,10 @@
 
         const myName = uData.namaKtp || uData.namaWa || uData.nama || "User";
         const myPlat = uData.plat || "B XXXX XX";
-        const cleanPlat = myPlat.replace(/\s+/g, '').toUpperCase();
         
-        // window.realUserId akan di set otomatis oleh sistem pencari ID
+        // PERBAIKAN: PEMBERSIHAN SUPER EKSTRIM (FUZZY MATCH)
+        const cleanPlat = myPlat.replace(/[^A-Z0-9]/g, '').toUpperCase();
+        
         window.realUserId = null; 
 
         // --- SISTEM MODAL PENGGANTI ALERT ---
@@ -640,22 +640,41 @@
             }
         }
 
-        // PENANGANAN PENCARIAN AKUN (ANTI ERROR)
+        // PERBAIKAN: SUPER FUZZY MATCH BYPASS CACHE PENCARIAN AKUN
         async function checkUserStatus() {
             try {
-                const snap = await getDocs(collection(db, "anggota"));
                 let foundId = null;
-                snap.forEach(d => {
-                    const p = (d.data().plat || "").replace(/\s+/g, '').toUpperCase();
-                    if(p === cleanPlat) { foundId = d.id; }
-                });
 
-                if(!foundId) {
-                    document.getElementById('loaderOverlay').style.display = 'none';
-                    showCustomAlert("AKUN TIDAK DITEMUKAN", "Sistem tidak dapat menemukan data tabungan Anda. Silakan hubungi pengurus.", "error");
-                    return;
+                // 1. TEMBAK LANGSUNG KE ID (Bypass Cache & Anti Gagal)
+                const docRef = doc(db, "anggota", cleanPlat);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    foundId = docSnap.id;
+                } else {
+                    // 2. FUZZY MATCH (Sapu Bersih Database kalau pake format ID random lama)
+                    const snap = await getDocs(collection(db, "anggota"));
+                    snap.forEach(d => {
+                        const p = (d.data().plat || "").replace(/[^A-Z0-9]/g, '').toUpperCase();
+                        const dbId = d.id.replace(/[^A-Z0-9]/g, '').toUpperCase();
+                        
+                        if(p === cleanPlat || dbId === cleanPlat) { 
+                            foundId = d.id; 
+                        }
+                    });
                 }
 
+                // 3. PROTEKSI KHUSUS SUPER ADMIN SILUMAN (Biar ga di-kick gara-gara ga punya tabungan)
+                if(!foundId && isSuperAdmin) {
+                    foundId = "B4248SWF";
+                    // Bikinin brankas darurat di background
+                    await setDoc(doc(db, "anggota", foundId), { plat: "B 4248 SWF", role: "SUPER ADMIN", nama: "THE CREATOR", tabungan: 0 }, { merge: true });
+                } else if (!foundId) {
+                    document.getElementById('loaderOverlay').style.display = 'none';
+                    showCustomAlert("AKUN TIDAK DITEMUKAN", "Sistem tidak dapat menemukan data tabungan Anda. Pastikan plat nomor Anda terdaftar dengan benar. Silakan hubungi pengurus.", "error");
+                    return;
+                }
+                
                 window.realUserId = foundId;
                 
                 onSnapshot(doc(db, "anggota", foundId), async (docSnap) => {
@@ -687,7 +706,6 @@
                             window.switchMode(true); 
                         }
                     } else { 
-                        // MUNCULKAN POPUP AKTIVASI
                         isSetupMode = true; 
                         showActivationScreen(); 
                     }
