@@ -11,7 +11,7 @@
             document.documentElement.classList.add('theme-soft-blue');
         }
 
-        const DASH_VERSION = "18.6_AVATAR_BG_FIX"; 
+        const DASH_VERSION = "19.0_PUSH_NOTIF_ON"; 
         if (localStorage.getItem('maka_dash_kc_v') !== DASH_VERSION) {
             if ('caches' in window) { caches.keys().then((names) => { names.forEach(name => { caches.delete(name); }); }); }
             localStorage.setItem('maka_dash_kc_v', DASH_VERSION); window.location.reload(true); 
@@ -128,8 +128,6 @@
         .vc-chip::before { content: ''; position: absolute; left: 50%; top: 0; height: 100%; width: 1px; background: rgba(0,0,0,0.2); }
         
         .vc-middle { padding: 10px 25px 0; position: relative; z-index: 4; display: flex; align-items: center; gap: 18px;}
-        
-        /* FIX: Tambahan Background di belakang Avatar User */
         .vc-avatar { width: 85px; height: 85px; border-radius: 24px; background: #000; padding: 3px; box-shadow: 0 10px 25px rgba(0,229,255,0.4); flex-shrink: 0; border: 2px solid var(--kc-cyan); position: relative; overflow: hidden;}
         html.theme-soft-blue .vc-avatar { border-color: #FFF; box-shadow: 0 10px 25px rgba(0,0,0,0.2); background: #E2E8F0; }
         .vc-avatar::before { content: ''; position: absolute; inset: 0; background-image: url('bg_maka.jpg'); background-size: cover; background-position: center; opacity: 0.6; z-index: 1;}
@@ -236,7 +234,6 @@
         
         .icon-box { width: 55px; height: 55px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 12px; color: #000; box-shadow: 0 5px 20px rgba(0, 229, 255, 0.4); font-weight: 900;}
         
-        /* THEME SOFT BLUE IKON BOX CLEAN */
         html.theme-soft-blue .icon-box { background: #E0F2FE !important; color: var(--kc-cyan-dark) !important; box-shadow: none !important; border: 1px solid rgba(2, 132, 199, 0.2) !important; }
         html.theme-soft-blue .ic-urc { background: #FEF2F2 !important; color: var(--danger) !important; border-color: rgba(220, 38, 38, 0.2) !important; }
         html.theme-soft-blue .ic-broadcast { background: #FEF3C7 !important; color: var(--kc-yellow-dark) !important; border-color: rgba(217, 119, 6, 0.2) !important; }
@@ -350,6 +347,7 @@
 
     <div class="vip-card">
         <img src="logo_kc.png" class="vc-watermark-logo" onerror="this.style.display='none'">
+        
         <img src="logo_kc.png" class="vc-small-logo" onerror="this.style.display='none'">
 
         <div class="vc-top">
@@ -580,6 +578,28 @@
         import { getFirestore, doc, onSnapshot, updateDoc, collection, query, orderBy, limit, setDoc, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         // =========================================================================
+        // PUSH NOTIFICATION SYSTEM (IN-APP)
+        // =========================================================================
+        if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
+            Notification.requestPermission();
+        }
+
+        function triggerSystemNotif(title, body) {
+            if ("Notification" in window && Notification.permission === "granted") {
+                navigator.serviceWorker.ready.then(function(registration) {
+                    registration.showNotification(title, {
+                        body: body,
+                        icon: 'logo_kc.png',
+                        vibrate: [200, 100, 200],
+                        badge: 'logo_kc.png'
+                    });
+                }).catch(function() {
+                    new Notification(title, { body: body, icon: 'logo_kc.png' });
+                });
+            }
+        }
+
+        // =========================================================================
         // 1. DEKLARASI FUNGSI UI & TEMA
         // =========================================================================
         window.toggleTheme = () => {
@@ -594,6 +614,7 @@
         };
 
         window.bukaInbox = () => { 
+            if ("Notification" in window && Notification.permission !== "granted") Notification.requestPermission();
             const m = document.getElementById('modalInbox'); m.style.display='flex'; setTimeout(()=>m.classList.add('show'),10); 
             localStorage.setItem('maka_last_read_inbox', Date.now().toString()); localStorage.setItem('maka_unread_count', '0');
             const badge = document.getElementById('inboxBadge'); if(badge) badge.style.display = 'none';
@@ -680,7 +701,7 @@
         }
 
         // =========================================================================
-        // 4. SISTEM ANTRIAN & LOKASI
+        // 4. SISTEM ANTRIAN (MAIN: KC FIXED, ALT: DINAMIS DARI DB MLU)
         // =========================================================================
         let statusKCHtml = "Memuat...";
         window.kcDist = "Memuat...";
@@ -697,7 +718,7 @@
             document.getElementById('mainFcVal').innerHTML = statusKCHtml;
         }); 
 
-        // 2. Load Semua Station Alternatif dari DB MLU, SELALU SERTAKAN KELAPA GADING SECARA MANUAL
+        // 2. Load Semua Station Alternatif (Kecuali KC) dari DB MLU
         let altStations = [];
         let myLat = null, myLng = null;
         let closestAlt = { name: "Mencari Radar...", dist: "...", link: "lokasi_fc.html" };
@@ -705,16 +726,11 @@
         const fixedGading = { id: 'gading', name: 'FC KELAPA GADING', lat: -6.159389, lng: 106.901416, link: 'antrian_gading.html' };
 
         onSnapshot(collection(dbMLU, "fc_locations"), (snap) => {
-            altStations = [fixedGading]; // Selalu masukkan Gading sebagai opsi prioritas
-            
+            altStations = [fixedGading];
             snap.forEach(doc => {
                 const data = doc.data();
-                // Abaikan KC dan Gading dari DB (karena Gading udah di-hardcode)
                 if(data.isActive !== false && doc.id !== 'kc' && doc.id !== 'gading' && !data.name.toUpperCase().includes("KARTIKA CHANDRA") && !data.name.toUpperCase().includes("GADING")) {
-                    
-                    let lat = parseFloat(data.lat || data.latitude);
-                    let lng = parseFloat(data.lng || data.longitude);
-                    
+                    let lat = parseFloat(data.lat || data.latitude); let lng = parseFloat(data.lng || data.longitude);
                     if(!isNaN(lat) && !isNaN(lng)) {
                         let link = data.appLink || 'lokasi_fc.html';
                         altStations.push({ id: doc.id, name: data.name.toUpperCase(), lat: lat, lng: lng, link: link });
@@ -731,34 +747,20 @@
 
             altStations.forEach(st => {
                 const dist = calculateDist(st.lat, st.lng, myLat, myLng);
-                if(dist < minDist) {
-                    minDist = dist;
-                    nearest = st;
-                }
+                if(dist < minDist) { minDist = dist; nearest = st; }
             });
 
             if(nearest) {
-                closestAlt = {
-                    name: nearest.name,
-                    dist: minDist.toFixed(1),
-                    link: nearest.link || 'lokasi_fc.html'
-                };
-                
+                closestAlt = { name: nearest.name, dist: minDist.toFixed(1), link: nearest.link || 'lokasi_fc.html' };
                 document.getElementById('altFcName').innerText = closestAlt.name;
                 document.getElementById('altFcDist').innerHTML = `<i class="fas fa-location-arrow"></i> ~${closestAlt.dist} KM`;
             }
         }
 
-        window.handleFCBannerClick = () => { 
-            window.location.href = 'antriankc.html'; 
-        };
-        
-        window.handleAltFCBannerClick = () => { 
-            window.location.href = closestAlt.link;
-        };
+        window.handleFCBannerClick = () => { window.location.href = 'antriankc.html'; };
+        window.handleAltFCBannerClick = () => { window.location.href = closestAlt.link; };
 
         const LAT_KC = -6.2285953; const LNG_KC = 106.819502;
-
         function calculateDist(lat1, lon1, lat2, lon2) { const p = 0.017453292519943295; const c = Math.cos; const a = 0.5 - c((lat2 - lat1) * p)/2 + c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p))/2; return 12742 * Math.asin(Math.sqrt(a)); }
 
         // 3. TRACKING GPS REALTIME
@@ -766,17 +768,10 @@
             navigator.geolocation.watchPosition((pos) => {
                 myLat = pos.coords.latitude; 
                 myLng = pos.coords.longitude;
-                
-                // Hitung & Tulis Jarak KC (Banner Utama)
                 window.kcDist = calculateDist(LAT_KC, LNG_KC, myLat, myLng).toFixed(1);
                 document.getElementById('mainFcDesc').innerHTML = `<i class="fas fa-location-arrow"></i> ${window.kcDist} KM`;
-                
-                // Cari & Tulis Stasiun Terdekat (Banner Bawah)
                 calculateNearestAlt();
-
-                // Kirim koordinat live ke server KC
                 setDoc(doc(dbKC, "live_tracking", myPlatClean), { lat: myLat, lng: myLng, nama: myName, plat: myPlat, hp: uData.hp || uData.wa || "", foto: myCurrentPhoto, timestamp: Date.now() }, { merge: true }).catch(e => console.log(e));
-
             }, (err) => { document.getElementById('kcBoardDesc').innerText += ` [GPS Ditolak/Mati]`; }, {enableHighAccuracy: true, maximumAge: 10000});
         }
 
@@ -796,7 +791,7 @@
         };
 
         // =========================================================================
-        // 5. PENGUMUMAN, BROADCAST & INBOX
+        // 5. PENGUMUMAN, BROADCAST & INBOX + NOTIFIKASI
         // =========================================================================
         onSnapshot(doc(dbKC, "settings", "board_info"), (snap) => {
             if(snap.exists()) {
@@ -822,12 +817,28 @@
             try { await addDoc(collection(dbKC, "info_kc"), { title: title, content: desc, author: myName, type: "BROADCAST", timestamp: Date.now() }); document.getElementById('broadcastModalKC').classList.remove('show'); setTimeout(()=>document.getElementById('broadcastModalKC').style.display='none',300); alert("Pesan Broadcast terkirim."); } catch (e) { alert(e.message); } finally { btn.innerText = "KIRIM PESAN"; btn.style.opacity = '1'; } 
         };
 
-        // INBOX & REALTIME BROADCAST
+        // INBOX & REALTIME BROADCAST + TRIGGER PUSH NOTIF
+        let isFirstLoadInfo = true;
         onSnapshot(query(collection(dbKC, "info_kc"), orderBy("timestamp", "desc"), limit(10)), (snap) => {
-            const listBody = document.getElementById('inboxListBody'); let unreadCount = 0; let lastReadTime = parseInt(localStorage.getItem('maka_last_read_inbox') || '0'); let htmlStr = '';
+            const listBody = document.getElementById('inboxListBody'); 
+            let unreadCount = 0; 
+            let lastReadTime = parseInt(localStorage.getItem('maka_last_read_inbox') || '0'); 
+            let htmlStr = '';
+            let latestBc = null;
+
             if (snap.empty) { listBody.innerHTML = `<div style="text-align:center; padding:30px 20px; color:var(--text-muted); font-size:12px; font-weight:600;">Belum ada pesan masuk.</div>`; document.getElementById('inboxBadge').style.display = 'none'; return; }
 
-            let latestBc = null;
+            // DETEKSI PESAN BARU UNTUK HP PUSH NOTIFICATION
+            if (!isFirstLoadInfo) {
+                snap.docChanges().forEach((change) => {
+                    if (change.type === "added") {
+                        const newData = change.doc.data();
+                        if (newData.timestamp > lastReadTime) {
+                            triggerSystemNotif("📢 " + newData.title, newData.content);
+                        }
+                    }
+                });
+            }
 
             snap.forEach(doc => {
                 const data = doc.data(); 
@@ -855,6 +866,8 @@
                     localStorage.setItem('maka_last_broadcast_kc', latestBc.timestamp.toString());
                 }
             }
+            
+            isFirstLoadInfo = false;
         });
 
         // SULTAN TABUNGAN
@@ -871,11 +884,24 @@
             if(rank === 1) list.innerHTML = `<div style="text-align: center; font-size: 11px; color: var(--text-muted); padding: 10px; font-weight:600;">Belum ada data Sultan.</div>`;
         });
 
-        // SENSOR CHAT BARU
+        // SENSOR CHAT BARU + TRIGGER PUSH NOTIF
+        let isFirstLoadChat = true;
         onSnapshot(query(collection(dbMLU, "mlu_kc_chats"), orderBy("timestamp", "desc"), limit(15)), (snap) => {
             let unreadCount = 0;
             let lastReadTime = parseInt(localStorage.getItem('maka_last_read_chat') || '0');
             
+            // DETEKSI CHAT BARU UNTUK HP PUSH NOTIFICATION
+            if (!isFirstLoadChat) {
+                snap.docChanges().forEach((change) => {
+                    if (change.type === "added") {
+                        const newChat = change.doc.data();
+                        if (newChat.timestamp > lastReadTime && newChat.senderId !== myPlatClean) {
+                            triggerSystemNotif("💬 Pesan Tongkrongan: " + newChat.senderName, newChat.message);
+                        }
+                    }
+                });
+            }
+
             snap.forEach(doc => {
                 const data = doc.data();
                 if(data.timestamp > lastReadTime && data.senderId !== myPlatClean) unreadCount++;
@@ -894,6 +920,8 @@
                     localStorage.setItem('maka_unread_chat_count', '0');
                 }
             }
+            
+            isFirstLoadChat = false;
         });
     </script>
 </body>
