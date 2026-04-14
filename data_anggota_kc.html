@@ -6,12 +6,18 @@
     <title>KC - Directory Anggota</title>
 
     <script>
+        // ==========================================
+        // 1. SISTEM BACA TEMA ANTI-KEDIP (FOUC PREVENTION)
+        // ==========================================
         const savedTheme = localStorage.getItem('maka_theme');
         if (savedTheme === 'soft-blue') {
             document.documentElement.classList.add('theme-soft-blue');
         }
 
-        const DATA_VERSION = "4.0_FAST_SYNC_LOAD"; 
+        // ==========================================
+        // 2. SISTEM AUTO-UPDATE PAKSA (PENGHANCUR CACHE)
+        // ==========================================
+        const DATA_VERSION = "4.2_DEFAULT_PIN"; 
         if (localStorage.getItem('maka_data_version') !== DATA_VERSION) {
             if ('caches' in window) {
                 caches.keys().then((names) => { names.forEach(name => { caches.delete(name); }); });
@@ -267,7 +273,7 @@
             <div class="form-group" id="mataDewaGroup" style="display:none; background:rgba(0,229,255,0.05); padding:15px; border-radius:14px; border:2px dashed var(--cyan-logo); margin-bottom:20px;">
                 <label class="form-label" style="color: var(--cyan-logo);"><i class="fas fa-eye"></i> MATA DEWA: PIN LOGIN</label>
                 <input type="text" id="formPinLogin" class="form-input" placeholder="Set PIN Baru" style="border-color: var(--cyan-logo); font-family: 'Space Grotesk'; letter-spacing: 3px; font-size: 18px; font-weight: 900; color: var(--cyan-logo);">
-                <div style="font-size:10px; color:var(--text-muted); margin-top:8px; font-weight: 800;">*Hanya terlihat oleh Super Admin.</div>
+                <div style="font-size:10px; color:var(--text-muted); margin-top:8px; font-weight: 800;">*Hanya terlihat oleh Super Admin. Anggota baru otomatis pakai PIN default 1234 jika ini dikosongkan.</div>
             </div>
 
             <div class="form-group">
@@ -695,8 +701,17 @@
                     type: type,
                 };
 
+                // SISTEM OTOMATIS PIN DEFAULT 1234
+                let inputPin = "";
                 if (isSuperAdmin) {
-                    const inputPin = document.getElementById('formPinLogin').value.trim();
+                    inputPin = document.getElementById('formPinLogin').value.trim();
+                }
+
+                if (actionType === 'add') {
+                    // Kalau nambah member baru, otomatis 1234. Kecuali Super Admin sengaja ngetik PIN lain.
+                    payload.pin_login = inputPin !== "" ? inputPin : "1234";
+                } else if (actionType === 'edit') {
+                    // Kalau edit, PIN cuma berubah kalau Super Admin ngetik sesuatu.
                     if (inputPin !== "") {
                         payload.pin_login = inputPin;
                     }
@@ -712,7 +727,10 @@
                         const dLama = membersData[oldDataIndex];
                         payload.tabungan = dLama.tabungan || 0;
                         if(dLama.pin_tabungan) payload.pin_tabungan = dLama.pin_tabungan;
-                        if(!isSuperAdmin && dLama.pin_login) payload.pin_login = dLama.pin_login;
+                        
+                        // Copy PIN lama jika ID berubah (kalau ga diubah sama Super Admin)
+                        if(!payload.pin_login && dLama.pin_login) payload.pin_login = dLama.pin_login;
+                        
                         if(dLama.faceDescriptor) payload.faceDescriptor = dLama.faceDescriptor;
                         if(dLama.kodeUnik) payload.kodeUnik = dLama.kodeUnik;
                     }
