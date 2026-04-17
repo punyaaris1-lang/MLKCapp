@@ -10,6 +10,14 @@
         if (savedTheme === 'soft-blue') {
             document.documentElement.classList.add('theme-soft-blue');
         }
+
+        // INI DIA PAWANG CACHE-NYA (BOM WAKTU PWA)
+        const LOKASI_VERSION = "5.0_FIX_TUMPUK_GMAPS"; 
+        if (localStorage.getItem('maka_lokasi_v') !== LOKASI_VERSION) {
+            if ('caches' in window) { caches.keys().then((names) => { names.forEach(name => { caches.delete(name); }); }); }
+            localStorage.setItem('maka_lokasi_v', LOKASI_VERSION); 
+            window.location.reload(true); 
+        }
     </script>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Space+Grotesk:wght@700;900&family=Outfit:wght@800;900&display=swap" rel="stylesheet">
@@ -85,7 +93,7 @@
 
         /* --- WIDGET NEAREST FC (NEW) --- */
         .nearest-widget { position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%); width: 88%; max-width: 380px; background: var(--bg-panel); backdrop-filter: blur(15px); border: 1px solid var(--border-glass); border-radius: 20px; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; z-index: 1500; box-shadow: 0 10px 30px rgba(0,0,0,0.6); cursor: pointer; transition: 0.3s; opacity: 0; visibility: hidden; }
-        html.theme-soft-blue .nearest-widget { box-shadow: 0 10px 30px rgba(2,132,199,0.15); }
+        html.theme-soft-blue .nearest-widget { box-shadow: 0 10px 30px rgba(2,132,199,0.15); background: rgba(255,255,255,0.95); }
         .nearest-widget.show { opacity: 1; visibility: visible; bottom: 95px;}
         .nearest-widget:active { transform: translateX(-50%) scale(0.96); }
         
@@ -93,6 +101,7 @@
         .nw-title { font-size: 9px; font-weight: 900; color: var(--kc-yellow); text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 5px;}
         html.theme-soft-blue .nw-title { color: var(--kc-yellow-dark); }
         .nw-name { font-family: 'Outfit'; font-size: 16px; font-weight: 900; color: var(--text-main); }
+        html.theme-soft-blue .nw-name { color: var(--text-main); }
         
         .nw-right { text-align: right; }
         .nw-dist { font-family: 'Space Grotesk'; font-size: 20px; font-weight: 900; color: var(--kc-cyan); }
@@ -102,11 +111,12 @@
 
         /* BOTTOM SHEET POPUP */
         .bottom-sheet { position: fixed; bottom: -100%; left: 0; width: 100%; background: var(--bg-surface); border-top-left-radius: 30px; border-top-right-radius: 30px; padding: 25px; box-shadow: 0 -10px 40px rgba(0,0,0,0.8); z-index: 2000; transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; flex-direction: column; border-top: 1px solid var(--border-glass);}
-        html.theme-soft-blue .bottom-sheet { box-shadow: 0 -10px 40px rgba(2,132,199,0.2); }
+        html.theme-soft-blue .bottom-sheet { box-shadow: 0 -10px 40px rgba(2,132,199,0.2); background: #FFFFFF; }
         .bottom-sheet.show { bottom: 0; }
         
         .bs-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .bs-title { font-family: 'Outfit'; font-size: 22px; font-weight: 900; color: var(--text-main); margin: 0; text-transform: uppercase; }
+        html.theme-soft-blue .bs-title { color: var(--text-main); }
         .btn-close { width: 35px; height: 35px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text-main); border: none; font-size: 16px; cursor: pointer; }
         html.theme-soft-blue .btn-close { background: #E2E8F0; color: #64748B; }
 
@@ -224,7 +234,11 @@
                 currentNearest = nearest;
                 document.getElementById('nwName').innerText = nearest.name;
                 document.getElementById('nwDist').innerText = min.toFixed(1) + ' KM';
-                document.getElementById('nearestCard').classList.add('show');
+                
+                // FIX: JANGAN TAMPILKAN WIDGET KALAU BOTTOM SHEET LAGI KEBUKA BIAR GAK NUMPUK
+                if (!document.getElementById('bottomSheet').classList.contains('show')) {
+                    document.getElementById('nearestCard').classList.add('show');
+                }
             } else {
                 document.getElementById('nearestCard').classList.remove('show');
             }
@@ -330,7 +344,8 @@
                 btnNav.className = 'btn-nav';
                 btnNav.innerHTML = '<i class="fas fa-location-arrow"></i> BUKA GOOGLE MAPS';
                 btnNav.onclick = () => {
-                    const destUrl = loc.mapLink || `http://googleusercontent.com/maps.google.com/maps?q=${loc.lat},${loc.lng}`;
+                    // FIX: PRIORTITASKAN LINK GMAPS DARI DATABASE BIAR GAK ERROR, ATAU PAKE URL GOOGLE MAPS YANG BENAR
+                    const destUrl = loc.gmaps || loc.mapLink || `https://www.google.com/maps?q=${loc.lat},${loc.lng}`;
                     window.open(destUrl, '_blank');
                 };
             } else {
