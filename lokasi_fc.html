@@ -12,7 +12,7 @@
         }
 
         // INI DIA PAWANG CACHE-NYA (BOM WAKTU PWA)
-        const LOKASI_VERSION = "5.0_FIX_TUMPUK_GMAPS"; 
+        const LOKASI_VERSION = "5.1_FIX_GMAPS_LINK"; 
         if (localStorage.getItem('maka_lokasi_v') !== LOKASI_VERSION) {
             if ('caches' in window) { caches.keys().then((names) => { names.forEach(name => { caches.delete(name); }); }); }
             localStorage.setItem('maka_lokasi_v', LOKASI_VERSION); 
@@ -163,7 +163,7 @@
             <button class="btn-close" onclick="closeSheet()"><i class="fas fa-times"></i></button>
         </div>
         <div class="info-bar" id="sheetInfoBar">
-            <i class="fas fa-route"></i> <span id="sheetDist">0 KM</span> &nbsp;•&nbsp; <i class="fas fa-clock"></i> <span id="sheetTime">0 MNT</span>
+            <i class="fas fa-route"></i> <span id="sheetDist">0 KM</span>  •  <i class="fas fa-clock"></i> <span id="sheetTime">0 MNT</span>
         </div>
         <button class="btn-nav" id="btnNav"><i class="fas fa-location-arrow"></i> BUKA GOOGLE MAPS</button>
     </div>
@@ -344,8 +344,7 @@
                 btnNav.className = 'btn-nav';
                 btnNav.innerHTML = '<i class="fas fa-location-arrow"></i> BUKA GOOGLE MAPS';
                 btnNav.onclick = () => {
-                    // FIX: PRIORTITASKAN LINK GMAPS DARI DATABASE BIAR GAK ERROR, ATAU PAKE URL GOOGLE MAPS YANG BENAR
-                    const destUrl = loc.gmaps || loc.mapLink || `https://www.google.com/maps?q=${loc.lat},${loc.lng}`;
+                    const destUrl = loc.gmaps || loc.mapLink || `https://www.google.com/maps/dir/?api=1&destination=${loc.lat},${loc.lng}`;
                     window.open(destUrl, '_blank');
                 };
             } else {
