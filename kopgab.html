@@ -75,18 +75,20 @@
         }
         .mc-title i { color: var(--gold); font-size: 18px; animation: pulseSoft 2s infinite; }
 
-        /* Tikum Section */
-        .tikum-info { display: flex; align-items: center; gap: 18px; margin-bottom: 25px;}
-        .tikum-icon { width: 55px; height: 55px; background: var(--light-blue); color: var(--electric-blue); border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
-        .tikum-name { font-family: 'Outfit'; font-size: 18px; color: var(--royal-blue); font-weight: 900; margin-bottom: 4px; letter-spacing: 0.5px;}
-        .tikum-desc { font-size: 12px; color: var(--text-muted); font-weight: 600; line-height: 1.4;}
+        /* --- RUTE & TIKUM (UPDATE BARU) --- */
+        .route-container { display: flex; flex-direction: column; position: relative; }
+        .route-point { display: flex; align-items: center; gap: 15px; position: relative; z-index: 2; background: var(--bg-light); padding: 15px; border-radius: 16px; border: 1px solid var(--border-soft); }
+        .rp-icon { width: 45px; height: 45px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: white; flex-shrink: 0; box-shadow: 0 5px 15px rgba(0,0,0,0.1);}
+        .rp-icon.start { background: var(--royal-blue); }
+        .rp-icon.end { background: var(--success); }
+        .rp-info { flex: 1; }
+        .rp-label { font-size: 9px; color: var(--text-muted); font-weight: 800; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 3px; }
+        .rp-name { font-family: 'Outfit'; font-size: 16px; color: var(--royal-blue); font-weight: 900; line-height: 1.1; margin-bottom: 3px;}
+        .rp-desc { font-size: 11px; color: var(--text-muted); font-weight: 600; line-height: 1.3;}
+        .rp-maps { width: 40px; height: 40px; background: white; border: 1px solid var(--border-soft); color: var(--electric-blue); border-radius: 12px; display: flex; align-items: center; justify-content: center; text-decoration: none; box-shadow: 0 5px 15px rgba(0,0,0,0.03); transition: 0.2s; flex-shrink: 0;}
+        .rp-maps:active { transform: scale(0.9); background: var(--light-blue); }
         
-        .btn-maps { 
-            display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 18px; 
-            background: var(--light-blue); color: var(--electric-blue); border-radius: 16px; text-decoration: none; 
-            font-family: 'Space Grotesk'; font-size: 13px; font-weight: 900; border: 1px solid rgba(37,99,235,0.1); transition: 0.2s;
-        }
-        .btn-maps:active { transform: scale(0.97); background: #DBEAFE; }
+        .route-line { height: 25px; border-left: 3px dashed var(--text-muted); margin-left: 37px; opacity: 0.5;}
 
         /* Timeline Rundown Section */
         .timeline-wrapper { position: relative; padding-left: 5px; }
@@ -123,13 +125,18 @@
         .stat-num { font-family: 'Outfit'; font-size: 32px; font-weight: 900; color: var(--royal-blue); margin-bottom: 4px; line-height: 1;}
         .stat-lbl { font-family: 'Space Grotesk'; font-size: 10px; color: var(--text-muted); font-weight: 800; letter-spacing: 1px; text-transform: uppercase;}
 
-        /* ABSENSI LIST */
-        .absen-list-container { max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-right: 5px;}
-        .absen-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--bg-light); border-radius: 16px; border: 1px solid var(--border-soft);}
-        .absen-item .name { font-size: 13px; font-weight: 800; color: var(--royal-blue); text-transform: uppercase;}
-        .absen-tag { font-family: 'Space Grotesk'; font-size: 10px; font-weight: 900; padding: 5px 10px; border-radius: 8px; letter-spacing: 1px; color: white;}
-        .tag-mlu { background: var(--electric-blue); }
-        .tag-kc { background: var(--success); }
+        /* ABSENSI SPLIT (MLU vs KC) */
+        .absen-split { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .absen-col { background: var(--bg-light); border: 1px solid var(--border-soft); border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; }
+        .ac-header { padding: 12px 10px; text-align: center; font-family: 'Space Grotesk'; font-size: 11px; font-weight: 900; color: white; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .mlu-hdr { background: var(--electric-blue); }
+        .kc-hdr { background: var(--success); }
+        .absen-list-container { max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; }
+        .absen-item { padding: 12px; border-bottom: 1px solid var(--border-soft); display: flex; flex-direction: column; }
+        .absen-item:last-child { border-bottom: none; }
+        .absen-item .name { font-size: 12px; font-weight: 800; color: var(--royal-blue); text-transform: uppercase; line-height: 1.3;}
+        .absen-item .plat { font-size: 9px; color: var(--text-muted); font-weight: 700; margin-top: 4px; font-family: 'Space Grotesk'; letter-spacing: 0.5px;}
+        .empty-absen { text-align: center; padding: 25px 15px; font-size: 11px; color: var(--text-muted); font-weight: 600; }
 
         /* --- TAB 2 & 3 (RADAR & CHAT) --- */
         #radarMap { width: 100%; height: 60vh; border-radius: 24px; border: 5px solid white; box-shadow: 0 15px 40px rgba(0,0,0,0.05); overflow: hidden; }
@@ -207,17 +214,31 @@
     <div id="viewInfo" class="content-area active">
         
         <div class="mission-card">
-            <div class="mc-title"><i class="fas fa-map-marker-alt"></i> TITIK KUMPUL (TIKUM) GABUNGAN</div>
-            <div class="tikum-info">
-                <div class="tikum-icon"><i class="fas fa-landmark"></i></div>
-                <div>
-                    <div class="tikum-name">TMP KALIBATA</div>
-                    <div class="tikum-desc">Taman Makam Pahlawan, Jakarta Selatan</div>
+            <div class="mc-title"><i class="fas fa-route"></i> RUTE KONVOI & TIKUM</div>
+            
+            <div class="route-container">
+                <div class="route-point">
+                    <div class="rp-icon start"><i class="fas fa-flag"></i></div>
+                    <div class="rp-info">
+                        <div class="rp-label">TITIK KUMPUL (TIKUM)</div>
+                        <div class="rp-name">TMP KALIBATA</div>
+                        <div class="rp-desc">Taman Makam Pahlawan, Jaksel</div>
+                    </div>
+                    <a href="https://maps.google.com/?q=-6.2583,106.8492" target="_blank" class="rp-maps"><i class="fas fa-location-arrow"></i></a>
+                </div>
+                
+                <div class="route-line"></div>
+                
+                <div class="route-point">
+                    <div class="rp-icon end"><i class="fas fa-flag-checkered"></i></div>
+                    <div class="rp-info">
+                        <div class="rp-label">TUJUAN AKHIR (FINISH)</div>
+                        <div class="rp-name">MAKA PASAR REBO</div>
+                        <div class="rp-desc">Basecamp MAKA, Jaktim</div>
+                    </div>
+                    <a href="https://maps.google.com/?q=MAKA+Pasar+Rebo" target="_blank" class="rp-maps"><i class="fas fa-location-arrow"></i></a>
                 </div>
             </div>
-            <a href="http://googleusercontent.com/maps.google.com/maps?q=-6.2583,106.8492" target="_blank" class="btn-maps">
-                <i class="fas fa-location-arrow"></i> PETUNJUK ARAH (MAPS)
-            </a>
         </div>
 
         <div class="mission-card">
@@ -256,10 +277,23 @@
             </div>
         </div>
 
-        <div class="mission-card" style="margin-top: 20px; animation-delay: 0.7s;">
-            <div class="mc-title"><i class="fas fa-users"></i> DAFTAR PASUKAN TERKONFIRMASI</div>
-            <div class="absen-list-container" id="absenList">
-                <div style="text-align:center; font-size:12px; color:var(--text-muted); font-weight:600; padding:20px;">Memuat data pasukan...</div>
+        <div class="mission-card" style="margin-top: 20px; animation-delay: 0.7s; padding: 20px 15px;">
+            <div class="mc-title" style="padding-left: 10px;"><i class="fas fa-users"></i> DAFTAR PASUKAN TERKONFIRMASI</div>
+            
+            <div class="absen-split">
+                <div class="absen-col">
+                    <div class="ac-header mlu-hdr"><i class="fas fa-shield-alt"></i> UNIT MLU</div>
+                    <div class="absen-list-container" id="absenListMLU">
+                        <div class="empty-absen">Memuat data...</div>
+                    </div>
+                </div>
+                
+                <div class="absen-col">
+                    <div class="ac-header kc-hdr"><i class="fas fa-shield-alt"></i> UNIT KC</div>
+                    <div class="absen-list-container" id="absenListKC">
+                        <div class="empty-absen">Memuat data...</div>
+                    </div>
+                </div>
             </div>
         </div>
         
@@ -372,13 +406,12 @@
         }
 
         // =========================================================================
-        // SISTEM RSVP (HADIR / BATAL) DENGAN FOTO
+        // SISTEM RSVP (HADIR / BATAL) DENGAN PEMISAHAN DAFTAR
         // =========================================================================
         window.konfirmasiHadir = async () => {
             const btn = document.getElementById('btnRsvp');
             btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> MEMPROSES...";
             try {
-                // Simpan juga FOTO PROFIL lu biar nongol di map
                 await setDoc(doc(db, "kopgab_rsvp", myId), {
                     nama: myName, plat: myPlat, club: myClub, foto: myPhoto, timestamp: serverTimestamp()
                 });
@@ -406,24 +439,36 @@
         onSnapshot(collection(db, "kopgab_rsvp"), (snap) => {
             let mluCount = 0; let kcCount = 0; 
             window.isUserRsvp = false;
-            let absenHtml = "";
+            
+            let htmlMLU = "";
+            let htmlKC = "";
 
             snap.forEach(doc => {
                 const d = doc.data();
-                if(d.club === "KC") kcCount++; else mluCount++;
                 if(doc.id === myId) window.isUserRsvp = true;
 
-                const tagClass = d.club === "KC" ? "tag-kc" : "tag-mlu";
-                absenHtml += `
-                <div class="absen-item">
-                    <div class="name">${d.nama} <span style="color:var(--text-muted); font-size:10px; font-weight:700; margin-left:4px;">[${d.plat}]</span></div>
-                    <div class="absen-tag ${tagClass}">${d.club}</div>
-                </div>`;
+                if(d.club === "KC") {
+                    kcCount++;
+                    htmlKC += `
+                    <div class="absen-item">
+                        <div class="name">${d.nama}</div>
+                        <div class="plat">[${d.plat}]</div>
+                    </div>`;
+                } else {
+                    mluCount++;
+                    htmlMLU += `
+                    <div class="absen-item">
+                        <div class="name">${d.nama}</div>
+                        <div class="plat">[${d.plat}]</div>
+                    </div>`;
+                }
             });
             
             document.getElementById('countMLU').innerText = mluCount;
             document.getElementById('countKC').innerText = kcCount;
-            document.getElementById('absenList').innerHTML = absenHtml || "<div style='text-align:center; font-size:12px; color:var(--text-muted); font-weight:600; padding:20px;'>Belum ada pasukan terkonfirmasi.</div>";
+            
+            document.getElementById('absenListMLU').innerHTML = htmlMLU || "<div class='empty-absen'>Belum ada<br>pasukan</div>";
+            document.getElementById('absenListKC').innerHTML = htmlKC || "<div class='empty-absen'>Belum ada<br>pasukan</div>";
 
             const btn = document.getElementById('btnRsvp');
             if(window.isUserRsvp) {
