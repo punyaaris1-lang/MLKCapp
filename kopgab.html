@@ -131,7 +131,7 @@
         .tag-mlu { background: var(--electric-blue); }
         .tag-kc { background: var(--success); }
 
-        /* --- TAB 2 & 3 (RADAR & CHAT) SAMA SEPERTI SEBELUMNYA TAPI DI-POLISH --- */
+        /* --- TAB 2 & 3 (RADAR & CHAT) --- */
         #radarMap { width: 100%; height: 60vh; border-radius: 24px; border: 5px solid white; box-shadow: 0 15px 40px rgba(0,0,0,0.05); overflow: hidden; }
         .btn-radar { width: 100%; padding: 18px; background: white; border: 2px solid var(--electric-blue); color: var(--electric-blue); border-radius: 18px; margin-top: 20px; font-family: 'Space Grotesk'; font-weight: 900; cursor: pointer; box-shadow: 0 5px 15px rgba(37,99,235,0.1); transition: 0.2s;}
         .btn-radar:active { transform: scale(0.96); background: var(--light-blue);}
@@ -156,6 +156,14 @@
 
         .btn-back { display: inline-flex; align-items: center; justify-content: center; gap: 10px; background: white; border: 1px solid var(--border-soft); color: var(--text-muted); padding: 16px 25px; border-radius: 50px; font-family: 'Space Grotesk'; font-size: 12px; font-weight: 800; text-decoration: none; margin: 20px auto; box-shadow: 0 10px 20px rgba(0,0,0,0.03); width: 100%; transition: 0.2s;}
         .btn-back:active { transform: scale(0.96); background: var(--bg-light); }
+
+        /* MARKER CUSTOM DI PETA (FOTO PROFIL) */
+        .custom-div-icon { background: transparent; border: none; }
+        .marker-label-hud { 
+            position: absolute; bottom: -22px; left: 50%; transform: translateX(-50%); 
+            background: white; color: var(--royal-blue); padding: 3px 8px; font-size: 9px; font-family: 'Space Grotesk'; 
+            font-weight: 900; border-radius: 6px; white-space: nowrap; box-shadow: 0 3px 10px rgba(0,0,0,0.1); z-index: 10;
+        }
 
         /* MODAL SECURITY */
         .modal-glass-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.8); backdrop-filter: blur(10px); z-index: 99999; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; padding: 20px;}
@@ -297,24 +305,25 @@
             window.location.href = 'index.html';
         }
 
-        // Cek darimana User klik tombol Kopgab (Dashboard KC atau MLU)
         let myClub = localStorage.getItem("kopgab_club_asal") || "MLU"; 
         
         if (document.referrer) {
             const refUrl = document.referrer.toLowerCase();
-            // Kalau asalnya dari link yang ada kata "kc"
             if (refUrl.includes("_kc") || refUrl.includes("kc.html")) {
                 myClub = "KC";
             } else if (refUrl.includes("dashboard.html")) {
                 myClub = "MLU";
             }
-            localStorage.setItem("kopgab_club_asal", myClub); // Simpan biar gak lupa pas di-refresh
+            localStorage.setItem("kopgab_club_asal", myClub);
         }
 
         const isAppKC = myClub === "KC";
         const myName = uData.namaKtp || uData.namaWa || uData.nama || "Pasukan " + myClub;
         const myPlat = uData.plat || "B XXXX XX";
         const myId = uData.id || myPlat.replace(/\s+/g, '').toUpperCase();
+        
+        // FOTO PROFIL UNTUK RADAR MAP
+        const myPhoto = uData.foto && uData.foto.length > 50 ? uData.foto : `https://ui-avatars.com/api/?background=0A2259&color=fff&name=${encodeURIComponent(myName)}`;
 
         window.kembaliKeMarkas = () => { window.location.href = isAppKC ? 'dashboard_kc.html' : 'dashboard.html'; };
 
@@ -363,14 +372,15 @@
         }
 
         // =========================================================================
-        // SISTEM RSVP (HADIR / BATAL)
+        // SISTEM RSVP (HADIR / BATAL) DENGAN FOTO
         // =========================================================================
         window.konfirmasiHadir = async () => {
             const btn = document.getElementById('btnRsvp');
             btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> MEMPROSES...";
             try {
+                // Simpan juga FOTO PROFIL lu biar nongol di map
                 await setDoc(doc(db, "kopgab_rsvp", myId), {
-                    nama: myName, plat: myPlat, club: myClub, timestamp: serverTimestamp()
+                    nama: myName, plat: myPlat, club: myClub, foto: myPhoto, timestamp: serverTimestamp()
                 });
             } catch (e) {
                 alert("Gagal: " + e.message);
@@ -386,7 +396,6 @@
             btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> MEMBATALKAN...";
             try {
                 await deleteDoc(doc(db, "kopgab_rsvp", myId));
-                // Matikan Radar otomatis kalau batal hadir
                 if (isRadarOn) window.toggleRadar();
             } catch (e) {
                 alert("Gagal membatalkan: " + e.message);
@@ -418,13 +427,11 @@
 
             const btn = document.getElementById('btnRsvp');
             if(window.isUserRsvp) {
-                // Tampilan Tombol Batal Hadir
                 btn.innerHTML = "<i class='fas fa-times-circle'></i> BATAL HADIR";
                 btn.style.background = "var(--danger)";
                 btn.style.boxShadow = "0 10px 25px rgba(239,68,68,0.3)";
                 btn.onclick = window.batalHadir;
             } else {
-                // Tampilan Tombol Hadir
                 btn.innerHTML = "<i class='fas fa-check-circle'></i> SAYA SIAP MERAPAT";
                 btn.style.background = "linear-gradient(135deg, var(--royal-blue), var(--electric-blue))";
                 btn.style.boxShadow = "0 10px 25px rgba(37,99,235,0.25)";
@@ -466,7 +473,7 @@
         };
 
         // =========================================================================
-        // SISTEM LIVE RADAR
+        // SISTEM LIVE RADAR DENGAN FOTO PROFIL
         // =========================================================================
         let map = null; let markers = {}; let watchId = null; let isRadarOn = false;
         
@@ -481,8 +488,23 @@
                 snap.forEach(doc => {
                     const m = doc.data();
                     if(m.lat && m.lng && m.isSharing) {
-                        const styleM = m.club === "KC" ? "marker-kc" : "marker-mlu";
-                        const icon = L.divIcon({ className: 'custom-div-icon', html: `<div class="${styleM}"></div><div class="marker-label-hud">${m.nama}</div>`, iconSize:[30,30], iconAnchor:[15,15] });
+                        
+                        // DESAIN AVATAR DI RADAR
+                        const borderColor = m.club === "KC" ? "var(--success)" : "var(--electric-blue)";
+                        const tagBg = m.club === "KC" ? "var(--success)" : "var(--electric-blue)";
+                        const fallbackFoto = `https://ui-avatars.com/api/?background=0A2259&color=fff&name=${encodeURIComponent(m.nama)}`;
+                        const finalFoto = m.foto && m.foto.length > 50 ? m.foto : fallbackFoto;
+
+                        const iconHtml = `
+                            <div style="position:relative;">
+                                <img src="${finalFoto}" style="width:38px; height:38px; border-radius:50%; object-fit:cover; border:3px solid ${borderColor}; box-shadow:0 5px 15px rgba(0,0,0,0.3); background:white;">
+                                <div style="position:absolute; top:-5px; right:-8px; background:${tagBg}; color:white; font-size:8px; font-weight:900; padding:2px 5px; border-radius:6px; border:1px solid white;">${m.club}</div>
+                                <div class="marker-label-hud">${m.nama}</div>
+                            </div>
+                        `;
+
+                        const icon = L.divIcon({ className: 'custom-div-icon', html: iconHtml, iconSize:[38,38], iconAnchor:[19,19] });
+                        
                         if(markers[doc.id]) markers[doc.id].setLatLng([m.lat, m.lng]);
                         else markers[doc.id] = L.marker([m.lat, m.lng], {icon}).addTo(map);
                     } else if(markers[doc.id]) {
@@ -498,6 +520,7 @@
                 if(!navigator.geolocation) return alert("GPS tidak didukung!");
                 btn.innerHTML = "<i class='fas fa-sync fa-spin'></i> MENGHUBUNGKAN SATELIT...";
                 watchId = navigator.geolocation.watchPosition(async (pos) => {
+                    // Update posisi ke Firebase setiap ada perubahan GPS
                     await setDoc(doc(db, "kopgab_rsvp", myId), { lat: pos.coords.latitude, lng: pos.coords.longitude, isSharing: true, timestamp: serverTimestamp() }, {merge: true});
                     isRadarOn = true;
                     btn.innerHTML = "<i class='fas fa-broadcast-tower'></i> RADAR AKTIF (MATIKAN)";
