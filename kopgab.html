@@ -257,9 +257,22 @@
         </div>
 
         <div class="mission-card" style="margin-top: 20px; animation-delay: 0.7s;">
-            <div class="mc-title"><i class="fas fa-users"></i> DAFTAR PASUKAN TERKONFIRMASI</div>
-            <div class="absen-list-container" id="absenList">
-                <div style="text-align:center; font-size:12px; color:var(--text-muted); font-weight:600; padding:20px;">Memuat data pasukan...</div>
+            <div class="mc-title" style="margin-bottom:15px;"><i class="fas fa-users"></i> DAFTAR PASUKAN TERKONFIRMASI</div>
+            
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:2px solid var(--border-soft); padding-bottom:5px;">
+                <div style="font-size:12px; font-weight:900; color:var(--electric-blue);"><i class="fas fa-shield-alt"></i> UNIT MLU</div>
+                <div style="font-size:10px; font-weight:800; color:var(--text-muted); background:var(--bg-light); padding:3px 10px; border-radius:10px;" id="countMluMini">0 Motor</div>
+            </div>
+            <div class="absen-list-container" id="absenListMLU" style="margin-bottom: 25px; max-height:200px;">
+                <div style="text-align:center; font-size:11px; color:var(--text-muted); font-weight:600; padding:15px;">Memuat data...</div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:2px solid var(--border-soft); padding-bottom:5px;">
+                <div style="font-size:12px; font-weight:900; color:var(--success);"><i class="fas fa-bolt"></i> UNIT KARTIKA CHANDRA</div>
+                <div style="font-size:10px; font-weight:800; color:var(--text-muted); background:var(--bg-light); padding:3px 10px; border-radius:10px;" id="countKcMini">0 Motor</div>
+            </div>
+            <div class="absen-list-container" id="absenListKC" style="max-height:200px;">
+                <div style="text-align:center; font-size:11px; color:var(--text-muted); font-weight:600; padding:15px;">Memuat data...</div>
             </div>
         </div>
         
@@ -403,27 +416,46 @@
             }
         };
 
+        // RENDER DAFTAR HADIR (PISAH MLU DAN KC)
         onSnapshot(collection(db, "kopgab_rsvp"), (snap) => {
             let mluCount = 0; let kcCount = 0; 
             window.isUserRsvp = false;
-            let absenHtml = "";
+            
+            let absenHtmlMLU = "";
+            let absenHtmlKC = "";
 
             snap.forEach(doc => {
                 const d = doc.data();
-                if(d.club === "KC") kcCount++; else mluCount++;
                 if(doc.id === myId) window.isUserRsvp = true;
 
-                const tagClass = d.club === "KC" ? "tag-kc" : "tag-mlu";
-                absenHtml += `
-                <div class="absen-item">
-                    <div class="name">${d.nama} <span style="color:var(--text-muted); font-size:10px; font-weight:700; margin-left:4px;">[${d.plat}]</span></div>
-                    <div class="absen-tag ${tagClass}">${d.club}</div>
-                </div>`;
+                if(d.club === "KC") {
+                    kcCount++;
+                    absenHtmlKC += `
+                    <div class="absen-item">
+                        <div class="name">${d.nama} <span style="color:var(--text-muted); font-size:10px; font-weight:700; margin-left:4px;">[${d.plat}]</span></div>
+                        <div class="absen-tag tag-kc">KC</div>
+                    </div>`;
+                } else {
+                    mluCount++;
+                    absenHtmlMLU += `
+                    <div class="absen-item">
+                        <div class="name">${d.nama} <span style="color:var(--text-muted); font-size:10px; font-weight:700; margin-left:4px;">[${d.plat}]</span></div>
+                        <div class="absen-tag tag-mlu">MLU</div>
+                    </div>`;
+                }
             });
             
+            // Update Angka di Atas
             document.getElementById('countMLU').innerText = mluCount;
             document.getElementById('countKC').innerText = kcCount;
-            document.getElementById('absenList').innerHTML = absenHtml || "<div style='text-align:center; font-size:12px; color:var(--text-muted); font-weight:600; padding:20px;'>Belum ada pasukan terkonfirmasi.</div>";
+            
+            // Update Angka di Header List
+            document.getElementById('countMluMini').innerText = mluCount + " Motor";
+            document.getElementById('countKcMini').innerText = kcCount + " Motor";
+
+            // Update HTML List
+            document.getElementById('absenListMLU').innerHTML = absenHtmlMLU || "<div style='text-align:center; font-size:11px; color:var(--text-muted); font-weight:600; padding:15px;'>Belum ada pasukan MLU yang merapat.</div>";
+            document.getElementById('absenListKC').innerHTML = absenHtmlKC || "<div style='text-align:center; font-size:11px; color:var(--text-muted); font-weight:600; padding:15px;'>Belum ada pasukan KC yang merapat.</div>";
 
             const btn = document.getElementById('btnRsvp');
             if(window.isUserRsvp) {
