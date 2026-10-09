@@ -701,7 +701,7 @@
             document.getElementById('menuUrc').style.display = 'flex';
         }
         
-        const allowedAdmins = ["B4124SWI", "B4426SWF", "B4959SWF", "B4372SWJ", "B4903SWG", "B4248SWF", "B42827SWJ", "B4934SWG"];
+        const allowedAdmins = ["B4124SWI", "B4919SWG", "B4426SWF", "B4959SWF", "B4372SWJ", "B4903SWG", "B4248SWF", "B42827SWJ", "B4934SWG"];
         if (allowedAdmins.includes(myPlatClean) || uData.id === "ghost_admin") {
             document.getElementById('btnEditBoard').style.display = 'flex';
             document.getElementById('menuBroadcast').style.display = 'flex';
@@ -801,13 +801,13 @@
                 const pesan = `🚨 *DARURAT S.O.S (KC)* 🚨\n\n👤 *Nama:* ${myName}\n🏍️ *Plat:* ${myPlat}\n⚠️ *Kasus:* ${jenis}\n📝 *Ket:* ${ket ? ket : '-'}\n\n📍 *LOKASI KORBAN:* \nhttps://maps.google.com/?q=${lat},${lng}\n\n_Mohon segera diluncurkan bantuan!_`;
                 
                 // BACKUP PLAN: Kirim ke 2 Nomor WhatsApp
-                const waTyan = `https://wa.me/6285121312930?text=${encodeURIComponent(pesan)}`;
-                const waManaf = `https://wa.me/6281385487429?text=${encodeURIComponent(pesan)}`;
+                const waSujono = `https://wa.me/6285278749334?text=${encodeURIComponent(pesan)}`;
+                const waCikal = `https://wa.me/6281211883770?text=${encodeURIComponent(pesan)}`;
                 
-                // Buka Tab pertama (Tyan)
+                // Buka Tab pertama (Jono)
                 window.open(waTyan, '_blank');
                 
-                // Jeda 1 detik, buka Tab kedua (Manaf)
+                // Jeda 1 detik, buka Tab kedua (Cikal)
                 setTimeout(() => {
                     window.open(waManaf, '_blank');
                 }, 1000);
