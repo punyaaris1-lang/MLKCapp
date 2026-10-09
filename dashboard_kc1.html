@@ -11,8 +11,8 @@
             document.documentElement.classList.add('theme-soft-blue');
         }
 
-        // VERSI DINAIIKIN KE 19.2 BIAR CACHE LAMA LANGSUNG HANCUR
-        const DASH_VERSION = "19.2_FINAL_KOPGAB"; 
+        // VERSI DINAIIKIN KE 19.5 BIAR CACHE LAMA LANGSUNG HANCUR
+        const DASH_VERSION = "19.5_NEWDB"; 
         if (localStorage.getItem('maka_dash_kc_v') !== DASH_VERSION) {
             if ('caches' in window) { caches.keys().then((names) => { names.forEach(name => { caches.delete(name); }); }); }
             localStorage.setItem('maka_dash_kc_v', DASH_VERSION); window.location.reload(true); 
